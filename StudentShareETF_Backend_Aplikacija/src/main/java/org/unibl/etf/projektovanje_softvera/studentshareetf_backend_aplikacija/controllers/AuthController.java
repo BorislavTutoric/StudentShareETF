@@ -72,9 +72,9 @@ public class AuthController {
     }
 
     @GetMapping("/check-username")
-    public ResponseEntity<CheckUsernameResponse> checkUsername(@RequestBody CheckUsernameRequest request) {
+    public ResponseEntity<CheckUsernameResponse> checkUsername(@RequestParam String username) {
         try {
-            UserDetails existingUser = userDetailsService.loadUserByUsername(request.getUsername());
+            UserDetails existingUser = userDetailsService.loadUserByUsername(username);
             CheckUsernameResponse response = new CheckUsernameResponse(false, "Username already taken");
             return ResponseEntity.ok(response);
         } catch (UsernameNotFoundException ex) {

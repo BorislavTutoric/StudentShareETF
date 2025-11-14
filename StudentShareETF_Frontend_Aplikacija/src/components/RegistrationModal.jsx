@@ -291,6 +291,7 @@ function RegistrationModal({ isOpen, onClose}) {
             border: 1px solid #90a4ae;
             border-radius: 8px;
             font-size: 14px;
+            color: black;
             background: rgba(255, 255, 255, 0.7);
             transition: all 0.3s;
         }
@@ -305,7 +306,9 @@ function RegistrationModal({ isOpen, onClose}) {
           padding: 12px 16px;
           border: 1px solid #90a4ae;
           border-radius: 8px;
+          color: black;
           font-size: 14px;
+
           background: rgba(255, 255, 255, 0.7);
           transition: all 0.3s;
         }

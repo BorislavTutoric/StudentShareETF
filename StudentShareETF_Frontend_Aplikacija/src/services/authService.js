@@ -11,7 +11,7 @@ export const login = async (username, password) => {
 
 export const checkUsername = async (username) => {
   try {
-    const res = await api.get("all/auth/check-username", { username }); 
+    const res = await api.get("all/auth/check-username", { params: { username } }); 
     return res.data; 
   } catch (err) {
     throw err.response || "Greška pri provjeri";
