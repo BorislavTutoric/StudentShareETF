@@ -18,7 +18,7 @@ function RegistrationModal({ isOpen, onClose}) {
 
   const usernameCheck = async () => {
     try {
-        const data = await checkUsername(username);
+        const data = await checkUsername(formData.username);
         if (!data.available) {
             setUsernameError("Korisničko ime je zauzeto");
         } else {
