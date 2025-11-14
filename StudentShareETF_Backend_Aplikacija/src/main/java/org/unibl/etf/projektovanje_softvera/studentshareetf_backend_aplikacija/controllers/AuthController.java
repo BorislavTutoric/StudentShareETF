@@ -45,7 +45,7 @@ public class AuthController {
             return ResponseEntity.ok(new LoginResponse(token, user.getAuthorities().iterator().next().getAuthority()));
         }
         catch (AuthenticationException ex) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Invalid username or password"));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Neispravno korisničko ime ili lozinka"));
         }
     }
 }
