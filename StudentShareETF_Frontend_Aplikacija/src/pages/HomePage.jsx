@@ -28,8 +28,6 @@ function Home() {
         onClose={handleClose}
         onLoginSuccess={handleLoginSuccess}
       />
-
-    
       
       <main style={styles.main}>
         <div style={styles.contentWrapper}>

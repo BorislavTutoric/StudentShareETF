@@ -5,7 +5,11 @@ function Navbar({ onLoginClick, username }) {
     <nav style={styles.navbar}>
       <div style={styles.logoContainer}>
         <div style={styles.logoIcon}>
-          <span style={styles.logoText}>ETF</span>
+          <img 
+              src="src/assets/logoo.png" 
+              alt="Logo" 
+              style={{ width: "100px", height: "80px", objectFit: "contain" }}
+          />
         </div>
         <h2 style={styles.logo}>STUDENT SHARE ETF</h2>
       </div>
@@ -35,7 +39,7 @@ const styles = {
     top: 0,
     left: 0,
     width: "100%",
-    height: "80px",
+    height: "100px",
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
@@ -51,8 +55,8 @@ const styles = {
     gap: "12px",
   },
   logoIcon: {
-    width: "50px",
-    height: "50px",
+    width: "110px",
+    height: "80px",
     backgroundColor: "#4fc3f7",
     borderRadius: "8px",
     display: "flex",

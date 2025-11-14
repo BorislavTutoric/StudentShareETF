@@ -1,21 +1,33 @@
 import React, { useState } from "react";
 import { login } from "../services/authService";
+import RegistrationModal from "../components/RegistrationModal";
 
 function LoginModal({ isOpen, onClose, onLoginSuccess }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
+
+  const handleRegistrationClick = (e) => {
+    e.preventDefault(); // sprečava scroll
+    setIsRegistrationModalOpen(true);
+  };
+
+  const handleRegistrationClose = () => {
+    setIsRegistrationModalOpen(false);
+  
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     try {
-        const data = await login(username, password);
-        localStorage.setItem("jwtToken", data.token);
-        onLoginSuccess(username);
-        onClose();
+      const data = await login(username, password);
+      localStorage.setItem("jwtToken", data.token);
+      onLoginSuccess(username);
+      onClose();
     } catch (err) {
-        setError(err);
+      setError(err);
     }
   };
 
@@ -23,9 +35,17 @@ function LoginModal({ isOpen, onClose, onLoginSuccess }) {
 
   return (
     <div style={styles.overlay} onClick={onClose}>
+      {/* RegistrationModal se prikazuje SAMO kada je otvoren */}
+      {isRegistrationModalOpen && (
+        <RegistrationModal
+          isOpen={isRegistrationModalOpen}
+          onClose={() => setIsRegistrationModalOpen(false)}
+        />
+      )}
+
       <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
         <button style={styles.closeIcon} onClick={onClose}>✕</button>
-        
+        {/* Avatar i form */}
         <div style={styles.avatarContainer}>
           <div style={styles.avatar}>
             <svg style={styles.avatarIcon} viewBox="0 0 24 24" fill="white">
@@ -62,18 +82,20 @@ function LoginModal({ isOpen, onClose, onLoginSuccess }) {
 
           {error && <p style={styles.error}>{error}</p>}
 
-          <button type="submit" style={styles.submitButton}>
-            Prijava
-          </button>
+          <button type="submit" style={styles.submitButton}>Prijava</button>
 
           <p style={styles.registerText}>
-            Prvi put ste ovdje? <a href="#" style={styles.registerLink}>Registrujte se!</a>
+            Prvi put ste ovdje?{" "}
+            <a style={styles.registerLink} onClick={handleRegistrationClick}>
+              Registrujte se!
+            </a>
           </p>
         </form>
       </div>
     </div>
   );
 }
+
 
 const styles = {
   overlay: {
@@ -198,6 +220,7 @@ const styles = {
     color: "#1976d2",
     fontWeight: "600",
     textDecoration: "none",
+    cursor: "pointer"
   },
 };
 
