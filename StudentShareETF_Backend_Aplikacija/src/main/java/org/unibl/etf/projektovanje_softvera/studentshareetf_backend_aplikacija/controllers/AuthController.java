@@ -71,7 +71,7 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/check-username")
+    @GetMapping("/check-username")
     public ResponseEntity<CheckUsernameResponse> checkUsername(@RequestBody CheckUsernameRequest request) {
         try {
             UserDetails existingUser = userDetailsService.loadUserByUsername(request.getUsername());
