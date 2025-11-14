@@ -9,13 +9,18 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.LoginRequest;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.LoginResponse;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Student;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories.StudentRepository;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.security.JwtService;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.RegistrationRequest;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.*;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.CheckUsernameRequest;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.CheckUsernameResponse;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+
 
 import java.util.Map;
 
@@ -27,6 +32,8 @@ public class AuthController {
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
+    private final RegistrationService RegistrationService;
+    private final StudentRepository StudentRepository;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
@@ -48,5 +55,47 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Neispravno korisničko ime ili lozinka"));
         }
     }
+    @PostMapping("/registration")
+    public ResponseEntity<?> register(@RequestBody RegistrationRequest request) {
+
+        try {
+            RegistrationService.register(request);
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(Map.of("message", "Registracija uspješna."));
+        }
+        catch (Exception ex) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", ex.getMessage()));
+        }
+    }
+
+    @PostMapping("/check-username")
+    public ResponseEntity<CheckUsernameResponse> checkUsername(@RequestBody CheckUsernameRequest request) {
+        try {
+            UserDetails existingUser = userDetailsService.loadUserByUsername(request.getUsername());
+            CheckUsernameResponse response = new CheckUsernameResponse(false, "Username already taken");
+            return ResponseEntity.ok(response);
+        } catch (UsernameNotFoundException ex) {
+            CheckUsernameResponse response = new CheckUsernameResponse(true, "Username is available");
+            return ResponseEntity.ok(response);
+        }
+    }
+
+    /*@GetMapping("/verify")
+    public ResponseEntity<?> verifyEmail(@RequestParam String token) {
+        Student student = StudentRepository.findByVerificationToken(token)
+                .orElseThrow(() -> new RuntimeException("Nevažeći token"));
+
+        student.setVerified(true);
+        student.setVerificationToken(null);
+        StudentRepository.save(student);
+
+        return ResponseEntity.ok(Map.of("message", "Email potvrđen. Sada se možete prijaviti."));
+        }
+     */
+
+
 }
 
