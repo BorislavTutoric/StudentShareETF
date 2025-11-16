@@ -38,7 +38,7 @@ public class RegistrationService {
 
         user = userRepository.save(user);
 
-        //String token = java.util.UUID.randomUUID().toString();
+        String token = java.util.UUID.randomUUID().toString();
 
         Student student = new Student(
                 user,
@@ -46,12 +46,12 @@ public class RegistrationService {
                 req.getStudyProgram(),
                 req.getMajor()
         );
-        //student.setVerificationToken(token);
-        //student.setVerified(false);
+        student.setVerificationToken(token);
+        student.setVerified(false);
 
         studentRepository.save(student);
 
-        //emailService.sendVerificationEmail(student.getEmail(), token);
+        emailService.sendVerificationEmail(student.getEmail(), token);
 
         return user;
     }

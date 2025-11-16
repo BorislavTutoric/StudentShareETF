@@ -35,3 +35,12 @@ export const registration = async (name, surname, email, studyProgram, major, us
   }
 };
 
+export const mailVerification = async (token) => {
+  try {
+    const res = await api.post("all/auth/verify", { token }); 
+    return res.data; 
+  } catch (err) {
+    throw err.response?.data?.error || "Greška pri verifikaciji";
+  }
+};
+

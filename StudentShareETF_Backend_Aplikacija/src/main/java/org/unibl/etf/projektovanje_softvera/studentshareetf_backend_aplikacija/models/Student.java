@@ -59,7 +59,6 @@ public class Student {
         return major;
     }
 
-    // SETTERS
     public void setUserId(Integer userId) {
         this.userId = userId;
     }
@@ -80,7 +79,7 @@ public class Student {
         this.major = major;
     }
 
-    /*public void setVerificationToken(String verificationToken) {
+    public void setVerificationToken(String verificationToken) {
         this.verificationToken = verificationToken;
     }
     public void setVerified(boolean  verified) {
@@ -92,5 +91,4 @@ public class Student {
     public String getVerificationToken() {
         return verificationToken;
     }
-     */
 }

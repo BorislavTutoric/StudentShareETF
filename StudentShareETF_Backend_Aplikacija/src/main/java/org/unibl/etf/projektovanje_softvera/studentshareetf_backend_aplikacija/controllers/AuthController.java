@@ -83,19 +83,22 @@ public class AuthController {
         }
     }
 
-    /*@GetMapping("/verify")
-    public ResponseEntity<?> verifyEmail(@RequestParam String token) {
-        Student student = StudentRepository.findByVerificationToken(token)
-                .orElseThrow(() -> new RuntimeException("Nevažeći token"));
+    @PostMapping("/verify")
+    public ResponseEntity<?> verifyEmail(@RequestBody Map<String, String> body) {
+        String token = body.get("token");
+        try
+        {
+            Student student = StudentRepository.findByVerificationToken(token)
+                    .orElseThrow(() -> new RuntimeException("Nevažeći token"));
 
-        student.setVerified(true);
-        student.setVerificationToken(null);
-        StudentRepository.save(student);
+            student.setVerified(true);
+            student.setVerificationToken(null);
+            StudentRepository.save(student);
 
-        return ResponseEntity.ok(Map.of("message", "Email potvrđen. Sada se možete prijaviti."));
+            return ResponseEntity.ok(Map.of("message", "Email potvrđen."));
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(400).body(Map.of("error", ex.getMessage()));
         }
-     */
-
-
+    }
 }
 

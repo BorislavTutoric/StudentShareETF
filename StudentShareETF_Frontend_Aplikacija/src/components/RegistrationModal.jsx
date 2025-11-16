@@ -113,9 +113,9 @@ function RegistrationModal({ isOpen, onClose}) {
                     onChange={handleChange}
                 >
                     <option value="">Odaberite studijski program</option>
-                    <option value="RačunarstvoInformatika">Računarstvo i informatika</option>
-                    <option value="ElektronikaTelekomunikacije">Elektronika i telekomunikacije</option>
-                    <option value="ElektroenergetikaAutomatika">Elektroenergetika i automatika</option>
+                    <option value="Računarstvo i informatika">Računarstvo i informatika</option>
+                    <option value="Elektronika i telekomunikacije">Elektronika i telekomunikacije</option>
+                    <option value="Elektroenergetika i automatika">Elektroenergetika i automatika</option>
                 </select>
               </div>
 
@@ -127,8 +127,8 @@ function RegistrationModal({ isOpen, onClose}) {
                     onChange={handleChange}
                 >
                     <option value="">Odaberite smjer</option>
-                    <option value="Softver">Softversko inženjerstvo</option>
-                    <option value="Hardver">Računarsko inženjerstvo</option>
+                    <option value="Softversko inzenjerstvo">Softversko inženjerstvo</option>
+                    <option value="Računarsko inzenjerstvo">Računarsko inženjerstvo</option>
                     <option value="Elektronika">Elektronika</option>
                     <option value="Telekomunikacije">Telekomunijacije</option>
                     <option value="Elektroenergetika">Elektroenergetika</option>
