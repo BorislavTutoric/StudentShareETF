@@ -1,4 +1,4 @@
-package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models;
+/*package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models;
 
 
 import jakarta.persistence.*;
@@ -128,3 +128,4 @@ public class Material {
         this.approved = approved;
     }
 }
+**/

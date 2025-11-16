@@ -1,4 +1,4 @@
-package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models;
+/*package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -67,3 +67,4 @@ public class Subject {
         this.major = major;
     }
 }
+**/

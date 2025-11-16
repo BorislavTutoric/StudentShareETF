@@ -1,4 +1,4 @@
-package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories;
+/*package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -15,3 +15,4 @@ public interface SubjectRepository extends JpaRepository<Subject, Integer> {
     Optional<Subject> findByName(String name);
 
 }
+**/

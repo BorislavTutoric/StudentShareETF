@@ -1,4 +1,4 @@
-package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services;
+/*package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -35,3 +35,4 @@ public class MaterialService {
                 .map(m -> storageService.generatePresignedUrl(m.getFileKey()));
     }
 }
+**/

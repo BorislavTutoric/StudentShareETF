@@ -1,4 +1,4 @@
-package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto;
+/*package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -12,3 +12,4 @@ public class MaterialResponse {
     private String name;
     private String category;
 }
+**/

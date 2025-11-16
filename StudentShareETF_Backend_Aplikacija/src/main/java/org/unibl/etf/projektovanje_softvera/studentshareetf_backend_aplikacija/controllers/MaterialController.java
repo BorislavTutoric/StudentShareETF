@@ -1,4 +1,4 @@
-package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.controllers;
+/*package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.controllers;
 
 
 import lombok.RequiredArgsConstructor;
@@ -35,3 +35,4 @@ public class MaterialController {
                 .orElse(ResponseEntity.notFound().build());
     }
 }
+**/
