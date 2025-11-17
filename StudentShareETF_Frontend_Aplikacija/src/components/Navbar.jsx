@@ -1,29 +1,48 @@
-import React from "react";
+import React, { useState } from "react";
 
-function Navbar({ onLoginClick, username }) {
+function Navbar({ onInitialClick, onLoginClick, onMaterialsClick, username }) {
+  const [hoveredIndex, setHoveredIndex] = useState(null);
+
+  const navItems = [
+    { label: "Početna", onClick: onInitialClick },
+    { label: "Materijali", onClick: onMaterialsClick },
+    { label: "Događaji", onClick: () => {} },
+  ];
+
   return (
     <nav style={styles.navbar}>
       <div style={styles.logoContainer}>
         <div style={styles.logoIcon}>
-          <img 
-              src="src/assets/logoo.png" 
-              alt="Logo" 
-              style={{ width: "100px", height: "80px", objectFit: "contain" }}
+          <img
+            src="src/assets/logoo.png"
+            alt="Logo"
+            style={{ width: "90px", height: "70px", objectFit: "contain" }}
           />
         </div>
         <h2 style={styles.logo}>STUDENT SHARE ETF</h2>
       </div>
-      
+
       <div style={styles.navCenter}>
-        <button style={styles.navButton}>Početna</button>
-        <button style={styles.navButton}>Materijali</button>
-        <button style={styles.navButton}>Događaji</button>
+        {navItems.map((item, index) => (
+          <div
+            key={index}
+            style={{
+              ...styles.navLink,
+              ...(hoveredIndex === index ? styles.navLinkHover : {}),
+            }}
+            onClick={item.onClick}
+            onMouseEnter={() => setHoveredIndex(index)}
+            onMouseLeave={() => setHoveredIndex(null)}
+          >
+            {item.label}
+          </div>
+        ))}
       </div>
 
       <div style={styles.navRight}>
         {!username ? (
           <button style={styles.loginButton} onClick={onLoginClick}>
-            <span style={styles.userIcon}>👤</span> Prijavi se!
+            👤 Prijavi se
           </button>
         ) : (
           <span style={styles.username}>Hej, {username}</span>
@@ -38,16 +57,16 @@ const styles = {
     position: "fixed",
     top: 0,
     left: 0,
+    right: 0,
     width: "100%",
     height: "100px",
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: "0 40px",
-    backgroundColor: "#f5f5f5",
-    borderBottom: "2px solid #e0e0e0",
+    padding: "50 20px",
+    backgroundColor: "#06105eff", 
+    boxShadow: "0 4px 15px rgba(0,0,0,0.25)",
     zIndex: 1000,
-    boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
   },
   logoContainer: {
     display: "flex",
@@ -55,71 +74,65 @@ const styles = {
     gap: "12px",
   },
   logoIcon: {
-    width: "110px",
-    height: "80px",
-    backgroundColor: "#4fc3f7",
-    borderRadius: "8px",
+    width: "90px",
+    height: "70px",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.2)",
-  },
-  logoText: {
-    color: "white",
-    fontWeight: "bold",
-    fontSize: "16px",
+    borderRadius: "10px",
+    backgroundColor: "#ffffffaa", 
+    boxShadow: "0 2px 6px rgba(0,0,0,0.3)",
   },
   logo: {
     margin: 0,
-    fontSize: "16px",
-    color: "#333",
-    fontWeight: "600",
-    letterSpacing: "0.5px",
+    fontSize: "20px",
+    color: "white",
+    fontWeight: "700",
+    letterSpacing: "1px",
   },
   navCenter: {
     display: "flex",
-    gap: "15px",
+    gap: "25px",
     alignItems: "center",
   },
-  navButton: {
-    padding: "12px 32px",
-    backgroundColor: "#4fc3f7",
-    color: "white",
-    border: "none",
-    borderRadius: "25px",
+  navLink: {
     cursor: "pointer",
-    fontSize: "15px",
+    fontSize: "17px",
     fontWeight: "500",
+    color: "white",
+    padding: "10px 0",
+    borderBottom: "2px solid transparent",
+    position: "relative",
     transition: "all 0.3s ease",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.15)",
+  },
+  navLinkHover: {
+    color: "#0ed830ff",
+    borderBottom: "2px solid #1cc30cff",
+    transform: "translateY(-2px)",
+    textShadow: "0 2px 6px rgba(0,0,0,0.3)",
   },
   navRight: {
     display: "flex",
     alignItems: "center",
-    marginRight: "60px",
+    gap: "15px",
   },
   loginButton: {
-    padding: "12px 28px",
-    backgroundColor: "#29b6f6",
-    color: "white",
+    padding: "15px 20px",
+    backgroundColor: "#60e016ff", 
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: "16px",
     border: "none",
     borderRadius: "25px",
     cursor: "pointer",
-    fontSize: "15px",
-    fontWeight: "500",
-    display: "flex",
-    alignItems: "center",
-    gap: "8px",
-    boxShadow: "0 2px 4px rgba(0,0,0,0.15)",
     transition: "all 0.3s ease",
-  },
-  userIcon: {
-    fontSize: "18px",
+    boxShadow: "0 4px 10px rgba(0,0,0,0.25)",
+    margin: "100"
   },
   username: {
     fontWeight: "600",
-    color: "#333",
-    fontSize: "15px",
+    color: "white",
+    fontSize: "16px",
   },
 };
 
