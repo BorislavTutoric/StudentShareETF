@@ -1,4 +1,4 @@
-/*package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models;
+package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models;
 
 
 import jakarta.persistence.*;
@@ -11,30 +11,19 @@ import java.time.LocalDateTime;
 public class Material {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "MaterijalId")
     private Integer materialId;
 
-    @Column(name = "PredmetId")
-    private Integer subjectId;
-
     @ManyToOne
-    @MapsId
     @JoinColumn(name = "PredmetId")
     private Subject subject;
 
-    @Column(name = "StudentId")
-    private Integer studentId;
-
     @ManyToOne
-    @MapsId
     @JoinColumn(name = "StudentId")
     private Student student;
 
-    @Column(name = "ModeratorId")
-    private Integer moderatorId;
-
-    @OneToOne
-    @MapsId
+    @ManyToOne
     @JoinColumn(name = "ModeratorId")
     private User moderator;
 
@@ -58,32 +47,35 @@ public class Material {
 
     public Material() {}
 
+    public Subject getSubject() {
+        return subject;
+    }
+
+    public void setSubject(Subject subject) {
+        this.subject = subject;
+    }
+
+    public Student getStudent() {
+        return student;
+    }
+
+    public void setStudent(Student student) {
+        this.student = student;
+    }
+
+    public User getModerator() {
+        return moderator;
+    }
+
+    public void setModerator(User moderator) {
+        this.moderator = moderator;
+    }
+
     public Integer getMaterialId() {
         return materialId;
     }
     public void setMaterialId(Integer materialId) {
         this.materialId = materialId;
-    }
-
-    public Integer getSubjectId() {
-        return subjectId;
-    }
-    public void setSubjectId(Integer subjectId) {
-        this.subjectId = subjectId;
-    }
-
-    public Integer getStudentId(){
-        return studentId;
-    }
-    public void setStudentId(Integer studentId) {
-        this.studentId = studentId;
-    }
-
-    public Integer getModeratorId(){
-        return moderatorId;
-    }
-    public void setModeratorId(Integer moderatorId) {
-        this.moderatorId = moderatorId;
     }
 
     public String getFileKey() {
@@ -128,4 +120,3 @@ public class Material {
         this.approved = approved;
     }
 }
-**/

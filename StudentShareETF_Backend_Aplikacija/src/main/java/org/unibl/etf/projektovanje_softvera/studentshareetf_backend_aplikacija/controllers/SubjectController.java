@@ -1,4 +1,4 @@
-/*package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.controllers;
+package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.controllers;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,4 +22,3 @@ public class SubjectController {
         return subjectService.getSubjects(year);
     }
 }
-**/

@@ -1,4 +1,4 @@
-/*package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.controllers;
+package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.controllers;
 
 
 import lombok.RequiredArgsConstructor;
@@ -19,13 +19,8 @@ public class MaterialController {
     private final MaterialService materialService;
 
     @GetMapping("/materials")
-    public ResponseEntity<?> getMaterials(@RequestParam String name) {
-        try {
-            List<MaterialResponse> materials = materialService.getMaterials(name);
-            return ResponseEntity.ok(materials);
-        }catch(RuntimeException e) {
-            return ResponseEntity.status(400).body(Map.of("error", e.getMessage()));
-        }
+    public List<MaterialResponse> getMaterials(@RequestParam String name) {
+        return materialService.getMaterials(name);
     }
 
     @GetMapping("/{id}/url")
@@ -35,4 +30,3 @@ public class MaterialController {
                 .orElse(ResponseEntity.notFound().build());
     }
 }
-**/
