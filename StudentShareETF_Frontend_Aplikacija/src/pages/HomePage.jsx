@@ -4,13 +4,15 @@ import LoginModal from "../components/LoginModal";
 import SubjectsDisplay from "../components/SubjectsDisplay";
 import MaterialsDisplay from "../components/MaterialsDisplay";
 import Initial from "../components/Initial";
+import EventsDisplay from "../components/EventsDisplay"; 
 
 function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [username, setUsername] = useState("");
-  const [activeComponent, setActiveComponent] = useState("initial"); // initial, subjects, materials
-  const [selectedSubject, setSelectedSubject] = useState(""); // za MaterialsDisplay
-  const [materials, setMaterials] = useState([]); // materijali za MaterialsDisplay
+  const [activeComponent, setActiveComponent] = useState("initial");
+
+  const [selectedSubject, setSelectedSubject] = useState("");
+  const [materials, setMaterials] = useState([]);
 
   const handleLoginClick = () => setIsModalOpen(true);
   const handleClose = () => setIsModalOpen(false);
@@ -18,8 +20,8 @@ function Home() {
 
   const handleInitialClick = () => setActiveComponent("initial");
   const handleSubjectsClick = () => setActiveComponent("subjects");
+  const handleEventsClick = () => setActiveComponent("events"); 
 
-  // poziva se iz SubjectsDisplay kad korisnik odabere predmet
   const handleOpenMaterials = (subjectName, materialsData) => {
     setSelectedSubject(subjectName);
     setMaterials(materialsData);
@@ -28,24 +30,35 @@ function Home() {
 
   useEffect(() => {
     if (localStorage.getItem("showLoginModal") === "true") {
-      setIsModalOpen(true);                    
-      localStorage.removeItem("showLoginModal"); 
+      setIsModalOpen(true);
+      localStorage.removeItem("showLoginModal");
     }
   }, []);
 
   return (
-    <div style={{ width: '100vw', minHeight: '100vh', margin: 0, padding: 0, boxSizing: 'border-box', overflowX: 'hidden' }}>
-      <Navbar 
-        onInitialClick={handleInitialClick} 
-        onLoginClick={handleLoginClick} 
-        onMaterialsClick={handleSubjectsClick} 
-        username={username} 
+    <div style={{ width: "100vw", minHeight: "100vh", overflowX: "hidden" }}>
+      <Navbar
+        onInitialClick={handleInitialClick}
+        onLoginClick={handleLoginClick}
+        onMaterialsClick={handleSubjectsClick}
+        onEventsClick={handleEventsClick}
+        username={username}
       />
 
-      <div style={{ marginTop: '100px', width: '100%', overflowX: 'hidden' }}>
+      <div style={{ marginTop: "100px", width: "100%" }}>
         {activeComponent === "initial" && <Initial />}
-        {activeComponent === "subjects" && <SubjectsDisplay onOpenMaterials={handleOpenMaterials} />}
-        {activeComponent === "materials" && <MaterialsDisplay materials={materials} isOpen={true} subjectName={selectedSubject} />}
+        {activeComponent === "subjects" && (
+          <SubjectsDisplay onOpenMaterials={handleOpenMaterials} />
+        )}
+        {activeComponent === "materials" && (
+          <MaterialsDisplay
+            materials={materials}
+            isOpen={true}
+            subjectName={selectedSubject}
+          />
+        )}
+
+        {activeComponent === "events" && <EventsDisplay />} {/* ✔ OVO JE TAČNO */}
       </div>
 
       <LoginModal

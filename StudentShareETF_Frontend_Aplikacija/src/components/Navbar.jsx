@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 
-function Navbar({ onInitialClick, onLoginClick, onMaterialsClick, username }) {
+function Navbar({ onInitialClick, onLoginClick, onMaterialsClick, onEventsClick, username }) {
   const [hoveredIndex, setHoveredIndex] = useState(null);
 
   const navItems = [
     { label: "Početna", onClick: onInitialClick },
     { label: "Materijali", onClick: onMaterialsClick },
-    { label: "Događaji", onClick: () => {} },
+    { label: "Događaji", onClick: onEventsClick },
   ];
 
   return (
@@ -64,7 +64,7 @@ const styles = {
     justifyContent: "space-between",
     alignItems: "center",
     padding: "50 20px",
-    backgroundColor: "#06105eff", 
+    backgroundColor: "#06105eff",
     boxShadow: "0 4px 15px rgba(0,0,0,0.25)",
     zIndex: 1000,
   },
@@ -80,7 +80,7 @@ const styles = {
     alignItems: "center",
     justifyContent: "center",
     borderRadius: "10px",
-    backgroundColor: "#ffffffaa", 
+    backgroundColor: "#ffffffaa",
     boxShadow: "0 2px 6px rgba(0,0,0,0.3)",
   },
   logo: {
@@ -118,7 +118,7 @@ const styles = {
   },
   loginButton: {
     padding: "15px 20px",
-    backgroundColor: "#60e016ff", 
+    backgroundColor: "#60e016ff",
     color: "#fff",
     fontWeight: "600",
     fontSize: "16px",
@@ -127,7 +127,6 @@ const styles = {
     cursor: "pointer",
     transition: "all 0.3s ease",
     boxShadow: "0 4px 10px rgba(0,0,0,0.25)",
-    margin: "100"
   },
   username: {
     fontWeight: "600",
