@@ -45,4 +45,5 @@ public class ProfileService {
             throw new UserNotFoundException(username);
         }
     }
+
 }

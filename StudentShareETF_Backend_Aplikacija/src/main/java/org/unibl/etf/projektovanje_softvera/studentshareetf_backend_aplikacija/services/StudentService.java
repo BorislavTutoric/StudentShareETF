@@ -3,6 +3,7 @@ package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.EmailNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.UnverifiedException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Student;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.User;
@@ -34,4 +35,5 @@ public class StudentService {
             }
         }
     }
+
 }

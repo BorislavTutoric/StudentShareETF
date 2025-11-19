@@ -10,16 +10,15 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.LoginRequest;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.LoginResponse;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.*;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.EmailNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.UnverifiedException;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.UserNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Student;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.User;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories.StudentRepository;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.security.JwtService;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.RegistrationRequest;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.*;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.CheckUsernameRequest;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.CheckUsernameResponse;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
 
@@ -36,6 +35,7 @@ public class AuthController {
     private final RegistrationService RegistrationService;
     private final StudentRepository StudentRepository;
     private final StudentService studentService;
+    private final ChangePasswordService changePasswordService;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
@@ -104,6 +104,28 @@ public class AuthController {
 
             return ResponseEntity.ok(Map.of("message", "Email potvrđen."));
         } catch (RuntimeException ex) {
+            return ResponseEntity.status(400).body(Map.of("error", ex.getMessage()));
+        }
+    }
+
+    @GetMapping("/forgotten-password-request")
+    public ResponseEntity<?> forgottenPasswordRequest(@RequestParam String email){
+        try {
+            changePasswordService.passwordChangeMailSender(email);
+            return ResponseEntity.ok(Map.of("message", "Email je poslat."));
+        }
+        catch (EmailNotFoundException ex) {
+            return ResponseEntity.status(400).body(Map.of("error", ex.getMessage()));
+        }
+    }
+
+    @PostMapping("/forgotten-password-change")
+    public ResponseEntity<?> forgottenPasswordChange(@RequestBody PasswordChangeRequest passwordChangeRequest) {
+        try {
+            changePasswordService.changePassword(passwordChangeRequest);
+            return ResponseEntity.ok(Map.of("message", "Lozinka je izmijenjena."));
+        }
+        catch (UserNotFoundException ex) {
             return ResponseEntity.status(400).body(Map.of("error", ex.getMessage()));
         }
     }
