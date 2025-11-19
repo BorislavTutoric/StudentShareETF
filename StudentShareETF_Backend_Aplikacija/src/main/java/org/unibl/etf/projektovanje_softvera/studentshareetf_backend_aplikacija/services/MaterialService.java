@@ -3,6 +3,7 @@ package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.MaterialResponse;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Material;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Subject;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories.MaterialRepository;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories.SubjectRepository;
@@ -22,6 +23,7 @@ public class MaterialService {
         Optional<Subject> subject = subjectRepository.findByName(name);
         List<MaterialResponse> materials =  materialRepository.findBySubjectAndApproved(subject.get(), true)
                 .stream()
+                .filter(Material::isApproved)
                 .map(m -> new MaterialResponse(m.getMaterialId(), m.getName(), m.getCategory()))
                 .toList();
         return materials;

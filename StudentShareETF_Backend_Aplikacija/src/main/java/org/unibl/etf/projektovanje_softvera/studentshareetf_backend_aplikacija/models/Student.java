@@ -79,6 +79,10 @@ public class Student {
         this.major = major;
     }
 
+    public boolean getVerified() {
+        return verified;
+    }
+
     public void setVerificationToken(String verificationToken) {
         this.verificationToken = verificationToken;
     }

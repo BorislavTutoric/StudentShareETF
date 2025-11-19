@@ -72,6 +72,7 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: "12px",
+    padding: '20px 30px'
   },
   logoIcon: {
     width: "90px",
@@ -115,9 +116,10 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: "15px",
+    padding: '0px 30px'
   },
   loginButton: {
-    padding: "15px 20px",
+    padding: "15px 25px",
     backgroundColor: "#60e016ff",
     color: "#fff",
     fontWeight: "600",

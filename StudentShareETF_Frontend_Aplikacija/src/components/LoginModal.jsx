@@ -5,18 +5,18 @@ import RegistrationModal from "../components/RegistrationModal";
 function LoginModal({ isOpen, onClose, onLoginSuccess }) {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
 
   const handleRegistrationClick = (e) => {
-    e.preventDefault(); // sprečava scroll
+    e.preventDefault();
     setIsRegistrationModalOpen(true);
   };
 
   const handleRegistrationClose = () => {
     setIsRegistrationModalOpen(false);
-  
-  }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,17 +25,37 @@ function LoginModal({ isOpen, onClose, onLoginSuccess }) {
       const data = await login(username, password);
       localStorage.setItem("jwtToken", data.token);
       onLoginSuccess(username);
+      resetForm();
       onClose();
     } catch (err) {
       setError(err);
     }
   };
 
+  const resetForm = () => {
+    setUsername("");
+    setPassword("");
+    setShowPassword(false);
+    setError("");
+  };
+
+  const handleClose = () => {
+    resetForm();
+    onClose();
+  };
+
+  const clearUsername = () => {
+    setUsername("");
+  };
+
+  const clearPassword = () => {
+    setPassword("");
+  };
+
   if (!isOpen) return null;
 
   return (
-    <div style={styles.overlay} onClick={onClose}>
-      {/* RegistrationModal se prikazuje SAMO kada je otvoren */}
+    <div style={styles.overlay} onClick={handleClose}>
       {isRegistrationModalOpen && (
         <RegistrationModal
           isOpen={isRegistrationModalOpen}
@@ -44,7 +64,7 @@ function LoginModal({ isOpen, onClose, onLoginSuccess }) {
       )}
 
       <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
-        <button style={styles.closeIcon} onClick={onClose}>✕</button>
+        <button style={styles.closeIcon} onClick={handleClose}>✕</button>
         {/* Avatar i form */}
         <div style={styles.avatarContainer}>
           <div style={styles.avatar}>
@@ -57,26 +77,58 @@ function LoginModal({ isOpen, onClose, onLoginSuccess }) {
         <form onSubmit={handleSubmit} style={styles.form}>
           <div style={styles.inputGroup}>
             <label style={styles.label}>Korisničko ime</label>
-            <input
-              style={styles.input}
-              type="text"
-              placeholder="Unesite korisničko ime"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-            />
+            <div style={styles.inputWrapper}>
+              <input
+                style={styles.input}
+                type="text"
+                placeholder="Unesite korisničko ime"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+              />
+              {username && (
+                <button
+                  type="button"
+                  style={styles.clearButton}
+                  onClick={clearUsername}
+                  title="Očisti"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
           </div>
 
           <div style={styles.inputGroup}>
             <label style={styles.label}>LOZINKA</label>
-            <input
-              style={styles.input}
-              type="password"
-              placeholder="•••••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
+            <div style={styles.inputWrapper}>
+              <input
+                style={styles.input}
+                type={showPassword ? "text" : "password"}
+                placeholder="•••••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+              {password && (
+                <button
+                  type="button"
+                  style={styles.clearButton}
+                  onClick={clearPassword}
+                  title="Očisti"
+                >
+                  ✕
+                </button>
+              )}
+              <button
+                type="button"
+                style={styles.eyeButton}
+                onClick={() => setShowPassword(!showPassword)}
+                title={showPassword ? "Sakrij lozinku" : "Prikaži lozinku"}
+              >
+                {showPassword ? "👁️" : "👁️‍🗨️"}
+              </button>
+            </div>
             <a href="#" style={styles.forgotLink}>Zaboravili ste lozinku?</a>
           </div>
 
@@ -171,6 +223,11 @@ const styles = {
     marginBottom: "6px",
     textTransform: "uppercase",
   },
+  inputWrapper: {
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
+  },
   input: {
     width: "100%",
     padding: "12px 15px",
@@ -182,6 +239,33 @@ const styles = {
     color: "#333",
     boxSizing: "border-box",
     transition: "border 0.3s ease",
+    paddingRight: "70px",
+  },
+  clearButton: {
+    position: "absolute",
+    right: "40px",
+    backgroundColor: "transparent",
+    border: "none",
+    fontSize: "16px",
+    color: "#999",
+    cursor: "pointer",
+    padding: "5px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    transition: "color 0.2s ease",
+  },
+  eyeButton: {
+    position: "absolute",
+    right: "12px",
+    backgroundColor: "transparent",
+    border: "none",
+    fontSize: "16px",
+    cursor: "pointer",
+    padding: "5px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
   },
   forgotLink: {
     display: "block",

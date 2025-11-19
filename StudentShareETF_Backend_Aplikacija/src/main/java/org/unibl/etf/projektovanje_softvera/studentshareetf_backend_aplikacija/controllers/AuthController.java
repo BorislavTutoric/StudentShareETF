@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.LoginRequest;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.LoginResponse;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.UnverifiedException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Student;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories.StudentRepository;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.security.JwtService;
@@ -34,6 +35,7 @@ public class AuthController {
     private final UserDetailsService userDetailsService;
     private final RegistrationService RegistrationService;
     private final StudentRepository StudentRepository;
+    private final StudentService studentService;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
@@ -47,12 +49,17 @@ public class AuthController {
             );
             UserDetails user = userDetailsService.loadUserByUsername(request.getUsername());
 
+            studentService.verificationCheck(user);
+
             String token = jwtService.generateToken(user);
 
             return ResponseEntity.ok(new LoginResponse(token, user.getAuthorities().iterator().next().getAuthority()));
         }
         catch (AuthenticationException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Neispravno korisničko ime ili lozinka"));
+        }
+        catch (UnverifiedException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", ex.getMessage()));
         }
     }
     @PostMapping("/registration")

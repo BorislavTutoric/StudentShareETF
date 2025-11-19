@@ -4,6 +4,7 @@ import { getSubjects, getMaterials } from "../services/materialsService";
 function SubjectsDisplay({ onOpenMaterials }) {
   const [courses, setCourses] = useState([]);
   const [selectedYear, setSelectedYear] = useState(1);
+  const [hoverId, setHoverId] = useState(null);
 
   const fetchSubjects = async (year) => {
     try {
@@ -17,7 +18,7 @@ function SubjectsDisplay({ onOpenMaterials }) {
   const fetchMaterials = async (name) => {
     try {
       const data = await getMaterials(name);
-      onOpenMaterials(name, data); // obavještava Home da otvori MaterialsDisplay
+      onOpenMaterials(name, data); 
     } catch (err) {
       console.error(err);
     }
@@ -59,16 +60,34 @@ function SubjectsDisplay({ onOpenMaterials }) {
 
       <div style={styles.courseListsContainer}>
         <div style={styles.semesterColumn}>
-          {firstSemester.map(course => (
-            <button key={course.id} style={styles.courseButton} onClick={() => fetchMaterials(course.name)}>
+          {firstSemester.map((course, index) => (
+            <button
+              key={`first-${index}`}
+              style={{
+                ...styles.courseButton,
+                ...(hoverId === `first-${index}` ? styles.courseButtonHover : {})
+              }}
+              onClick={() => fetchMaterials(course.name)}
+              onMouseEnter={() => setHoverId(`first-${index}`)}
+              onMouseLeave={() => setHoverId(null)}
+            >
               {course.name}
             </button>
           ))}
         </div>
 
         <div style={styles.semesterColumn}>
-          {secondSemester.map(course => (
-            <button key={course.id} style={styles.courseButton} onClick={() => fetchMaterials(course.name)}>
+          {secondSemester.map((course, index) => (
+            <button
+              key={`second-${index}`}
+              style={{
+                ...styles.courseButton,
+                ...(hoverId === `second-${index}` ? styles.courseButtonHover : {})
+              }}
+              onClick={() => fetchMaterials(course.name)}
+              onMouseEnter={() => setHoverId(`second-${index}`)}
+              onMouseLeave={() => setHoverId(null)}
+            >
               {course.name}
             </button>
           ))}
@@ -81,7 +100,7 @@ function SubjectsDisplay({ onOpenMaterials }) {
 const styles = {
   container: {
     width: '100%',
-    minHeight: 'calc(100vh - 100px)', // odmah ispod Navbara
+    minHeight: 'calc(100vh - 100px)', 
     display: 'flex',
     flexDirection: 'column',
     justifyContent: 'flex-start',
@@ -89,14 +108,6 @@ const styles = {
     background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%)",
     boxSizing: 'border-box',
     padding: '20px 10px',
-    overflowX: 'hidden', // nema horizontalnog skrolera
-  },
-  contentWrapper: {
-    width: '100%',
-    maxWidth: '1400px',
-    margin: '0 auto',
-    padding: '0 20px',
-    boxSizing: 'border-box',
   },
   yearButtonsContainer: {
     display: 'flex',
@@ -118,7 +129,7 @@ const styles = {
     outline: 'none'
   },
   yearButtonActive: {
-    backgroundColor: '#6b7280',
+    backgroundColor: '#60e016',
     color: '#ffffff',
     borderColor: '#374151',
     transform: 'scale(1.05)'
@@ -148,12 +159,13 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     gap: '15px',
+    padding: "0px 30px"
   },
   courseButton: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: '15px 25px',
+    padding: '16px 25px',
     fontSize: '18px',
     fontWeight: '700',
     border: '2px solid #000000ff',
@@ -167,9 +179,12 @@ const styles = {
     textAlign: 'left',
     boxSizing: 'border-box',
     fontFamily: 'Times New Roman, serif', 
-    
   },
+  courseButtonHover: {
+    backgroundColor: "#60e016", 
+    color: '#ffffff',           
+    borderColor: '#ffffffff'
+  }
 };
-
 
 export default SubjectsDisplay;

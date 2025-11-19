@@ -17,3 +17,12 @@ export const getMaterials = async (name) => {
     throw err.response?.data?.error || "Greška pri ucitavanju";
   }
 };
+
+export const getMaterial = async (id) => {
+  try {
+    const response = await api.get(`all/subject/${id}/url`);
+    return response.data; // ovde je tvoj presigned URL
+  } catch (err) {
+    throw err.response?.data?.error || "Greška pri učitavanju";
+  }
+};
