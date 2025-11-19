@@ -23,5 +23,18 @@ public class EmailService {
 
         mailSender.send(mailMessage);
     }
+
+    public void sendPasswordChangeEmail(String toEmail, String token) {
+        String subject = "Izmjena lozinke";
+        String changePasswordUrl = "http://localhost:5173/password-change?token=" + token;
+        String message = "Za izmjenu lozinke kliknite na link:\n" + changePasswordUrl;
+
+        SimpleMailMessage mailMessage = new SimpleMailMessage();
+        mailMessage.setTo(toEmail);
+        mailMessage.setSubject(subject);
+        mailMessage.setText(message);
+
+        mailSender.send(mailMessage);
+    }
 }
 
