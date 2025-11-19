@@ -42,6 +42,12 @@ public class SecurityConfig {
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers("/all/**")
                         .permitAll()
+                        .requestMatchers("/api/**")
+                        .permitAll()
+                        /*.hasRole("ADMIN")
+                        .requestMatchers("/api/**").hasRole("STUDENT")
+                        .requestMatchers("/api/**").hasRole("MODERATOR_DOGADJAJA")
+                        .requestMatchers("/api/**").hasRole("MODERATOR_MATERIJALA")*/
                         //.requestMatchers("/api/admin/**").hasRole("ADMIN")
                         //.requestMatchers("/api/student/**").hasRole("STUDENT")
                         //.requestMatchers("/api/moderator/dogadjaji/**").hasRole("MODERATOR_DOGADJAJA")
