@@ -2,6 +2,7 @@ package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.task.DelegatingSecurityContextAsyncTaskExecutor;
 import org.springframework.stereotype.Service;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.EmailNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.UnverifiedException;
@@ -36,4 +37,13 @@ public class StudentService {
         }
     }
 
+    public void emailCheck(String email) throws EmailNotFoundException {
+        Optional<Student>  student = studentRepository.findByEmail(email);
+        if(student.isPresent()) {
+            return;
+        }
+        else{
+            throw new EmailNotFoundException("Email is available");
+        }
+    }
 }

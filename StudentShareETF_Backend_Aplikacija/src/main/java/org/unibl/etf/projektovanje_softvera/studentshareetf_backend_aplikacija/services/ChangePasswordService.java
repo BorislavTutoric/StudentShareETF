@@ -31,7 +31,6 @@ public class ChangePasswordService {
             student.setVerificationToken(token);
             studentRepository.save(student);
             emailService.sendPasswordChangeEmail(student.getEmail(), token);
-
         }
         else {
             throw new EmailNotFoundException();
@@ -42,7 +41,7 @@ public class ChangePasswordService {
         Optional<Student> s = studentRepository.findByVerificationToken(passwordChangeRequest.getToken());
         if(s.isPresent()){
             Student student = s.get();
-            Optional<User> u = userRepository.findByUserID(student.getUserId());
+            Optional<User> u = userRepository.findByUserId(student.getUserId());
             if(u.isPresent()){
                 User user = u.get();
                 user.setPassword(passwordEncoder.encode(passwordChangeRequest.getPassword()));

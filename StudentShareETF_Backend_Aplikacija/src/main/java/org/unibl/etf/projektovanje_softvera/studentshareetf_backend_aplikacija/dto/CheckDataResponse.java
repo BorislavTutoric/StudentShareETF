@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class CheckUsernameRequest {
-    private String username;
+public class CheckDataResponse {
+    private boolean available;
+    private String message;
 }

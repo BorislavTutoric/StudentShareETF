@@ -58,7 +58,7 @@ function Home() {
           />
         )}
 
-        {activeComponent === "events" && <EventsDisplay />} {/* ✔ OVO JE TAČNO */}
+        {activeComponent === "events" && <EventsDisplay />} 
       </div>
 
       <LoginModal
