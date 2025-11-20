@@ -15,7 +15,6 @@ import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.e
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.UnverifiedException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.UserNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Student;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.User;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories.StudentRepository;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.security.JwtService;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.*;
@@ -33,7 +32,7 @@ public class AuthController {
     private final JwtService jwtService;
     private final UserDetailsService userDetailsService;
     private final RegistrationService RegistrationService;
-    private final StudentRepository StudentRepository;
+    private final StudentRepository studentRepository;
     private final StudentService studentService;
     private final ChangePasswordService changePasswordService;
 
@@ -79,13 +78,25 @@ public class AuthController {
     }
 
     @GetMapping("/check-username")
-    public ResponseEntity<CheckUsernameResponse> checkUsername(@RequestParam String username) {
+    public ResponseEntity<CheckDataResponse> checkUsername(@RequestParam String username) {
         try {
             UserDetails existingUser = userDetailsService.loadUserByUsername(username);
-            CheckUsernameResponse response = new CheckUsernameResponse(false, "Username already taken");
+            CheckDataResponse response = new CheckDataResponse(false, "Username already taken");
             return ResponseEntity.ok(response);
         } catch (UsernameNotFoundException ex) {
-            CheckUsernameResponse response = new CheckUsernameResponse(true, "Username is available");
+            CheckDataResponse response = new CheckDataResponse(true, "Username is available");
+            return ResponseEntity.ok(response);
+        }
+    }
+
+    @GetMapping("/check-email")
+    public ResponseEntity<CheckDataResponse> checkEmail(@RequestParam String email) {
+        try {
+            studentService.emailCheck(email);
+            CheckDataResponse response = new CheckDataResponse(false, "Email already taken");
+            return ResponseEntity.ok(response);
+        } catch (EmailNotFoundException ex) {
+            CheckDataResponse response = new CheckDataResponse(true, ex.getMessage());
             return ResponseEntity.ok(response);
         }
     }
@@ -95,12 +106,12 @@ public class AuthController {
         String token = body.get("token");
         try
         {
-            Student student = StudentRepository.findByVerificationToken(token)
+            Student student = studentRepository.findByVerificationToken(token)
                     .orElseThrow(() -> new RuntimeException("Nevažeći token"));
 
             student.setVerified(true);
             student.setVerificationToken(null);
-            StudentRepository.save(student);
+            studentRepository.save(student);
 
             return ResponseEntity.ok(Map.of("message", "Email potvrđen."));
         } catch (RuntimeException ex) {

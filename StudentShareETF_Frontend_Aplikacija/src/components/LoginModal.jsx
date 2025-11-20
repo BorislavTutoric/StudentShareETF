@@ -24,9 +24,11 @@ function LoginModal({ isOpen, onClose, onLoginSuccess }) {
     try {
       const data = await login(username, password);
       localStorage.setItem("jwtToken", data.token);
-      onLoginSuccess(username);
-      resetForm();
-      onClose();
+      if(data.role === "ROLE_STUDENT"){
+        window.location.href = "/student";
+      }
+      //resetForm();
+      //onClose();
     } catch (err) {
       setError(err);
     }
