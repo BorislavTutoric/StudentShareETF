@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
-import { checkUsername, registration } from "../services/authService";
+import { checkUsername, checkEmail, registration } from "../services/authService";
 
 function RegistrationModal({ isOpen, onClose}) {
   const [usernameError, setUsernameError] = useState("");
+  const [emailError, setEmailError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [formData, setFormData] = useState({
     name: '',
@@ -27,6 +28,20 @@ function RegistrationModal({ isOpen, onClose}) {
         }
     } catch (err) {
         console.error(err);
+    }
+  };
+
+  const emailCheck = async () => {
+    try {
+      const data = await checkEmail(formData.email);
+      if(!data.available) {
+        setEmailError("Email zauzet");
+        setFormData({...formData,email: ''});
+      } else {
+        setEmailError("");
+      }
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -163,13 +178,15 @@ function RegistrationModal({ isOpen, onClose}) {
               <div style={styles.formGroup}>
                 <label style={styles.label}>Email: {!formData.email && <span style={{color: '#e53935'}}>!</span>}</label>
                 <input
-                  style={styles.input}
+                  style={{...styles.input, borderColor: emailError ? '#e53935' : '#90a4ae'}}
                   type="email"
                   name="email"
                   placeholder="someone@domena.tld"
                   value={formData.email}
                   onChange={handleChange}
+                  onBlur={emailCheck}
                 />
+                {emailError && <p style={styles.errorMessage}>{emailError}</p>}
               </div>
 
               <div style={styles.formGroup}>

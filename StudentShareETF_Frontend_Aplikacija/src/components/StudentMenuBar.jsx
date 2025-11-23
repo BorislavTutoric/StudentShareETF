@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { LogOut } from 'lucide-react';
 
-function StudentMenuBar({ onLogoutClick }) {
+function StudentMenuBar({ onLogoutClick, onMenuClick }) {
   const [hoveredItem, setHoveredItem] = useState(null);
 
   const menuItems = [
@@ -27,6 +27,7 @@ function StudentMenuBar({ onLogoutClick }) {
             onMouseEnter={() => setHoveredItem(item)}
             onMouseLeave={() => setHoveredItem(null)}
             style={styles.menuButton}
+            onClick={() => onMenuClick(item)} // poziv funkcije iz StudentPage
           >
             <span
               style={{

@@ -21,7 +21,7 @@ export const getMaterials = async (name) => {
 export const getMaterial = async (id) => {
   try {
     const response = await api.get(`all/subject/${id}/url`);
-    return response.data; // ovde je tvoj presigned URL
+    return response.data; 
   } catch (err) {
     throw err.response?.data?.error || "Greška pri učitavanju";
   }

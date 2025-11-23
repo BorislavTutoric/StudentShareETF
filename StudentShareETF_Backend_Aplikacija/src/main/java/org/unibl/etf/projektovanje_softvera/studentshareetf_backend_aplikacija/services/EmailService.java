@@ -24,6 +24,19 @@ public class EmailService {
         mailSender.send(mailMessage);
     }
 
+    public void sendChangeEmail(String toEmail, String token) {
+        String subject = "Potvrda Email-a";
+        String verificationUrl = "http://localhost:5173/verify?token=" + token;
+        String message = "Kliknite na link da potvrdite vaš email:\n" + verificationUrl;
+
+        SimpleMailMessage mailMessage = new SimpleMailMessage();
+        mailMessage.setTo(toEmail);
+        mailMessage.setSubject(subject);
+        mailMessage.setText(message);
+
+        mailSender.send(mailMessage);
+    }
+
     public void sendPasswordChangeEmail(String toEmail, String token) {
         String subject = "Izmjena lozinke";
         String changePasswordUrl = "http://localhost:5173/password-change?token=" + token;

@@ -62,7 +62,7 @@ function Verify() {
               <h2 style={styles.title}>Email Verifikovan!</h2>
               <p style={styles.subtitle}>{message}</p>
               <p style={styles.description}>
-                Vaš nalog je sada aktivan. Možete se prijaviti i početi da koristite StudentShareETF platformu.
+                Možete se prijaviti i početi da koristite StudentShareETF platformu.
               </p>
               <button 
                 style={styles.button}
@@ -84,7 +84,7 @@ function Verify() {
               <h2 style={styles.title}>Verifikacija Neuspješna</h2>
               <p style={styles.subtitle}>{message}</p>
               <p style={styles.description}>
-                Vaš nalog je već aktiviran. Možete se direktno prijaviti i koristiti platformu. U slučaju da Vam se pri prijavi pojavi poruku da niste verifikovali email kliknite ponovo na link koji Vam je poslat na mail.
+                Vaš nalog je već aktiviran. Možete se direktno prijaviti i koristiti platformu. U slučaju da Vam se pri prijavi pojavi porukua da niste verifikovali email kliknite ponovo na link koji Vam je poslat na mail.
               </p>
               <button 
                 style={styles.button}

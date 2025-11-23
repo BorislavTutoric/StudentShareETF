@@ -104,20 +104,30 @@ public class AuthController {
     @PostMapping("/verify")
     public ResponseEntity<?> verifyEmail(@RequestBody Map<String, String> body) {
         String token = body.get("token");
-        try
-        {
+
+        try {
             Student student = studentRepository.findByVerificationToken(token)
                     .orElseThrow(() -> new RuntimeException("Nevažeći token"));
 
-            student.setVerified(true);
+            if (student.getPendingEmail() != null) {
+                student.setEmail(student.getPendingEmail());
+                student.setPendingEmail(null);
+            }
+
+            if (!student.getVerified()) {
+                student.setVerified(true);
+            }
+
             student.setVerificationToken(null);
             studentRepository.save(student);
 
             return ResponseEntity.ok(Map.of("message", "Email potvrđen."));
-        } catch (RuntimeException ex) {
+        }
+        catch (Exception ex) {
             return ResponseEntity.status(400).body(Map.of("error", ex.getMessage()));
         }
     }
+
 
     @GetMapping("/forgotten-password-request")
     public ResponseEntity<?> forgottenPasswordRequest(@RequestParam String email){

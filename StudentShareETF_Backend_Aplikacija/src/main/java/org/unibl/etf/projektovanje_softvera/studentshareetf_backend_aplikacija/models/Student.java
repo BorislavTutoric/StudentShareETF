@@ -30,6 +30,9 @@ public class Student {
     @Column(name = "Smjer")
     private String major;
 
+    @Column(name = "PendingEmail")
+    private String pendingEmail;
+
     public Student() {}
 
     public Student(User user,String email, String studyProgram, String major) {
@@ -94,5 +97,11 @@ public class Student {
     }
     public String getVerificationToken() {
         return verificationToken;
+    }
+    public void setPendingEmail(String pendingEmail) {
+        this.pendingEmail = pendingEmail;
+    }
+    public String getPendingEmail() {
+        return pendingEmail;
     }
 }
