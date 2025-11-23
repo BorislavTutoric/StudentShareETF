@@ -18,6 +18,16 @@ export const checkUsername = async (username) => {
   }
 };
 
+export const checkEmail = async (email) => {
+  try{
+    const res = await api.get("all/auth/check-email", { params: { email } });
+    return res.data;
+  }catch (err)
+  {
+    throw err.response || "Greška pri provjeri";
+  }
+};
+
 export const registration = async (name, surname, email, studyProgram, major, username, password) => {
   try {
     const res = await api.post("all/auth/registration", {
