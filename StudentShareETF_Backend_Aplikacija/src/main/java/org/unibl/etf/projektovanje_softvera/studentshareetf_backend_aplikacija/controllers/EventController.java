@@ -18,7 +18,6 @@ import java.util.Map;
 public class EventController {
 
     private final EventService eventService;
-    private final EventRepository eventRepository;
 
     @GetMapping
     public ResponseEntity<?> getAllAktivniEvents() {
@@ -40,8 +39,4 @@ public class EventController {
         }
     }
 
-    @GetMapping("/test")
-    public List<Event> testAll() {
-        return eventRepository.findAll();
-    }
 }

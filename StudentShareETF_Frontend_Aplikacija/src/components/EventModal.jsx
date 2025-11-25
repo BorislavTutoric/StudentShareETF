@@ -60,7 +60,7 @@ function EventModal({ event, onClose }) {
 
               <div style={styles.modalInfoItem}>
                 <span style={styles.modalLabel}>Autor:</span>
-                <span style={styles.modalValue}>{event.autor}</span>
+                <span style={styles.modalValue}>{event.username}</span>
               </div>
             </div>
 
