@@ -34,7 +34,7 @@ function EventCard({ event, onClick }) {
         
         <div style={styles.infoRow}>
           <span style={styles.infoLabel}>Autor:</span>
-          <span style={styles.infoValue}>{event.autor}</span>
+          <span style={styles.infoValue}>{event.username}</span>
         </div>
         
         <button style={styles.viewMoreButton}>

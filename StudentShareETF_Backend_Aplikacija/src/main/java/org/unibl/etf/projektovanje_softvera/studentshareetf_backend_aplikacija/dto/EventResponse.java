@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EventResponse {
+    private String username;
     private Integer dogadjajId;
     private String naziv;
     private String mjesto;

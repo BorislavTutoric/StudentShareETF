@@ -19,11 +19,6 @@ public class Subject {
     @Column(name = "Semestar")
     private Integer semester;
 
-    @Column(name = "StudijskiProgram")
-    private String studyProgram;
-
-    @Column(name = "Smjer")
-    private String major;
 
     public Subject() {}
 
@@ -51,19 +46,4 @@ public class Subject {
         this.semester = semester;
     }
 
-    public String getStudyProgram() {
-        return studyProgram;
-    }
-
-    public void setStudyProgram(String studyProgram) {
-        this.studyProgram = studyProgram;
-    }
-
-    public String getMajor() {
-        return major;
-    }
-
-    public void setMajor(String major) {
-        this.major = major;
-    }
 }

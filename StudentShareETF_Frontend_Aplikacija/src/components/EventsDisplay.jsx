@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { getAllEvents } from "../services/eventService";
+import { getAllEvents } from "../services/eventService"
 import EventCard from "./EventCard";
 import EventModal from "./EventModal";
 

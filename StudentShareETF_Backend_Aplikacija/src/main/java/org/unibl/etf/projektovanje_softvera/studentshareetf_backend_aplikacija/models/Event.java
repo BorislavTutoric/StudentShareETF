@@ -36,7 +36,7 @@ public class Event {
     private String fileKey;
 
     @Column(name = "Aktivan", nullable = false)
-    private String aktivan = "NEAKTIVAN";
+    private boolean aktivan = false;
 
     public Event() {}
 
@@ -64,6 +64,6 @@ public class Event {
     public String getFileKey() { return fileKey; }
     public void setFileKey(String fileKey) { this.fileKey = fileKey; }
 
-    public String getAktivan() { return aktivan; }
-    public void setAktivan(String status) { this.aktivan = status; }
+    public boolean getAktivan() { return aktivan; }
+    public void setAktivan(boolean status) { this.aktivan = status; }
 }
