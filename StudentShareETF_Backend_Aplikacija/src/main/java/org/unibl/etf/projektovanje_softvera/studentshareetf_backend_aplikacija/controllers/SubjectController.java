@@ -21,4 +21,9 @@ public class SubjectController {
     public List<SubjectSimple> getSubjects(@RequestParam Integer year){
         return subjectService.getSubjects(year);
     }
+
+    @GetMapping("/subjects/search")
+    public List<SubjectSimple> searchSubjects(@RequestParam String search){
+        return subjectService.getSearchedSubjects(search);
+    }
 }

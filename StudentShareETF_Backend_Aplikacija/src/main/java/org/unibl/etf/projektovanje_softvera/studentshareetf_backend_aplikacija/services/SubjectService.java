@@ -50,4 +50,11 @@ public class SubjectService {
             return 1;
         }
     }
+
+    public List<SubjectSimple> getSearchedSubjects(String search){
+        return subjectRepository.findByNameContainingIgnoreCase(search)
+                .stream()
+                .map(s -> new SubjectSimple(s.getName(), s.getSemester()))
+                .toList();
+    }
 }
