@@ -1,4 +1,4 @@
-package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.controllers;
+/*package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.controllers;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -53,3 +53,4 @@ public class EventAuthController {
         }
     }
 }
+*/
