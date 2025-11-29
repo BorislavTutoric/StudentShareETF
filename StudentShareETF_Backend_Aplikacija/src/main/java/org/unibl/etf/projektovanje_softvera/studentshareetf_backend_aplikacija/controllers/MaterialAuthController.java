@@ -36,8 +36,5 @@ public class MaterialAuthController {
     public List<MaterialReviewResponse> getRecenzijePoMaterijalId(@RequestParam Integer materijalId){
         return materialReviewService.getReviewsByMaterialId(materijalId);
     }
-
-    //Ilinois
-    @GetMapping("/myReview")
-    public
+    
 }
