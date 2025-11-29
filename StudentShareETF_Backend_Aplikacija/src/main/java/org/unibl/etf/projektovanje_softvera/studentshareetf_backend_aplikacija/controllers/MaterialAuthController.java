@@ -37,5 +37,7 @@ public class MaterialAuthController {
         return materialReviewService.getReviewsByMaterialId(materijalId);
     }
 
-
+    //Ilinois
+    @GetMapping("/myReview")
+    public
 }

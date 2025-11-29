@@ -9,18 +9,7 @@ function CommentsSection({ isOpen, onClose, documentName = "Termodinamika.pdf" }
       rating: 5,
       text: "Jako korisni materijali, sve lepo objašnjeno!",
     },
-    {
-      id: 2,
-      author: "Petar Petrović",
-      rating: 5,
-      text: "Savršen dodatak za polaganje završnog ispita."
-    },
-    {
-      id: 3,
-      author: "Maja Marić",
-      rating: 3,
-      text: "Smatra da odredeni djelovi nisu dobro objašnjeni."
-    }
+
   ]);
 
   const [newComment, setNewComment] = useState("");

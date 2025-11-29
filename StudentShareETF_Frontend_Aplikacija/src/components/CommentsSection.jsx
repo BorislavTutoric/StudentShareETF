@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Star, MoreVertical, UserCircle2, X, MessageCircle } from 'lucide-react';
+import { Star, MoreVertical, UserCircle2, X, MessageCircle, Trash2 } from 'lucide-react';
 
 function CommentsSection({ isOpen, onClose, documentName = "Termodinamika.pdf" }) {
   const [comments, setComments] = useState([
@@ -8,38 +8,33 @@ function CommentsSection({ isOpen, onClose, documentName = "Termodinamika.pdf" }
       author: "Milan Milanović",
       rating: 5,
       text: "Jako korisni materijali, sve lepo objašnjeno!",
+      isCurrentUser: false,
     },
-    {
-      id: 2,
-      author: "Petar Petrović",
-      rating: 5,
-      text: "Savršen dodatak za polaganje završnog ispita."
-    },
-    {
-      id: 3,
-      author: "Maja Marić",
-      rating: 3,
-      text: "Smatra da odredeni djelovi nisu dobro objašnjeni."
-    }
   ]);
 
+  const [myRating, setMyRating] = useState(null);
+  const [myComment, setMyComment] = useState(null);
   const [newComment, setNewComment] = useState("");
   const [newRating, setNewRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [showAddForm, setShowAddForm] = useState(false);
 
-  const averageRating = comments.length > 0 
+  const allCommentsForRating = comments.length > 0 
     ? (comments.reduce((sum, c) => sum + c.rating, 0) / comments.length).toFixed(1)
     : 0;
 
   const handleSubmit = () => {
     if (newComment.trim() && newRating > 0) {
-      setComments([...comments, {
+      const newCommentObj = {
         id: Date.now(),
-        author: "Novi Korisnik",
+        author: "Vi (Trenutni korisnik)",
         rating: newRating,
-        text: newComment
-      }]);
+        text: newComment,
+        isCurrentUser: true,
+      };
+      setComments([...comments, newCommentObj]);
+      setMyRating(newRating);
+      setMyComment(newCommentObj);
       setNewComment("");
       setNewRating(0);
       setShowAddForm(false);
@@ -49,7 +44,23 @@ function CommentsSection({ isOpen, onClose, documentName = "Termodinamika.pdf" }
     }
   };
 
+  const handleDeleteMyRating = () => {
+    if (myComment) {
+      setComments(comments.filter(c => c.id !== myComment.id));
+    }
+    setMyRating(null);
+    setMyComment(null);
+    alert('Vaša ocjena i komentar su obrisani!');
+  };
+
+  const handleDeleteComment = (id) => {
+    setComments(comments.filter(c => c.id !== id));
+    alert('Komentar uspješno obrisan!');
+  };
+
   if (!isOpen) return null;
+
+  const otherComments = comments.filter(c => !c.isCurrentUser);
 
   return (
     <div style={styles.modalOverlay} onClick={onClose}>
@@ -80,35 +91,68 @@ function CommentsSection({ isOpen, onClose, documentName = "Termodinamika.pdf" }
               <Star
                 key={i}
                 size={24}
-                fill={i < Math.round(averageRating) ? '#facc15' : 'none'}
-                color={i < Math.round(averageRating) ? '#facc15' : '#9ca3af'}
+                fill={i < Math.round(allCommentsForRating) ? '#facc15' : 'none'}
+                color={i < Math.round(allCommentsForRating) ? '#facc15' : '#9ca3af'}
               />
             ))}
           </div>
           <p style={styles.averageText}>
-            {averageRating} prosječna ocjena ({comments.length} {comments.length === 1 ? 'recenzija' : 'recenzija'})
+            {allCommentsForRating} prosječna ocjena ({comments.length} {comments.length === 1 ? 'recenzija' : 'recenzija'})
           </p>
         </div>
 
-       
-        <div style={styles.addButtonContainer}>
-          <button
-            onClick={() => setShowAddForm(!showAddForm)}
-            style={styles.addCommentButton}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#50c012';
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = '0 6px 16px rgba(96, 224, 22, 0.4)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#60e016';
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 4px 12px rgba(96, 224, 22, 0.3)';
-            }}
-          >
-            <MessageCircle size={18} />
-            {showAddForm ? 'Otkaži' : 'Dodaj komentar'}
-          </button>
+        {/* MOJA OCJENA SEKCIJA */}
+        <div style={styles.myRatingCard}>
+          <h3 style={styles.myRatingTitle}>Moja ocjena</h3>
+          <div style={styles.myRatingContent}>
+            {myRating && (
+              <div style={styles.myRatingStars}>
+                {[...Array(5)].map((_, i) => (
+                  <Star
+                    key={i}
+                    size={28}
+                    fill={i < myRating ? '#60e016' : 'none'}
+                    color={i < myRating ? '#60e016' : '#9ca3af'}
+                  />
+                ))}
+              </div>
+            )}
+            {myRating ? (
+              <button
+                onClick={handleDeleteMyRating}
+                style={styles.deleteRatingButton}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#ef4444';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(239, 68, 68, 0.4)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#dc2626';
+                  e.currentTarget.style.boxShadow = '0 2px 8px rgba(239, 68, 68, 0.3)';
+                }}
+              >
+                <Trash2 size={18} />
+                Obriši ocjenu
+              </button>
+            ) : (
+              <button
+                onClick={() => setShowAddForm(!showAddForm)}
+                style={styles.addCommentButton2}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#50c012';
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 6px 16px rgba(96, 224, 22, 0.4)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#60e016';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(96, 224, 22, 0.3)';
+                }}
+              >
+                <MessageCircle size={18} />
+                {showAddForm ? 'Otkaži' : 'Dodaj ocjenu'}
+              </button>
+            )}
+          </div>
         </div>
 
        
@@ -122,8 +166,8 @@ function CommentsSection({ isOpen, onClose, documentName = "Termodinamika.pdf" }
                     key={i}
                     size={32}
                     style={styles.starButton}
-                    fill={i < (hoverRating || newRating) ? '#facc15' : 'none'}
-                    color={i < (hoverRating || newRating) ? '#facc15' : '#9ca3af'}
+                    fill={i < (hoverRating || newRating) ? '#60e016' : 'none'}
+                    color={i < (hoverRating || newRating) ? '#60e016' : '#9ca3af'}
                     onMouseEnter={() => setHoverRating(i + 1)}
                     onMouseLeave={() => setHoverRating(0)}
                     onClick={() => setNewRating(i + 1)}
@@ -166,51 +210,92 @@ function CommentsSection({ isOpen, onClose, documentName = "Termodinamika.pdf" }
           </div>
         )}
 
-       
-        <div style={styles.commentsTitle}>
-          <h2 style={styles.sectionTitle}>Komentari i recenzije:</h2>
-        </div>
-
-      
-        <div style={styles.commentsList}>
-          {comments.length === 0 ? (
-            <p style={styles.noComments}>Još nema komentara. Budite prvi!</p>
-          ) : (
-            comments.map((comment) => (
-              <div 
-                key={comment.id} 
-                style={styles.commentItem}
-              >
+        {/* MOJI KOMENTARI - ODVOJENA SEKCIJA */}
+        <div style={styles.section}>
+          <div style={styles.commentsTitle}>
+            <h2 style={styles.sectionTitle}>Moji komentari:</h2>
+          </div>
+          {myComment ? (
+            <div style={styles.commentsList}>
+              <div style={styles.commentItem}>
                 <div style={styles.commentHeader}>
                   <div style={styles.commentAuthor}>
                     <div style={styles.avatar}>
                       <UserCircle2 size={24} color="#0a1457" />
                     </div>
                     <div style={styles.authorInfo}>
-                      <p style={styles.authorName}>{comment.author}</p>
+                      <p style={styles.authorName}>{myComment.author}</p>
                       <div style={styles.commentRating}>
                         {[...Array(5)].map((_, i) => (
                           <Star
                             key={i}
                             size={14}
-                            fill={i < comment.rating ? '#facc15' : 'none'}
-                            color={i < comment.rating ? '#facc15' : '#9ca3af'}
+                            fill={i < myComment.rating ? '#60e016' : 'none'}
+                            color={i < myComment.rating ? '#60e016' : '#9ca3af'}
                           />
                         ))}
                       </div>
                     </div>
                   </div>
                   <button 
-                    style={styles.moreButton}
-                    onMouseEnter={(e) => e.currentTarget.style.color = '#60e016'}
-                    onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255, 255, 255, 0.5)'}
+                    style={styles.deleteButton}
+                    onClick={() => handleDeleteComment(myComment.id)}
+                    onMouseEnter={(e) => e.currentTarget.style.color = '#ef4444'}
+                    onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(239, 68, 68, 0.7)'}
                   >
-                    <MoreVertical size={20} />
+                    <Trash2 size={20} />
                   </button>
                 </div>
-                <p style={styles.commentText}>{comment.text}</p>
+                <p style={styles.commentText}>{myComment.text}</p>
               </div>
-            ))
+            </div>
+          ) : (
+            <p style={styles.noComments}>Još niste dodali komentar</p>
+          )}
+        </div>
+
+        {/* KOMENTARI I RECENZIJE - ODVOJENA SEKCIJA */}
+        <div style={styles.section}>
+          <div style={styles.commentsTitle}>
+            <h2 style={styles.sectionTitle}>Komentari i recenzije:</h2>
+          </div>
+          {otherComments.length > 0 ? (
+            <div style={styles.commentsList}>
+              {otherComments.map((comment) => (
+                <div key={comment.id} style={styles.commentItem}>
+                  <div style={styles.commentHeader}>
+                    <div style={styles.commentAuthor}>
+                      <div style={styles.avatar}>
+                        <UserCircle2 size={24} color="#0a1457" />
+                      </div>
+                      <div style={styles.authorInfo}>
+                        <p style={styles.authorName}>{comment.author}</p>
+                        <div style={styles.commentRating}>
+                          {[...Array(5)].map((_, i) => (
+                            <Star
+                              key={i}
+                              size={14}
+                              fill={i < comment.rating ? '#facc15' : 'none'}
+                              color={i < comment.rating ? '#facc15' : '#9ca3af'}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                    <button 
+                      style={styles.moreButton}
+                      onMouseEnter={(e) => e.currentTarget.style.color = '#60e016'}
+                      onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(255, 255, 255, 0.5)'}
+                    >
+                      <MoreVertical size={20} />
+                    </button>
+                  </div>
+                  <p style={styles.commentText}>{comment.text}</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p style={styles.noComments}>Još nema komentara drugih korisnika</p>
           )}
         </div>
       </div>
@@ -302,10 +387,65 @@ const styles = {
     fontWeight: 500,
   },
 
-  addButtonContainer: {
+  myRatingCard: {
+    background: 'rgba(96, 224, 22, 0.15)',
+    borderRadius: '12px',
+    padding: '16px',
     marginBottom: '20px',
+    border: '2px solid rgba(96, 224, 22, 0.3)',
+  },
+
+  myRatingTitle: {
+    color: '#60e016',
+    fontSize: '16px',
+    fontWeight: 700,
+    margin: '0 0 12px 0',
+    letterSpacing: '0.5px',
+  },
+
+  myRatingContent: {
     display: 'flex',
-    justifyContent: 'flex-end',
+    alignItems: 'center',
+    gap: '16px',
+  },
+
+  myRatingStars: {
+    display: 'flex',
+    gap: '6px',
+  },
+
+  addCommentButton2: {
+    backgroundColor: '#60e016',
+    color: '#0a1457',
+    fontWeight: 700,
+    fontSize: '14px',
+    padding: '10px 20px',
+    borderRadius: '12px',
+    border: 'none',
+    cursor: 'pointer',
+    boxShadow: '0 4px 12px rgba(96, 224, 22, 0.3)',
+    transition: 'all 0.3s',
+    letterSpacing: '0.5px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+  },
+
+  deleteRatingButton: {
+    backgroundColor: '#dc2626',
+    color: '#ffffff',
+    fontWeight: 700,
+    fontSize: '14px',
+    padding: '8px 16px',
+    borderRadius: '8px',
+    border: 'none',
+    cursor: 'pointer',
+    boxShadow: '0 2px 8px rgba(239, 68, 68, 0.3)',
+    transition: 'all 0.3s',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    whiteSpace: 'nowrap',
   },
 
   addCommentButton: {
@@ -323,6 +463,8 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
+    width: '100%',
+    justifyContent: 'center',
   },
 
   addCommentForm: {
@@ -392,59 +534,65 @@ const styles = {
     letterSpacing: '0.5px',
   },
 
+  section: {
+    marginBottom: '20px',
+    padding: '16px',
+    background: 'rgba(26, 42, 94, 0.3)',
+    borderRadius: '12px',
+    border: '1px solid rgba(96, 224, 22, 0.15)',
+  },
+
   commentsTitle: {
-    marginBottom: '16px',
-    paddingTop: '8px',
+    marginBottom: '12px',
   },
 
   sectionTitle: {
-    color: '#ffffff',
-    fontSize: '18px',
-    fontWeight: 600,
+    color: '#60e016',
+    fontSize: '16px',
+    fontWeight: 700,
     margin: 0,
+    letterSpacing: '0.5px',
   },
 
   commentsList: {
     display: 'flex',
     flexDirection: 'column',
     gap: '12px',
-    maxHeight: '400px',
+    maxHeight: '300px',
     overflowY: 'auto',
-    paddingRight: '8px',
   },
 
   noComments: {
     color: 'rgba(255, 255, 255, 0.6)',
     textAlign: 'center',
-    padding: '32px 16px',
-    fontSize: '15px',
+    padding: '16px',
+    fontSize: '14px',
     margin: 0,
   },
 
   commentItem: {
-    background: 'rgba(26, 42, 94, 0.4)',
-    borderRadius: '12px',
-    padding: '16px',
-    border: '1px solid rgba(96, 224, 22, 0.2)',
-    backdropFilter: 'blur(10px)',
+    background: 'rgba(26, 42, 94, 0.5)',
+    borderRadius: '10px',
+    padding: '14px',
+    border: '1px solid rgba(96, 224, 22, 0.15)',
   },
 
   commentHeader: {
     display: 'flex',
     alignItems: 'start',
     justifyContent: 'space-between',
-    marginBottom: '12px',
+    marginBottom: '10px',
   },
 
   commentAuthor: {
     display: 'flex',
     alignItems: 'center',
-    gap: '12px',
+    gap: '10px',
   },
 
   avatar: {
-    width: '40px',
-    height: '40px',
+    width: '36px',
+    height: '36px',
     backgroundColor: '#60e016',
     borderRadius: '50%',
     display: 'flex',
@@ -456,20 +604,20 @@ const styles = {
   authorInfo: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '4px',
+    gap: '3px',
   },
 
   authorName: {
     color: '#ffffff',
     fontWeight: 600,
-    fontSize: '15px',
+    fontSize: '14px',
     margin: 0,
   },
 
   commentRating: {
     display: 'flex',
     alignItems: 'center',
-    gap: '3px',
+    gap: '2px',
   },
 
   moreButton: {
@@ -483,12 +631,23 @@ const styles = {
     alignItems: 'center',
   },
 
+  deleteButton: {
+    background: 'none',
+    border: 'none',
+    color: 'rgba(239, 68, 68, 0.7)',
+    cursor: 'pointer',
+    padding: '4px',
+    transition: 'color 0.2s ease',
+    display: 'flex',
+    alignItems: 'center',
+  },
+
   commentText: {
     color: 'rgba(255, 255, 255, 0.85)',
-    fontSize: '14px',
-    lineHeight: '1.6',
+    fontSize: '13px',
+    lineHeight: '1.5',
     margin: 0,
-    paddingLeft: '52px',
+    paddingLeft: '46px',
   },
 };
 

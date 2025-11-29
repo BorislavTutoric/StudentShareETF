@@ -12,11 +12,15 @@ function MaterialsStudentDisplay({ materials, isOpen, subjectName }) {
   });
   const [isUploadFormOpen, setIsUploadFormOpen] = useState(false);
   const [isCommentSectionOpen, setIsCommentSectionOpen] = useState(false);
+  const [currentMaterial, setCurrentMaterial] = useState("");
 
   const handleOpenForm = () => setIsUploadFormOpen(true);
   const handleCloseForm = () => setIsUploadFormOpen(false);
 
-  const handleOpenCommentSection = () => setIsCommentSectionOpen(true);
+  const handleOpenCommentSection = (materialName) => {
+    setCurrentMaterial(materialName);
+    setIsCommentSectionOpen(true);
+  }
   const handleCloseCommentSection = () => setIsCommentSectionOpen(false);
 
   if (!isOpen) return null;
@@ -63,7 +67,7 @@ function MaterialsStudentDisplay({ materials, isOpen, subjectName }) {
                   title="Komentari"
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleOpenCommentSection();
+                    handleOpenCommentSection(mat.name);
                     console.log('Komentari za:', mat.name);
                   }}
                   onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(96, 224, 22, 0.15)'}
@@ -90,7 +94,6 @@ function MaterialsStudentDisplay({ materials, isOpen, subjectName }) {
                   title="Sačuvaj"
                   onClick={(e) => {
                     e.stopPropagation();
-                    // TODO: Implementiraj save funkcionalnost
                     console.log('Sačuvaj:', mat.name);
                   }}
                   onMouseEnter={(e) => {
@@ -112,7 +115,6 @@ function MaterialsStudentDisplay({ materials, isOpen, subjectName }) {
                       style={styles.starButton}
                       onClick={(e) => {
                         e.stopPropagation();
-                        // TODO: Implementiraj rating funkcionalnost
                         console.log('Rating:', star, 'za:', mat.name);
                       }}
                       onMouseEnter={(e) => e.target.style.transform = 'scale(1.2)'}
@@ -147,6 +149,7 @@ function MaterialsStudentDisplay({ materials, isOpen, subjectName }) {
       <CommentsSection 
         isOpen={isCommentSectionOpen}
         onClose={handleCloseCommentSection}
+        documentName={currentMaterial}
       />
       
       <div style={styles.headerRow}>
