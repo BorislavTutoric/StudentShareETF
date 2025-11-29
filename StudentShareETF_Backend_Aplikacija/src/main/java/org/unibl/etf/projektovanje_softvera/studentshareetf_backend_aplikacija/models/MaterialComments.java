@@ -31,6 +31,13 @@ public class MaterialComments {
 
     public MaterialComments() {}
 
+    public MaterialComments(String content, LocalDateTime dateTime, Material material, User user) {
+        this.sadrzaj = content;
+        this.datumVrijeme = dateTime;
+        this.materijal = material;
+        this.korisnik = user;
+    }
+
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
 

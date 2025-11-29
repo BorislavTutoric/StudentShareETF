@@ -36,6 +36,15 @@ public class MaterialReview {
     public MaterialReview() {
     }
 
+    public MaterialReview(Integer review, LocalDateTime dateTime, Material material, User user) {
+        this.ocjena = review;
+        this.datumVrijeme = dateTime;
+        this.materijal = material;
+        this.user = user;
+        this.materijalId = material.getMaterialId();
+        this.studentId = user.getUserId();
+    }
+
     public Integer getMaterialId() {return  this.materijalId;}
     public void setMaterialId(Integer materialId) {this.materijalId = materialId;}
     public Material getMaterial() {return this.materijal;}

@@ -7,10 +7,12 @@ import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.m
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Subject;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface MaterialRepository extends JpaRepository<Material, Integer> {
 
     List<Material> findBySubjectAndApproved(Subject subject, Boolean approved);
 
+    Optional<Material> findByMaterialId(Integer integer);
 }

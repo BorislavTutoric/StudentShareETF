@@ -14,4 +14,5 @@ public class MaterialCommentResponse {
     private LocalDateTime datum;
     private String name;
     private String surname;
+    private boolean isMyComment;
 }

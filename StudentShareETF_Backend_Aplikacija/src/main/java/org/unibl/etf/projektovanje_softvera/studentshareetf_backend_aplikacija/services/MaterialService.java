@@ -3,6 +3,8 @@ package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.MaterialResponse;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.EntityNotFoundException;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.UserNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Material;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Subject;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories.MaterialRepository;
@@ -32,5 +34,14 @@ public class MaterialService {
     public Optional<String> getMaterialUrl(Integer materialId) {
         return materialRepository.findById(materialId)
                 .map(m -> storageService.generatePresignedUrl(m.getFileKey()));
+    }
+
+    public Material getMaterialById(Integer materialId) throws EntityNotFoundException {
+        Optional<Material> material = materialRepository.findByMaterialId(materialId);
+        if (material.isPresent()) {
+            return material.get();
+        } else  {
+            throw new EntityNotFoundException("Materijal nije pronadjen!");
+        }
     }
 }

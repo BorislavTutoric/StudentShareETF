@@ -62,4 +62,14 @@ public class StudentService {
             throw new EntityNotFoundException("Studentski nalog ne postoji");
         }
     }
+
+    public Student getStudentByUser(User user) throws EntityNotFoundException {
+        Optional<Student> s = studentRepository.findByUser(user);
+        if(s.isPresent()){
+            Student student = s.get();
+            return student;
+        }else  {
+            throw new EntityNotFoundException("Studentski nalog ne postoji");
+        }
+    }
 }

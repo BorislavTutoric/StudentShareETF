@@ -3,18 +3,19 @@ package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.MaterialCommentRequest;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.MaterialCommentResponse;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.MaterialReviewRequest;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.MaterialReviewResponse;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.EntityNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.UserNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.generics.UserHolder;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories.MaterialRepository;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.MaterialCommentService;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.MaterialReviewService;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.MaterialService;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.SavedMaterialService;
 
 import java.util.List;
 
@@ -23,18 +24,53 @@ import java.util.List;
 @RequiredArgsConstructor
 public class MaterialAuthController {
 
-    private final MaterialCommentService  materialCommentService;
+    private final MaterialCommentService materialCommentService;
     private final MaterialReviewService materialReviewService;
+    private final SavedMaterialService savedMaterialService;
 
     @GetMapping("/comments")
     public List<MaterialCommentResponse> getKomentariPoMaterijalId(@RequestParam Integer materijalId){
-
-        return materialCommentService.getCommentsByMaterialId(materijalId);
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return materialCommentService.getCommentsByMaterialId(materijalId, username);
     }
 
     @GetMapping("/review")
     public List<MaterialReviewResponse> getRecenzijePoMaterijalId(@RequestParam Integer materijalId){
-        return materialReviewService.getReviewsByMaterialId(materijalId);
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return materialReviewService.getReviewsByMaterialId(materijalId, username);
+    }
+
+    @PostMapping("/add-comment")
+    public ResponseEntity<?> addComment(@RequestBody MaterialCommentRequest materialComment){
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        try {
+            materialCommentService.postComment(username, materialComment.getContent(), materialComment.getMaterialId());
+            return ResponseEntity.ok().build();
+        } catch (UserNotFoundException | EntityNotFoundException ex){
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        }
+    }
+
+    @PostMapping("/add-review")
+    public ResponseEntity<?> addReview(@RequestBody MaterialReviewRequest materialReview){
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        try{
+            materialReviewService.postReview(username, materialReview.getReview(), materialReview.getMaterialId());
+            return ResponseEntity.ok().build();
+        } catch (UserNotFoundException | EntityNotFoundException ex){
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        }
+    }
+
+    @PostMapping("/save-material")
+    public ResponseEntity<?> saveMaterial(@RequestBody Integer materialId){
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        try {
+            savedMaterialService.materialSave(username, materialId);
+            return ResponseEntity.ok().build();
+        } catch (UserNotFoundException | EntityNotFoundException ex){
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        }
     }
     
 }
