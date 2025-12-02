@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.MaterialCommentRequest;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.MaterialCommentResponse;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.MaterialReviewRequest;
@@ -17,6 +18,7 @@ import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.s
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.MaterialService;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.SavedMaterialService;
 
+import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -72,5 +74,15 @@ public class MaterialAuthController {
             return ResponseEntity.badRequest().body(ex.getMessage());
         }
     }
+
+    /*@PostMapping("/upload")
+    public ResponseEntity<?> uploadMaterial(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("naziv") String naziv,
+            @RequestParam("opis") String opis) throws IOException {
+
+        Materijal materijal = materijalService.uploadMaterijal(file, naziv, opis);
+        return ResponseEntity.ok(materijal);
+    }*/
     
 }

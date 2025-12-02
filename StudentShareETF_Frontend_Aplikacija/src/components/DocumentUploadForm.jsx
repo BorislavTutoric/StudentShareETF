@@ -2,28 +2,34 @@ import React, { useState } from 'react';
 import { X, Upload } from 'lucide-react';
 
 function DocumentUploadForm({ isOpen, onClose}) {
+  const [file, setFile] = useState(null);
   const [fileName, setFileName] = useState('');
   const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
-
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setFileName(file.name);
-    }
-  };
+  const [errors, setErrors] = useState({});
 
   if (!isOpen) return null;
 
   const handleSubmit = () => {
-    if (!fileName || !category) {
-      alert('Molimo odaberite dokument i kategoriju!');
+    const newErrors = {};
+
+    if (!file) {
+      newErrors.file = 'Fajl nije dodan';
+    }
+    if (!category) {
+      newErrors.category = 'Kategorija nije unesena';
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
-    alert(`Dokument "${fileName}" je spremljen u kategoriji "${category}"!`);
+
+    //alert(`Dokument "${fileName}" je spremljen u kategoriji "${category}"!`);
     setFileName('');
     setCategory('');
     setDescription('');
+    setErrors({});
     onClose();
   };
 
@@ -58,7 +64,7 @@ function DocumentUploadForm({ isOpen, onClose}) {
               type="file"
               id="fileInput"
               style={styles.fileInput}
-              onChange={handleFileChange}
+              onChange={(e) => setFile(e.target.files[0])}
             />
             <label htmlFor="fileInput" style={styles.uploadLabel}>
               <Upload size={64} style={styles.uploadIcon} />
@@ -72,6 +78,9 @@ function DocumentUploadForm({ isOpen, onClose}) {
                 <p style={styles.uploadSuccess}>✓ Dokument odabran</p>
               )}
             </label>
+            {errors.file && (
+              <p style={styles.errorText}>{errors.file}</p>
+            )}
           </div>
 
           <div style={styles.formSection}>
@@ -81,7 +90,10 @@ function DocumentUploadForm({ isOpen, onClose}) {
               </label>
               <select
                 value={category}
-                onChange={(e) => setCategory(e.target.value)}
+                onChange={(e) => {
+                  setCategory(e.target.value);
+                  setErrors(prev => ({ ...prev, category: '' }));
+                }}
                 style={styles.select}
                 onFocus={(e) => e.target.style.borderColor = '#60e016'}
                 onBlur={(e) => e.target.style.borderColor = 'rgba(96, 224, 22, 0.3)'}
@@ -92,6 +104,9 @@ function DocumentUploadForm({ isOpen, onClose}) {
                 <option value="Rokovi">Rokovi</option>
                 <option value="Ostalo">Ostalo</option>
               </select>
+              {errors.category && (
+                <p style={styles.errorText}>{errors.category}</p>
+              )}
             </div>
 
             <div>
@@ -243,6 +258,17 @@ const styles = {
     margin: 0,
   },
 
+  errorText: {
+    fontSize: "13px",
+    fontWeight: "600",
+    color: "#e53935",
+    margin: "4px 0 0 0",
+    padding: "6px 12px",
+    backgroundColor: "rgba(229, 57, 53, 0.1)",
+    borderRadius: "6px",
+    border: "1px solid rgba(229, 57, 53, 0.3)",
+  },
+
   uploadSuccess: {
     fontSize: '14px',
     color: '#60e016',
@@ -281,6 +307,7 @@ const styles = {
     transition: 'all 0.3s',
     cursor: 'pointer',
     fontWeight: '500',
+    boxSizing: 'border-box',
   },
 
   textarea: {

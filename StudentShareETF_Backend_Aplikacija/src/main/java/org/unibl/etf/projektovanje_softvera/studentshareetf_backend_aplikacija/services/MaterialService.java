@@ -2,6 +2,7 @@ package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.MaterialResponse;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.EntityNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.UserNotFoundException;
@@ -11,6 +12,7 @@ import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.r
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories.SubjectRepository;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,4 +46,17 @@ public class MaterialService {
             throw new EntityNotFoundException("Materijal nije pronadjen!");
         }
     }
+
+    /*public void uploadMaterijal(String subjectName, String username, MultipartFile file, String description, String category) throws IOException {
+        // 1️⃣ Upload na Backblaze → vraća key
+        String key = storageService.uploadFile(file);
+
+        // 2️⃣ Sačuvaj u MySQL bazu
+        Material material = new Material();
+        material.setName(naziv);
+        material.setOpis(opis);
+        materijal.setFileKey(key);
+
+        return materijalRepository.save(materijal);
+    }*/
 }

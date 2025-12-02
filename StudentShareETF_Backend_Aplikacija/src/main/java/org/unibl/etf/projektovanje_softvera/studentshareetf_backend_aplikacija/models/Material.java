@@ -16,21 +16,21 @@ public class Material {
     private Integer materialId;
 
     @ManyToOne
-    @JoinColumn(name = "PredmetId")
+    @JoinColumn(name = "PredmetId", nullable = false)
     private Subject subject;
 
     @ManyToOne
-    @JoinColumn(name = "StudentId")
+    @JoinColumn(name = "StudentId",  nullable = false)
     private Student student;
 
     @ManyToOne
     @JoinColumn(name = "ModeratorId")
     private User moderator;
 
-    @Column(name = "file_key")
+    @Column(name = "file_key", nullable = false)
     private String fileKey;
 
-    @Column(name = "Naziv")
+    @Column(name = "Naziv", nullable = false)
     private String name;
 
     @Column(name = "Opis")
@@ -39,10 +39,10 @@ public class Material {
     @Column(name = "DatumPostavljanja")
     private LocalDateTime date;
 
-    @Column(name = "Kategorija")
+    @Column(name = "Kategorija", nullable = false)
     private String category;
 
-    @Column(name = "Odobren")
+    @Column(name = "Odobren", nullable = false)
     private boolean approved;
 
     public Material() {}
