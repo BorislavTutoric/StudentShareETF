@@ -33,9 +33,9 @@ public class MaterialCommentService {
         for (MaterialComments comment : comments) {
             User user = comment.getKorisnik();
             if (username.equals(user.getUsername())) {
-                commentResponses.add(new MaterialCommentResponse(comment.getSadrzaj(), comment.getDatumVrijeme(), user.getName(), user.getSurname(), true));
+                commentResponses.add(new MaterialCommentResponse(comment.getId(), comment.getSadrzaj(), comment.getDatumVrijeme(), user.getName(), user.getSurname(), true));
             } else {
-                commentResponses.add(new MaterialCommentResponse(comment.getSadrzaj(), comment.getDatumVrijeme(), user.getName(), user.getSurname(), false));
+                commentResponses.add(new MaterialCommentResponse(comment.getId(), comment.getSadrzaj(), comment.getDatumVrijeme(), user.getName(), user.getSurname(), false));
             }
         }
         return commentResponses;
@@ -47,5 +47,16 @@ public class MaterialCommentService {
         LocalDateTime  dateTime = LocalDateTime.now();
         MaterialComments materialComment = new MaterialComments(content, dateTime, material, user);
         materialCommentRepository.save(materialComment);
+    }
+
+    public void commentReport(Integer commentId) throws EntityNotFoundException {
+        Optional<MaterialComments> materialComment = materialCommentRepository.findById(commentId);
+        if (materialComment.isPresent()){
+            MaterialComments matComment = materialComment.get();
+            matComment.setPrijavljen(true);
+            materialCommentRepository.save(matComment);
+        }else{
+            throw new EntityNotFoundException("Komentar nije pronadjen!");
+        }
     }
 }
