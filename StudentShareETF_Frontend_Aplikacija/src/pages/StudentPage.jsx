@@ -4,6 +4,7 @@ import WelcomeHeader from "../components/WelcomeHeader";
 import ProfileDisplay from "../components/ProfileDisplay";
 import StudentHome from "../components/StudentHome";
 import MaterialsStudentDisplay from "../components/MaterialsStudentDisplay";
+import EventsDisplayAuth from "../components/EventsDisplayAuth";
 
 function StudentPage() {
   const [activeSection, setActiveSection] = useState("Početna");
@@ -59,7 +60,7 @@ function StudentPage() {
         return <h2>Savjeti</h2>;
 
       case "Događaji":
-        return <h2>Događaji</h2>;
+        return <EventsDisplayAuth />;
 
       default:
         return <h2>Dobrodošli!</h2>;
