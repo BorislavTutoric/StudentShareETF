@@ -4,6 +4,7 @@ package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.EventRequest;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.EventResponse;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.EventService;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Event;
@@ -36,6 +37,16 @@ public class EventController {
             return ResponseEntity.ok(event);
         } catch (RuntimeException e) {
             return ResponseEntity.status(404).body(Map.of("error", e.getMessage()));
+        }
+    }
+
+    @PostMapping("/create")
+    public ResponseEntity<?> createEvent(@RequestBody EventRequest request) {
+        try {
+            EventResponse response = eventService.createDogadjaj(request);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(400).body(Map.of("error", e.getMessage()));
         }
     }
 
