@@ -75,6 +75,16 @@ public class MaterialAuthController {
         }
     }
 
+    @PostMapping("/report-comment")
+    public ResponseEntity<?> reportComment(@RequestBody Integer commentId){
+        try {
+            materialCommentService.commentReport(commentId);
+            return ResponseEntity.ok().build();
+        } catch (EntityNotFoundException ex){
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        }
+    }
+
     /*@PostMapping("/upload")
     public ResponseEntity<?> uploadMaterial(
             @RequestParam("file") MultipartFile file,

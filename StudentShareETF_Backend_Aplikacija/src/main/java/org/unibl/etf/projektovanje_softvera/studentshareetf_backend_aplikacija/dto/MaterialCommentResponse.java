@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MaterialCommentResponse {
+    private Integer commentId;
     private String sadrzaj;
     private LocalDateTime datum;
     private String name;

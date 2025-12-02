@@ -10,11 +10,12 @@ import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.m
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.MaterialCommentResponse;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface MaterialCommentRepository extends JpaRepository<MaterialComments, Integer> {
 
     List<MaterialComments> findByMaterijal_MaterialId(Integer materialId);
 
-
+    Optional<MaterialComments> findById(Integer commentId);
 }
