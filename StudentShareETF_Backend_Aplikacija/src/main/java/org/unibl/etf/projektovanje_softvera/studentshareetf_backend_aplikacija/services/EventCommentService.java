@@ -63,7 +63,7 @@ public class EventCommentService {
                 .orElseThrow(() -> new UserNotFoundException(username));
 
         Student currentStudent = studentRepo.findByUser(user)
-                .orElseThrow(() -> new RuntimeException("Student ne postoji"));
+                .orElseThrow(() -> new UserNotFoundException("Student ne postoji"));
 
 
         List<EventComment> comments = commentRepo.findByEvent_Id(eventId);

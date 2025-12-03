@@ -1,9 +1,11 @@
 package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.controllers;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.*;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.EventReview;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.generics.UserHolder;
@@ -12,7 +14,11 @@ import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.s
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.EventService;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.EventReviewService;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.EventCommentResponse;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Event;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.StorageService;
 
+import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -25,6 +31,7 @@ public class EventAuthController {
     private final EventService eventService;
     private final EventReviewService reviewService;
     private final EventCommentService commentService;
+    private final StorageService storageService;
 
     @GetMapping
     public ResponseEntity<?> getAllActiveEvents() {
@@ -73,7 +80,7 @@ public class EventAuthController {
     public ResponseEntity<?> getCommentsForEvent(@PathVariable Integer eventId) {
         try {
             String username = SecurityContextHolder.getContext().getAuthentication().getName();
-            List<EventCommentResponse> comments = commentService.getCommentsForEvent(eventId,username);
+            List<EventCommentResponse> comments = commentService.getCommentsForEvent(eventId, username);
             return ResponseEntity.ok(comments);
         } catch (RuntimeException ex) {
             return ResponseEntity.status(404).body(Map.of("error", ex.getMessage()));
@@ -81,19 +88,27 @@ public class EventAuthController {
     }
 
     @PostMapping("/{eventId}/comments")
-    public ResponseEntity<?> createCommentForEvent(@PathVariable Integer eventId,@RequestBody EventCommentRequest request) {
+    public ResponseEntity<?> createCommentForEvent(@PathVariable Integer eventId, @RequestBody EventCommentRequest request) {
         try {
             String username = SecurityContextHolder.getContext().getAuthentication().getName();
-            EventCommentResponse response= commentService.createComment(request, eventId, username);
+            EventCommentResponse response = commentService.createComment(request, eventId, username);
             return ResponseEntity.ok(response);
         } catch (RuntimeException ex) {
             return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
         }
     }
 
-
-
-
+    @PostMapping("/create")
+    public ResponseEntity<Event> createEvent(@ModelAttribute EventCreateRequest request) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        try {
+            Event event = eventService.createEvent(request, username);
+            return ResponseEntity.ok(event);
+        } catch (IOException e) {
+            throw new ResponseStatusException(
+                    HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom kreiranja dogadjaja", e);
+        }
+    }
 }
 
 
