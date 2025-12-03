@@ -1,6 +1,7 @@
 package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.controllers;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -29,43 +30,44 @@ public class MaterialAuthController {
     private final MaterialCommentService materialCommentService;
     private final MaterialReviewService materialReviewService;
     private final SavedMaterialService savedMaterialService;
+    private final MaterialService materialService;
 
-    @GetMapping("/comments")
-    public List<MaterialCommentResponse> getKomentariPoMaterijalId(@RequestParam Integer materijalId){
+    @GetMapping("/{materialId}/comments")
+    public List<MaterialCommentResponse> getKomentariPoMaterijalId(@PathVariable Integer materialId){
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        return materialCommentService.getCommentsByMaterialId(materijalId, username);
+        return materialCommentService.getCommentsByMaterialId(materialId, username);
     }
 
-    @GetMapping("/review")
-    public List<MaterialReviewResponse> getRecenzijePoMaterijalId(@RequestParam Integer materijalId){
+    @GetMapping("/{materialId}/review")
+    public List<MaterialReviewResponse> getRecenzijePoMaterijalId(@PathVariable Integer materialId){
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        return materialReviewService.getReviewsByMaterialId(materijalId, username);
+        return materialReviewService.getReviewsByMaterialId(materialId, username);
     }
 
-    @PostMapping("/add-comment")
-    public ResponseEntity<?> addComment(@RequestBody MaterialCommentRequest materialComment){
+    @PostMapping("/{materialId}/add-comment")
+    public ResponseEntity<?> addComment(@PathVariable Integer materialId, String content){
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         try {
-            materialCommentService.postComment(username, materialComment.getContent(), materialComment.getMaterialId());
+            materialCommentService.postComment(username, content, materialId);
             return ResponseEntity.ok().build();
         } catch (UserNotFoundException | EntityNotFoundException ex){
             return ResponseEntity.badRequest().body(ex.getMessage());
         }
     }
 
-    @PostMapping("/add-review")
-    public ResponseEntity<?> addReview(@RequestBody MaterialReviewRequest materialReview){
+    @PostMapping("/{materialId}/add-review")
+    public ResponseEntity<?> addReview(@PathVariable Integer materialId, Integer review){
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         try{
-            materialReviewService.postReview(username, materialReview.getReview(), materialReview.getMaterialId());
+            materialReviewService.postReview(username, review, materialId);
             return ResponseEntity.ok().build();
         } catch (UserNotFoundException | EntityNotFoundException ex){
             return ResponseEntity.badRequest().body(ex.getMessage());
         }
     }
 
-    @PostMapping("/save-material")
-    public ResponseEntity<?> saveMaterial(@RequestBody Integer materialId){
+    @PostMapping("/{materialId}/save-material")
+    public ResponseEntity<?> saveMaterial(@PathVariable Integer materialId){
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         try {
             savedMaterialService.materialSave(username, materialId);
@@ -75,8 +77,8 @@ public class MaterialAuthController {
         }
     }
 
-    @PostMapping("/report-comment")
-    public ResponseEntity<?> reportComment(@RequestBody Integer commentId){
+    @PostMapping("/{commentId}/report-comment")
+    public ResponseEntity<?> reportComment(@PathVariable Integer commentId){
         try {
             materialCommentService.commentReport(commentId);
             return ResponseEntity.ok().build();
@@ -85,14 +87,22 @@ public class MaterialAuthController {
         }
     }
 
-    /*@PostMapping("/upload")
+    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadMaterial(
             @RequestParam("file") MultipartFile file,
-            @RequestParam("naziv") String naziv,
-            @RequestParam("opis") String opis) throws IOException {
+            @RequestParam("category") String category,
+            @RequestParam("description") String description,
+            @RequestParam("subject") String subjectName) {
 
-        Materijal materijal = materijalService.uploadMaterijal(file, naziv, opis);
-        return ResponseEntity.ok(materijal);
-    }*/
-    
+        String username =  SecurityContextHolder.getContext().getAuthentication().getName();
+
+        try{
+            materialService.uploadMaterial(subjectName, username, file, description, category);
+            return ResponseEntity.ok().build();
+        }catch (IOException ex){
+            return ResponseEntity.badRequest().body("Greška pri upload fajla!");
+        }catch (EntityNotFoundException | UserNotFoundException ex){
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        }
+    }
 }

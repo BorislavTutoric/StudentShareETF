@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { getMaterial } from '../services/materialsService';
 import DocumentUploadForm from './DocumentUploadForm';
 import CommentsSection from './CommentsSection';
+import Toast from './Toast'; // Kreiramo custom Toast komponentu
 
 function MaterialsStudentDisplay({ materials, isOpen, subjectName }) {
   const [expandedSections, setExpandedSections] = useState({
@@ -13,6 +14,12 @@ function MaterialsStudentDisplay({ materials, isOpen, subjectName }) {
   const [isUploadFormOpen, setIsUploadFormOpen] = useState(false);
   const [isCommentSectionOpen, setIsCommentSectionOpen] = useState(false);
   const [currentMaterial, setCurrentMaterial] = useState("");
+  const [toast, setToast] = useState(null);
+
+  const showToast = (message, type = 'success', duration = 3000) => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), duration);
+  };
 
   const handleOpenForm = () => setIsUploadFormOpen(true);
   const handleCloseForm = () => setIsUploadFormOpen(false);
@@ -35,7 +42,7 @@ function MaterialsStudentDisplay({ materials, isOpen, subjectName }) {
       window.open(url, "_blank");
     } catch (err) {
       console.error(err);
-      alert("Greška pri otvaranju materijala");
+      showToast("Greška pri otvaranju materijala", 'error');
     }
   };
 
@@ -68,7 +75,7 @@ function MaterialsStudentDisplay({ materials, isOpen, subjectName }) {
                   onClick={(e) => {
                     e.stopPropagation();
                     handleOpenCommentSection(mat.name);
-                    console.log('Komentari za:', mat.name);
+                    showToast(`Komentari za: ${mat.name}`, 'info');
                   }}
                   onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(96, 224, 22, 0.15)'}
                   onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
@@ -94,7 +101,7 @@ function MaterialsStudentDisplay({ materials, isOpen, subjectName }) {
                   title="Sačuvaj"
                   onClick={(e) => {
                     e.stopPropagation();
-                    console.log('Sačuvaj:', mat.name);
+                    showToast(`Sačuvano: ${mat.name}`, 'success');
                   }}
                   onMouseEnter={(e) => {
                     e.target.style.backgroundColor = 'rgba(96, 224, 22, 0.15)';
@@ -115,7 +122,7 @@ function MaterialsStudentDisplay({ materials, isOpen, subjectName }) {
                       style={styles.starButton}
                       onClick={(e) => {
                         e.stopPropagation();
-                        console.log('Rating:', star, 'za:', mat.name);
+                        showToast(`Ocjena: ${star} ⭐ za ${mat.name}`, 'success');
                       }}
                       onMouseEnter={(e) => e.target.style.transform = 'scale(1.2)'}
                       onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
@@ -141,9 +148,14 @@ function MaterialsStudentDisplay({ materials, isOpen, subjectName }) {
 
   return (
     <div style={styles.container}>
+      {toast && <Toast message={toast.message} type={toast.type} />}
+
       <DocumentUploadForm 
         isOpen={isUploadFormOpen}
         onClose={handleCloseForm}
+        subjectName={subjectName}
+        onUploadSuccess={() => showToast('Zahtjev za upload materijal uspješno poslat!', 'success')}
+        onUploadError={(err) => showToast(`Greška: ${err}`, 'error')}
       />
 
       <CommentsSection 
