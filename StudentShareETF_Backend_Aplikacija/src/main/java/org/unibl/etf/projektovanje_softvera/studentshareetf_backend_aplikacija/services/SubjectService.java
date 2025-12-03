@@ -3,6 +3,7 @@ package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.SubjectSimple;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.EntityNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Subject;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories.SubjectRepository;
 
@@ -56,5 +57,14 @@ public class SubjectService {
                 .stream()
                 .map(s -> new SubjectSimple(s.getName(), s.getSemester()))
                 .toList();
+    }
+
+    public Subject getSubjectByName(String name) throws EntityNotFoundException {
+        Optional<Subject> subject = subjectRepository.findByName(name);
+        if(subject.isPresent()){
+            return subject.get();
+        }else{
+            throw new EntityNotFoundException("Predmet nije pronadjen!");
+        }
     }
 }

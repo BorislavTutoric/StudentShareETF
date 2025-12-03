@@ -35,3 +35,13 @@ export const getMaterial = async (id) => {
     throw err.response?.data?.error || "Greška pri učitavanju";
   }
 };
+
+export const uploadMaterial = async (fd) => {
+  try {
+    const response = await api.post("api/materials/upload", fd);
+      return response.data;
+    } catch (err) {
+      console.error(err);
+      throw err;
+    }
+};

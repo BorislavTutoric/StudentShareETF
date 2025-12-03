@@ -16,8 +16,11 @@ import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequ
 
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.time.Duration;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class StorageService {
@@ -48,7 +51,11 @@ public class StorageService {
     }
 
     public String uploadFile(MultipartFile file) throws IOException {
-        String key = System.currentTimeMillis() + "_" + sanitizeFilename(file.getOriginalFilename());
+        String originalName = Optional.ofNullable(file.getOriginalFilename())
+                .map(this::sanitizeFilename)
+                .orElse("unknown");
+
+        String key = "materijali/" + UUID.randomUUID() + "_" + originalName;
 
         PutObjectRequest putReq = PutObjectRequest.builder()
                 .bucket(bucket)
@@ -56,7 +63,10 @@ public class StorageService {
                 .contentType(file.getContentType())
                 .build();
 
-        s3.putObject(putReq, RequestBody.fromBytes(file.getBytes()));
+        try (InputStream is = file.getInputStream()) {
+            s3.putObject(putReq, RequestBody.fromInputStream(is, file.getSize()));
+        }
+
         return key;
     }
 

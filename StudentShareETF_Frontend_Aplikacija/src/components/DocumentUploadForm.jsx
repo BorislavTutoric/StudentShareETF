@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
 import { X, Upload } from 'lucide-react';
+import { uploadMaterial } from '../services/materialsService';
 
-function DocumentUploadForm({ isOpen, onClose}) {
+function DocumentUploadForm({ isOpen, onClose, subjectName, onUploadSuccess, onUploadError}) {
   const [file, setFile] = useState(null);
-  const [fileName, setFileName] = useState('');
+  const [fileName, setFileName] = useState("");
+  //const [fileName, setFileName] = useState('');
   const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
   const [errors, setErrors] = useState({});
 
   if (!isOpen) return null;
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const newErrors = {};
 
     if (!file) {
@@ -25,7 +27,18 @@ function DocumentUploadForm({ isOpen, onClose}) {
       return;
     }
 
-    //alert(`Dokument "${fileName}" je spremljen u kategoriji "${category}"!`);
+    const fd = new FormData();
+    fd.append("file", file);
+    fd.append("category", category); 
+    fd.append("description", description);
+    fd.append("subject", subjectName);
+
+    try {
+      const res = uploadMaterial(fd);
+      onUploadSuccess();
+    } catch (err) {
+      onUploadError(err);
+    }  
     setFileName('');
     setCategory('');
     setDescription('');
@@ -64,17 +77,21 @@ function DocumentUploadForm({ isOpen, onClose}) {
               type="file"
               id="fileInput"
               style={styles.fileInput}
-              onChange={(e) => setFile(e.target.files[0])}
+              onChange={(e) => {
+                  setFile(e.target.files[0])
+                  setFileName(e.target.files[0].name)
+                }
+              }
             />
             <label htmlFor="fileInput" style={styles.uploadLabel}>
               <Upload size={64} style={styles.uploadIcon} />
               <p style={styles.uploadText}>
                 {fileName || 'Upload'}
               </p>
-              {!fileName && (
+              {!file && (
                 <p style={styles.uploadSubtext}>Klikni ovdje ili prevuci fajl</p>
               )}
-              {fileName && (
+              {file && (
                 <p style={styles.uploadSuccess}>✓ Dokument odabran</p>
               )}
             </label>
