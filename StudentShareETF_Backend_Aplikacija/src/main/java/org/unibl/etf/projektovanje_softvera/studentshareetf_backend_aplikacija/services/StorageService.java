@@ -50,12 +50,12 @@ public class StorageService {
                 .build();
     }
 
-    public String uploadFile(MultipartFile file) throws IOException {
+    public String uploadFile(MultipartFile file, String folder) throws IOException {
         String originalName = Optional.ofNullable(file.getOriginalFilename())
                 .map(this::sanitizeFilename)
                 .orElse("unknown");
 
-        String key = "materijali/" + UUID.randomUUID() + "_" + originalName;
+        String key = folder + "/" + UUID.randomUUID() + "_" + originalName;
 
         PutObjectRequest putReq = PutObjectRequest.builder()
                 .bucket(bucket)

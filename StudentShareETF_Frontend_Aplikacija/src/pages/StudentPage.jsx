@@ -11,19 +11,28 @@ function StudentPage() {
   const [activeComponent, setActiveComponent] = useState("subjects");
   const [selectedSubject, setSelectedSubject] = useState("");
   const [materials, setMaterials] = useState([]);
+  const [year, setYear] = useState();
+  const [subjects, setSubjects] = useState("all");
 
-  const handleSubjectsClick = () => setActiveComponent("subjects");
+  const handleSubjectsClick = () => { 
+    setActiveComponent("subjects");
+    //setYear(null);
+  }
 
-  const handleOpenMaterials = (subjectName, materialsData) => {
+  const handleOpenMaterials = (subjectName, materialsData, selectedYear, subs) => {
     setSelectedSubject(subjectName);
     setMaterials(materialsData);
+    setYear(selectedYear);
     setActiveComponent("materials");
+    setSubjects(subs);
   };
 
   const handleLogoutClick = () => {
     window.location.href = "/";
     localStorage.removeItem("jwtToken");
   };
+
+  const handleCloseMaterials = () => {setActiveComponent("subjects")}
 
   const renderContent = () => {
     switch (activeSection) {
@@ -34,13 +43,14 @@ function StudentPage() {
         return (
           <>
             {activeComponent === "subjects" && (
-              <StudentHome onOpenMaterials={handleOpenMaterials} />
+              <StudentHome onOpenMaterials={handleOpenMaterials} startYear={year} subjectsView={subjects}/>
             )}
 
             {activeComponent === "materials" && (
               <MaterialsStudentDisplay
                 materials={materials}
                 isOpen={true}
+                onClose={handleCloseMaterials}
                 subjectName={selectedSubject}
               />
             )}

@@ -58,7 +58,7 @@ public class MaterialService {
     public void uploadMaterial(String subjectName, String username, MultipartFile file,
                                String description, String category) throws IOException, EntityNotFoundException, UserNotFoundException {
 
-        String key = storageService.uploadFile(file);
+        String key = storageService.uploadFile(file, "materijali");
 
         Subject subject = subjectService.getSubjectByName(subjectName);
 

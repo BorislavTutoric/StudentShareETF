@@ -17,5 +17,6 @@ public interface MaterialReviewRepository extends JpaRepository<MaterialReview, 
 
     List<MaterialReview> findByMaterijal_MaterialId(Integer materialId);
 
+    void deleteByMaterijalIdAndStudentId(Integer materijalId, Integer studentId);
 
 }
