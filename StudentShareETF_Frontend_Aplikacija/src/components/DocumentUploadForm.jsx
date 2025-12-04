@@ -4,13 +4,21 @@ import { uploadMaterial } from '../services/materialsService';
 
 function DocumentUploadForm({ isOpen, onClose, subjectName, onUploadSuccess, onUploadError}) {
   const [file, setFile] = useState(null);
-  const [fileName, setFileName] = useState("");
-  //const [fileName, setFileName] = useState('');
+  const [fileName, setFileName] = useState('');
   const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
   const [errors, setErrors] = useState({});
 
   if (!isOpen) return null;
+
+  const handleClose = () => {
+    setFile(null);
+    setFileName('');
+    setCategory('');
+    setDescription('');
+    setErrors({});
+    onClose();
+  }
 
   const handleSubmit = async () => {
     const newErrors = {};
@@ -39,6 +47,7 @@ function DocumentUploadForm({ isOpen, onClose, subjectName, onUploadSuccess, onU
     } catch (err) {
       onUploadError(err);
     }  
+    setFile(null);
     setFileName('');
     setCategory('');
     setDescription('');
@@ -61,7 +70,7 @@ function DocumentUploadForm({ isOpen, onClose, subjectName, onUploadSuccess, onU
               e.currentTarget.style.backgroundColor = 'transparent';
               e.currentTarget.style.transform = 'rotate(0deg)';
             }}
-            onClick={onClose}
+            onClick={handleClose}
           >
             <X size={24} />
           </button>

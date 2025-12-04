@@ -50,7 +50,7 @@ public class StorageService {
                 .build();
     }
 
-    public String uploadFile(MultipartFile file,String folder) throws IOException {
+    public String uploadFile(MultipartFile file, String folder) throws IOException {
         String originalName = Optional.ofNullable(file.getOriginalFilename())
                 .map(this::sanitizeFilename)
                 .orElse("unknown");

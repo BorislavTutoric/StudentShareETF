@@ -38,14 +38,14 @@ public class MaterialAuthController {
         return materialCommentService.getCommentsByMaterialId(materialId, username);
     }
 
-    @GetMapping("/{materialId}/review")
+    @GetMapping("/{materialId}/reviews")
     public List<MaterialReviewResponse> getRecenzijePoMaterijalId(@PathVariable Integer materialId){
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return materialReviewService.getReviewsByMaterialId(materialId, username);
     }
 
     @PostMapping("/{materialId}/add-comment")
-    public ResponseEntity<?> addComment(@PathVariable Integer materialId, String content){
+    public ResponseEntity<?> addComment(@PathVariable Integer materialId, @RequestParam String content){
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         try {
             materialCommentService.postComment(username, content, materialId);
@@ -56,13 +56,24 @@ public class MaterialAuthController {
     }
 
     @PostMapping("/{materialId}/add-review")
-    public ResponseEntity<?> addReview(@PathVariable Integer materialId, Integer review){
+    public ResponseEntity<?> addReview(@PathVariable Integer materialId, @RequestParam Integer review){
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         try{
-            materialReviewService.postReview(username, review, materialId);
+            MaterialReviewResponse materialReviewResponse = materialReviewService.postReview(username, review, materialId);
+            return ResponseEntity.ok(materialReviewResponse);
+        } catch (UserNotFoundException | EntityNotFoundException ex){
+            return ResponseEntity.badRequest().body("Greška pri dodavanju recenzije!");
+        }
+    }
+
+    @PostMapping("/{materialId}/delete-review")
+    public ResponseEntity<?> deleteReview(@PathVariable Integer materialId){
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        try{
+            materialReviewService.reviewDelete(username, materialId);
             return ResponseEntity.ok().build();
         } catch (UserNotFoundException | EntityNotFoundException ex){
-            return ResponseEntity.badRequest().body(ex.getMessage());
+            return ResponseEntity.badRequest().body("Greška pri dodavanju recenzije!");
         }
     }
 
@@ -94,15 +105,13 @@ public class MaterialAuthController {
             @RequestParam("description") String description,
             @RequestParam("subject") String subjectName) {
 
-        String username =  SecurityContextHolder.getContext().getAuthentication().getName();
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        try{
+        try {
             materialService.uploadMaterial(subjectName, username, file, description, category);
             return ResponseEntity.ok().build();
-        }catch (IOException ex){
-            return ResponseEntity.badRequest().body("Greška pri upload fajla!");
-        }catch (EntityNotFoundException | UserNotFoundException ex){
-            return ResponseEntity.badRequest().body(ex.getMessage());
+        } catch (IOException | EntityNotFoundException | UserNotFoundException ex) {
+            return ResponseEntity.badRequest().body("Greška pri upload-u fajla!");
         }
     }
 }

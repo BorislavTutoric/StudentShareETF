@@ -14,5 +14,5 @@ public class MaterialReviewResponse {
     private LocalDateTime datum;
     private String name;
     private String surname;
-    private boolean isMyReview;
+    private boolean myReview;
 }

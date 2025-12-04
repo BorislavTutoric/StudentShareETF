@@ -4,7 +4,7 @@ import { Filter, Search } from 'lucide-react';
 import SearchInput from './SearchInput';
 import FilterComponent from './FilterComponent';
 
-function StudentHome({ onOpenMaterials }) {
+function StudentHome({ onOpenMaterials, startYear = 1, subjectsView = "all" }) {
   const [courses, setCourses] = useState([]);
   const [selectedYear, setSelectedYear] = useState(1);
   const [hoverId, setHoverId] = useState(null);
@@ -39,7 +39,7 @@ function StudentHome({ onOpenMaterials }) {
   const fetchMaterials = async (name) => {
     try {
       const data = await getMaterials(name);
-      onOpenMaterials(name, data);
+      onOpenMaterials(name, data, selectedYear, subjects);
     } catch (err) {
       console.error(err);
     }
@@ -92,7 +92,9 @@ function StudentHome({ onOpenMaterials }) {
   }
 
   useEffect(() => {
-    fetchSubjects(1);
+    setSelectedYear(startYear)
+    fetchSubjects(startYear);
+    setSubjects(subjectsView);
   }, []);
 
   useEffect(() => {
@@ -118,6 +120,7 @@ function StudentHome({ onOpenMaterials }) {
         onClose={handleFilterClose}
         setMySubjects={filterMySubjects}
         setAllSubjects={setAllSubjects}
+        subjectsView={subjects}
       />
 
       <div style={styles.filterSearchContainer}>

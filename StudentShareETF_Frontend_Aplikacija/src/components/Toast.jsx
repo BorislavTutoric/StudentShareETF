@@ -13,10 +13,10 @@ function Toast({ message, type = 'success' }) {
 
   const getColors = () => {
     const colors = {
-      success: { bg: 'rgba(96, 224, 22, 0.95)', border: '#60e016', light: 'rgba(96, 224, 22, 0.2)' },
-      error: { bg: 'rgba(239, 68, 68, 0.95)', border: '#ef4444', light: 'rgba(239, 68, 68, 0.2)' },
-      warning: { bg: 'rgba(245, 158, 11, 0.95)', border: '#f59e0b', light: 'rgba(245, 158, 11, 0.2)' },
-      info: { bg: 'rgba(59, 130, 246, 0.95)', border: '#3b82f6', light: 'rgba(59, 130, 246, 0.2)' },
+      success: { bg: 'rgba(96, 224, 22, 0.95)', border: '#60e016', text: '#0a1457' },
+      error: { bg: 'rgba(239, 68, 68, 0.95)', border: '#ef4444', text: '#ffffff' },
+      warning: { bg: 'rgba(245, 158, 11, 0.95)', border: '#f59e0b', text: '#ffffff' },
+      info: { bg: 'rgba(59, 130, 246, 0.95)', border: '#3b82f6', text: '#ffffff' },
     };
     return colors[type] || colors.success;
   };
@@ -52,15 +52,17 @@ function Toast({ message, type = 'success' }) {
         ...styles.toast,
         backgroundColor: colors.bg,
         borderLeftColor: colors.border,
+        color: colors.text,
+        boxShadow: `0 4px 12px rgba(96, 224, 22, 0.25)`,
       }}>
         <div style={{
           ...styles.icon,
-          backgroundColor: colors.light,
-          color: colors.border,
+          backgroundColor: colors.border,
+          color: colors.text,
         }}>
           {getIcon()}
         </div>
-        <span style={styles.message}>{message}</span>
+        <span style={{...styles.message, color: colors.text}}>{message}</span>
       </div>
     </>
   );
@@ -71,30 +73,28 @@ const styles = {
     position: 'fixed',
     bottom: '30px',
     right: '30px',
-    padding: '5px 20px',
-    borderRadius: '14px',
+    padding: '14px 24px',
+    borderRadius: '12px',
     display: 'flex',
     alignItems: 'center',
     gap: '14px',
     fontSize: '15px',
     fontWeight: '600',
-    color: '#ffffff',
     zIndex: 9999,
-    boxShadow: '0 12px 32px rgba(0, 0, 0, 0.35)',
     animation: 'slideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1)',
     maxWidth: '420px',
     wordWrap: 'break-word',
-    backdropFilter: 'blur(12px)',
-    border: '1px solid rgba(255, 255, 255, 0.15)',
+    backdropFilter: 'blur(10px)',
+    border: '1px solid rgba(96, 224, 22, 0.25)',
     borderLeft: '4px solid',
     letterSpacing: '0.5px',
     transition: 'all 0.3s ease',
   },
   icon: {
-    fontSize: '18px',
+    fontSize: '20px',
     fontWeight: 'bold',
-    minWidth: '32px',
-    height: '32px',
+    minWidth: '36px',
+    height: '36px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -104,7 +104,7 @@ const styles = {
   message: {
     flex: 1,
     lineHeight: '1.5',
-    fontWeight: '500',
+    fontWeight: '600',
   },
 };
 

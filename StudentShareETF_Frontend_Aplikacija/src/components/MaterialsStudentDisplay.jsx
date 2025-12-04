@@ -2,9 +2,9 @@ import React, { useState } from 'react';
 import { getMaterial } from '../services/materialsService';
 import DocumentUploadForm from './DocumentUploadForm';
 import CommentsSection from './CommentsSection';
-import Toast from './Toast'; // Kreiramo custom Toast komponentu
+import Toast from './Toast';
 
-function MaterialsStudentDisplay({ materials, isOpen, subjectName }) {
+function MaterialsStudentDisplay({ materials, isOpen, onClose, subjectName }) {
   const [expandedSections, setExpandedSections] = useState({
     predavanja: true,
     vjezbe: true,
@@ -15,8 +15,9 @@ function MaterialsStudentDisplay({ materials, isOpen, subjectName }) {
   const [isCommentSectionOpen, setIsCommentSectionOpen] = useState(false);
   const [currentMaterial, setCurrentMaterial] = useState("");
   const [toast, setToast] = useState(null);
+  const [currentMaterialId, setCurrentMaterialId] = useState(null);
 
-  const showToast = (message, type = 'success', duration = 3000) => {
+  const showToast = (message, type = 'success', duration = 10000) => {
     setToast({ message, type });
     setTimeout(() => setToast(null), duration);
   };
@@ -24,7 +25,8 @@ function MaterialsStudentDisplay({ materials, isOpen, subjectName }) {
   const handleOpenForm = () => setIsUploadFormOpen(true);
   const handleCloseForm = () => setIsUploadFormOpen(false);
 
-  const handleOpenCommentSection = (materialName) => {
+  const handleOpenCommentSection = (materialName, matId) => {
+    setCurrentMaterialId(matId);
     setCurrentMaterial(materialName);
     setIsCommentSectionOpen(true);
   }
@@ -74,8 +76,7 @@ function MaterialsStudentDisplay({ materials, isOpen, subjectName }) {
                   title="Komentari"
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleOpenCommentSection(mat.name);
-                    showToast(`Komentari za: ${mat.name}`, 'info');
+                    handleOpenCommentSection(mat.name, mat.materialId);
                   }}
                   onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(96, 224, 22, 0.15)'}
                   onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
@@ -101,7 +102,7 @@ function MaterialsStudentDisplay({ materials, isOpen, subjectName }) {
                   title="Sačuvaj"
                   onClick={(e) => {
                     e.stopPropagation();
-                    showToast(`Sačuvano: ${mat.name}`, 'success');
+                    showToast(`Uspješno ste sačuvali materijal: ${mat.name}`, 'success');
                   }}
                   onMouseEnter={(e) => {
                     e.target.style.backgroundColor = 'rgba(96, 224, 22, 0.15)';
@@ -122,7 +123,6 @@ function MaterialsStudentDisplay({ materials, isOpen, subjectName }) {
                       style={styles.starButton}
                       onClick={(e) => {
                         e.stopPropagation();
-                        showToast(`Ocjena: ${star} ⭐ za ${mat.name}`, 'success');
                       }}
                       onMouseEnter={(e) => e.target.style.transform = 'scale(1.2)'}
                       onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
@@ -162,9 +162,27 @@ function MaterialsStudentDisplay({ materials, isOpen, subjectName }) {
         isOpen={isCommentSectionOpen}
         onClose={handleCloseCommentSection}
         documentName={currentMaterial}
+        showToast={showToast}
+        materialId={currentMaterialId}
       />
       
       <div style={styles.headerRow}>
+        <button
+          style={styles.backButton}
+          title="Nazad"
+          onMouseEnter={(e) => {
+            e.target.style.backgroundColor = 'rgba(96, 224, 22, 0.2)';
+            e.target.style.transform = 'translateX(-4px)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.backgroundColor = 'rgba(96, 224, 22, 0.1)';
+            e.target.style.transform = 'translateX(0)';
+          }}
+          onClick={onClose}
+        >
+          ← Nazad
+        </button>
+
         <div style={styles.titleContainer}>
           <div style={styles.titleIcon}>📚</div>
           <div style={styles.titleWrapper}>
@@ -245,6 +263,23 @@ const styles = {
     alignItems: 'center',
     marginBottom: '30px',
     padding: '0 10px',
+    gap: '20px',
+  },
+  backButton: {
+    backgroundColor: 'rgba(96, 224, 22, 0.1)',
+    color: '#60e016',
+    border: '2px solid rgba(96, 224, 22, 0.3)',
+    padding: '10px 16px',
+    borderRadius: '12px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    fontSize: '15px',
+    transition: 'all 0.3s ease',
+    letterSpacing: '0.5px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    flexShrink: 0,
   },
   titleContainer: {
     display: 'flex',
@@ -300,6 +335,7 @@ const styles = {
     boxShadow: '0 4px 8px rgba(96, 224, 22, 0.3)',
     transition: 'all 0.3s ease',
     letterSpacing: '0.5px',
+    flexShrink: 0,
   },
   section: {
     width: '100%',
