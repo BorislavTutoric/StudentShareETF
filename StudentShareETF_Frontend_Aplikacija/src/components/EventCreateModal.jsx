@@ -1,14 +1,15 @@
 import React, { useState } from "react";
-import { X, Calendar } from 'lucide-react';
+import { X } from 'lucide-react';
+import { createEvent } from '../services/eventService'; 
 
 export default function EventCreateModal({ onClose, onCreated }) {
   const [form, setForm] = useState({
-    naziv: "",
-    mjesto: "",
-    datum: "",
-    vrijeme: "",
-    opis: "",
-    slika: null,
+    title: "",
+    location: "",
+    date: "",
+    time: "",
+    description: "",
+    image: null,
   });
 
   const handleChange = (e) => {
@@ -19,11 +20,22 @@ export default function EventCreateModal({ onClose, onCreated }) {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    alert("Ovdje ide API poziv za kreiranje eventa!");
-    onCreated();
-    onClose();
+
+    const eventDataToSend = {
+      ...form,
+      time: form.time.trim() === "" ? null : form.time
+    };
+
+    try {
+      await createEvent(eventDataToSend);
+      onCreated();
+      onClose();
+    } catch (error) {
+      console.error("Greška prilikom kreiranja događaja:", error);
+      alert("Došlo je do greške!");
+    }
   };
 
   return (
@@ -54,8 +66,8 @@ export default function EventCreateModal({ onClose, onCreated }) {
                 <label style={styles.label}>Naziv</label>
                 <input
                   style={styles.input}
-                  name="naziv"
-                  value={form.naziv}
+                  name="title"
+                  value={form.title}
                   onChange={handleChange}
                   placeholder="Unesite naziv događaja"
                   onFocus={(e) => e.target.style.borderColor = '#60e016'}
@@ -67,8 +79,8 @@ export default function EventCreateModal({ onClose, onCreated }) {
                 <label style={styles.label}>Mjesto</label>
                 <input
                   style={styles.input}
-                  name="mjesto"
-                  value={form.mjesto}
+                  name="location"
+                  value={form.location}
                   onChange={handleChange}
                   placeholder="Unesite mjesto održavanja"
                   onFocus={(e) => e.target.style.borderColor = '#60e016'}
@@ -84,8 +96,8 @@ export default function EventCreateModal({ onClose, onCreated }) {
                 <input
                   type="date"
                   style={styles.input}
-                  name="datum"
-                  value={form.datum}
+                  name="date"
+                  value={form.date}
                   onChange={handleChange}
                   onFocus={(e) => e.target.style.borderColor = '#60e016'}
                   onBlur={(e) => e.target.style.borderColor = 'rgba(96, 224, 22, 0.3)'}
@@ -93,12 +105,12 @@ export default function EventCreateModal({ onClose, onCreated }) {
                 />
               </div>
               <div style={styles.column}>
-                <label style={styles.label}>Vrijeme</label>
+                <label style={styles.label}>Vrijeme (opciono)</label>
                 <input
                   type="time"
                   style={styles.input}
-                  name="vrijeme"
-                  value={form.vrijeme}
+                  name="time"
+                  value={form.time}
                   onChange={handleChange}
                   onFocus={(e) => e.target.style.borderColor = '#60e016'}
                   onBlur={(e) => e.target.style.borderColor = 'rgba(96, 224, 22, 0.3)'}
@@ -109,8 +121,8 @@ export default function EventCreateModal({ onClose, onCreated }) {
             <label style={styles.label}>Opis</label>
             <textarea
               style={styles.textarea}
-              name="opis"
-              value={form.opis}
+              name="description"
+              value={form.description}
               onChange={handleChange}
               placeholder="Unesite kratak opis događaja..."
               onFocus={(e) => e.target.style.borderColor = '#60e016'}
@@ -122,7 +134,7 @@ export default function EventCreateModal({ onClose, onCreated }) {
             <input
               type="file"
               style={styles.input}
-              name="slika"
+              name="image"
               accept="image/*"
               onChange={handleChange}
               onFocus={(e) => e.target.style.borderColor = '#60e016'}
