@@ -24,7 +24,7 @@ public class AcademicCalendar {
     @Column(name = "Aktivan", nullable = false)
     boolean aktivan;
 
-    @OneToOne
+    @ManyToOne
     @JoinColumn(name = "KorisnikId", nullable = false)
     User user;
 
