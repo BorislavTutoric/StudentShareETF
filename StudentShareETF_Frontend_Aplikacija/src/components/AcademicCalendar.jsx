@@ -4,7 +4,7 @@ import { getAcademicCalendar, getTasks, openAcademicCalendar } from '../services
 import Toast from './Toast';
 
 function AkademskiKalendar({ 
-  calendarFile = { title: "Akademski_kalendar_za_akademsku_2024_2025_godinu.pdf", id: 1 }, 
+  calendarFile, 
   facultyEvents = {
     '0-15': [
       { name: 'Ispit iz Programiranja', time: '09:00' },
@@ -109,7 +109,7 @@ function AkademskiKalendar({
 
   const handleFileClick = async (fileId) => {
     try{
-      const url = await openAcademicCalendar(id);
+      const url = await openAcademicCalendar(fileId);
       window.open(url, "_blank");
     } catch(err){
       console.error(err);
@@ -213,7 +213,7 @@ function AkademskiKalendar({
         <div style={styles.headerLeft}>
           <h2 style={styles.title}>Akademski Kalendar</h2>
           {calendarFile && (
-            <button style={styles.downloadBtn} onClick={handleFileClick(calendarFile.id)}>
+            <button style={styles.downloadBtn} onClick={() => handleFileClick(calendarFile.id)}>
               <span style={styles.downloadIcon}>📄</span>
               {calendarFile.title}
             </button>
