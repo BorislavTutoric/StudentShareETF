@@ -1,10 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import StudentMenuBar from "../components/StudentMenuBar";
 import WelcomeHeader from "../components/WelcomeHeader";
 import ProfileDisplay from "../components/ProfileDisplay";
 import StudentHome from "../components/StudentHome";
 import MaterialsStudentDisplay from "../components/MaterialsStudentDisplay";
 import EventsDisplayAuth from "../components/EventsDisplayAuth";
+import AcademicCalendar from "../components/AcademicCalendar";
+import { getAcademicCalendar } from "../services/calendarService,";
+import Toast from "../components/Toast";
 
 function StudentPage() {
   const [activeSection, setActiveSection] = useState("Početna");
@@ -13,11 +16,18 @@ function StudentPage() {
   const [materials, setMaterials] = useState([]);
   const [year, setYear] = useState();
   const [subjects, setSubjects] = useState("all");
+  const [calendarFile, setCalendarFile] = useState(null);
+  const [toast, setToast] = useState(null);
 
   const handleSubjectsClick = () => { 
     setActiveComponent("subjects");
     //setYear(null);
   }
+
+  const showToast = (message, type = 'success', duration = 5000) => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), duration);
+  };
 
   const handleOpenMaterials = (subjectName, materialsData, selectedYear, subs) => {
     setSelectedSubject(subjectName);
@@ -33,6 +43,16 @@ function StudentPage() {
   };
 
   const handleCloseMaterials = () => {setActiveComponent("subjects")}
+
+  const getCalendar = async () => {
+    try{
+      const response = await getAcademicCalendar();
+      setCalendarFile({ id: response.id, title: response.title })
+    }catch (err){
+      console.error(err);
+      showToast(`${err}`, 'error');
+    }
+  }
 
   const renderContent = () => {
     switch (activeSection) {
@@ -64,7 +84,7 @@ function StudentPage() {
         return <h2>Sačuvano</h2>;
 
       case "Akademski kalendar":
-        return <h2>Akademski kalendar</h2>;
+        return <AcademicCalendar calendarFile={calendarFile}/>
 
       case "Savjeti":
         return <h2>Savjeti</h2>;
@@ -78,11 +98,13 @@ function StudentPage() {
 };
   return (
     <div style={styles.mainLayout}>
+      {toast && <Toast message={toast.message} type={toast.type} />}
       <div style={styles.leftMenu}>
         <StudentMenuBar 
           onLogoutClick={handleLogoutClick}
           onMenuClick={setActiveSection}
           onHomeCLick={handleSubjectsClick}
+          onCalendarClick={getCalendar}
         />
       </div>
 
