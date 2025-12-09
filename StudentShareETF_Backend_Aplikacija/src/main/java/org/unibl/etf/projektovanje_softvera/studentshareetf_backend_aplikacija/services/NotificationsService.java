@@ -37,4 +37,24 @@ public class NotificationsService {
         }
         return  notificationsResponses;
     }
+
+    public void notificationDelete(Integer id) throws EntityNotFoundException {
+        Optional<Notification> notification = notificationsRepository.findById(id);
+        if (notification.isPresent()) {
+            notificationsRepository.delete(notification.get());
+        }else{
+            throw new EntityNotFoundException("Nepostojeće obavještenje!");
+        }
+    }
+
+    public void setReadNotification(Integer id) throws EntityNotFoundException {
+        Optional<Notification> notification = notificationsRepository.findById(id);
+        if (notification.isPresent()) {
+            Notification notification1 = notification.get();
+            notification1.setRead(true);
+            notificationsRepository.save(notification1);
+        } else{
+            throw new EntityNotFoundException("Obavještenje nije pronadjeno!");
+        }
+    }
 }

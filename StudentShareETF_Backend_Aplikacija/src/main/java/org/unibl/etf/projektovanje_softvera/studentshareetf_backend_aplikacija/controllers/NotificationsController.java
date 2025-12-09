@@ -3,10 +3,7 @@ package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.NotificationsResponse;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.EntityNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.UserNotFoundException;
@@ -29,6 +26,26 @@ public class NotificationsController {
             return ResponseEntity.ok(notificationsResponses);
         }catch (UserNotFoundException | EntityNotFoundException ex){
             return ResponseEntity.badRequest().body("Greška pri učitavanju obavještenja!");
+        }
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<?> deleteNotification(@PathVariable Integer id) {
+        try{
+            notificationsService.notificationDelete(id);
+            return ResponseEntity.ok("Obavještenje uspješno obrisano!");
+        } catch (EntityNotFoundException ex){
+            return ResponseEntity.badRequest().body("Greška pri učitavanju obavještenja!");
+        }
+    }
+
+    @PostMapping("/read/{id}")
+    public ResponseEntity<?> setNotificationRead(@PathVariable Integer id){
+        try{
+            notificationsService.setReadNotification(id);
+            return ResponseEntity.ok().build();
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 }

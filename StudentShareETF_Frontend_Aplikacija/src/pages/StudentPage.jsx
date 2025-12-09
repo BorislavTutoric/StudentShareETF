@@ -5,6 +5,9 @@ import ProfileDisplay from "../components/ProfileDisplay";
 import StudentHome from "../components/StudentHome";
 import MaterialsStudentDisplay from "../components/MaterialsStudentDisplay";
 import EventsDisplayAuth from "../components/EventsDisplayAuth";
+import Notifications from "../components/Notifications";
+import { getNotificationsApi } from "../services/notificationsService";
+import Toast from "../components/Toast";
 
 function StudentPage() {
   const [activeSection, setActiveSection] = useState("Početna");
@@ -13,6 +16,7 @@ function StudentPage() {
   const [materials, setMaterials] = useState([]);
   const [year, setYear] = useState();
   const [subjects, setSubjects] = useState("all");
+  const [notifications, setNotifications] = useState(null);
 
   const handleSubjectsClick = () => { 
     setActiveComponent("subjects");
@@ -26,6 +30,15 @@ function StudentPage() {
     setActiveComponent("materials");
     setSubjects(subs);
   };
+
+  const handleNotificationsClick = async () => {
+    try{
+      const response = await getNotificationsApi();
+      setNotifications(response);
+    } catch(err){
+      console.log(err);
+    }
+  }
 
   const handleLogoutClick = () => {
     window.location.href = "/";
@@ -58,7 +71,7 @@ function StudentPage() {
         );
 
       case "Obavještenja":
-        return <h2>Obavještenja</h2>;
+        return <Notifications studentNotifications={notifications}/>;
 
       case "Sačuvano":
         return <h2>Sačuvano</h2>;
@@ -83,6 +96,7 @@ function StudentPage() {
           onLogoutClick={handleLogoutClick}
           onMenuClick={setActiveSection}
           onHomeCLick={handleSubjectsClick}
+          onNotificationsClick={handleNotificationsClick}
         />
       </div>
 
