@@ -9,7 +9,7 @@ export const openAcademicCalendar = async (id) => {
   }
 };
 
-export const getAcademicCalendar = async () => {
+export const getAcademicCalendarApi = async () => {
   try {
     const response = await api.get("api/academic-calendar");
     return response.data; 
@@ -18,12 +18,4 @@ export const getAcademicCalendar = async () => {
   }
 };
 
-export const getTasks = async (selectedDate) => {
-  try {
-    const response = await api.get("api/tasks", { params: { date: selectedDate }});
-    return response.data; 
-  } catch (err) {
-    throw err;
-  }
-};
 

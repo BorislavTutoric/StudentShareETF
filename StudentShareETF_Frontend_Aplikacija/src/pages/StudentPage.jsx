@@ -6,8 +6,9 @@ import StudentHome from "../components/StudentHome";
 import MaterialsStudentDisplay from "../components/MaterialsStudentDisplay";
 import EventsDisplayAuth from "../components/EventsDisplayAuth";
 import AcademicCalendar from "../components/AcademicCalendar";
-import { getAcademicCalendar } from "../services/calendarService,";
+import { getAcademicCalendarApi } from "../services/calendarService,";
 import Toast from "../components/Toast";
+import { getFacultyMonthTasksApi, checkMonthMyTasksApi } from "../services/taskService";
 
 function StudentPage() {
   const [activeSection, setActiveSection] = useState("Početna");
@@ -17,6 +18,8 @@ function StudentPage() {
   const [year, setYear] = useState();
   const [subjects, setSubjects] = useState("all");
   const [calendarFile, setCalendarFile] = useState(null);
+  const [facultyMonthTasks, setFacultyMonthTasks] = useState(null);
+  const [myTasksCheck, setMyTasksCheck] = useState(null);
   const [toast, setToast] = useState(null);
 
   const handleSubjectsClick = () => { 
@@ -44,10 +47,30 @@ function StudentPage() {
 
   const handleCloseMaterials = () => {setActiveComponent("subjects")}
 
-  const getCalendar = async () => {
+  const handleCalendarClick = async () => {
+    const now = new Date();
+    const currentYear = now.getFullYear();  
+    const currentMonth = now.getMonth() + 1; 
     try{
-      const response = await getAcademicCalendar();
-      setCalendarFile({ id: response.id, title: response.title })
+      const [calendarResponse] = await Promise.all([
+        getAcademicCalendarApi(),
+        handleMonthTasks(currentMonth, currentYear)
+      ]);
+      setCalendarFile(calendarResponse)
+    }catch (err){
+      console.error(err);
+      showToast(`${err}`, 'error');
+    }
+  }
+
+  const handleMonthTasks = async (month, year) => {
+    try{
+      const [facultyTasksResponse, myTasksCheckResponse] = await Promise.all([
+        getFacultyMonthTasksApi(month, year),
+        checkMonthMyTasksApi(month, year)
+      ]);
+      setFacultyMonthTasks(facultyTasksResponse);
+      setMyTasksCheck(myTasksCheckResponse);
     }catch (err){
       console.error(err);
       showToast(`${err}`, 'error');
@@ -84,7 +107,12 @@ function StudentPage() {
         return <h2>Sačuvano</h2>;
 
       case "Akademski kalendar":
-        return <AcademicCalendar calendarFile={calendarFile}/>
+        return <AcademicCalendar 
+                  calendarFile={calendarFile}
+                  facultyMonthTasks={facultyMonthTasks}
+                  myTasksCheck={myTasksCheck}
+                  handleMonthTasks={handleMonthTasks}
+                />
 
       case "Savjeti":
         return <h2>Savjeti</h2>;
@@ -104,7 +132,7 @@ function StudentPage() {
           onLogoutClick={handleLogoutClick}
           onMenuClick={setActiveSection}
           onHomeCLick={handleSubjectsClick}
-          onCalendarClick={getCalendar}
+          onCalendarClick={handleCalendarClick}
         />
       </div>
 
