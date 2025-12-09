@@ -25,6 +25,9 @@ public class Task {
     @JoinColumn(name = "StudentId",nullable = false)
     private Student student;
 
+    @Column(name = "Fakultetska")
+    private boolean fakultetska;
+
     public Task() {}
 
     public Integer getId() {
@@ -57,5 +60,10 @@ public class Task {
     public void setStudent(Student student) {
         this.student = student;
     }
-
+    public  boolean isFakultetska() {
+        return fakultetska;
+    }
+    public void setFakultetska(boolean fakultetska) {
+        this.fakultetska = fakultetska;
+    }
 }

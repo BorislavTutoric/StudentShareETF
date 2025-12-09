@@ -12,4 +12,5 @@ public class CreateTaskRequest {
     private String opis;
     private String datum;
     private String vrijeme;
+    private String nacin;
 }

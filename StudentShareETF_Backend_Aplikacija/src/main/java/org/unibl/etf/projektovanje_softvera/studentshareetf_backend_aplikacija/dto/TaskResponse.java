@@ -13,4 +13,5 @@ public class TaskResponse {
     private String description;
     private String date;
     private String time;
+    private boolean isFaculcy;
 }
