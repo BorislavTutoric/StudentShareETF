@@ -33,4 +33,14 @@ public class UserService implements UserDetailsService {
         }
     }
 
+    public String getNameByUsername(String username) throws UserNotFoundException {
+        Optional<User> user = userRepository.findByUsername(username);
+        if(user.isPresent()){
+            return user.get().getName();
+        }
+        else {
+            throw new UserNotFoundException();
+        }
+    }
+
 }
