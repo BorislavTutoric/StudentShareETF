@@ -26,28 +26,43 @@ public class TaskService {
     private final UserService userService;
     private final StudentService studentService;
 
-    public List<TaskResponse> getTasksForDate(String dateString,String username) {
-        User user = userService.getUserByUsername(username);
+    public List<TaskResponse> getTasksForDate(String month, String year, String username) {
 
+        User user = userService.getUserByUsername(username);
         Student student = studentService.getStudentByUser(user);
 
-        LocalDate d = LocalDate.parse(dateString);
-        LocalDateTime startOfDay = d.atStartOfDay();
-        LocalDateTime endOfDay = d.atTime(LocalTime.MAX);
+        int m = Integer.parseInt(month);
+        int y = Integer.parseInt(year);
 
-        List<Task> tasks = taskRepository.findByStudentAndDatumVrijemeBetween(student, startOfDay, endOfDay);
+        LocalDate startDate = LocalDate.of(y, m, 1);
+
+        LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+
+        LocalDateTime startOfMonth = startDate.atStartOfDay();
+        LocalDateTime endOfMonth = endDate.atTime(LocalTime.MAX);
+
+        List<Task> tasks = taskRepository.findByStudentAndDatumVrijemeBetween(
+                student, startOfMonth, endOfMonth
+        );
 
         return tasks.stream()
-                .map(t ->{
+                .map(t -> {
                     LocalDateTime dt = t.getDatumVrijeme();
                     String date = dt.toLocalDate().toString();
                     String time = dt.toLocalTime().toString();
-                    return new TaskResponse(t.getId(), t.getNaslov(), t.getOpis(), date,time);
+                    return new TaskResponse(
+                            t.getId(),
+                            t.getNaslov(),
+                            t.getOpis(),
+                            date,
+                            time,
+                            t.isFakultetska()
+                    );
                 })
                 .collect(Collectors.toList());
     }
 
-    public void createTask(String title, String description, String date, String time, String username) {
+    public Integer createTask(String title, String description, String date, String time, String username,String way) {
         User user = userService.getUserByUsername(username);
 
         Student student = studentService.getStudentByUser(user);
@@ -63,8 +78,11 @@ public class TaskService {
         task.setOpis(description);
         task.setDatumVrijeme(dateTime);
         task.setStudent(student);
+        task.setFakultetska(!"personal".equals(way));
 
         taskRepository.save(task);
+
+        return task.getId();
     }
 
     public void deleteTask(Integer taskId, String username) {
