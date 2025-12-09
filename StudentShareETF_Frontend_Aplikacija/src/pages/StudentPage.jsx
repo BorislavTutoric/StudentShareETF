@@ -3,6 +3,7 @@ import StudentMenuBar from "../components/StudentMenuBar";
 import WelcomeHeader from "../components/WelcomeHeader";
 import ProfileDisplay from "../components/ProfileDisplay";
 import StudentHome from "../components/StudentHome";
+import SavedMaterials from "../components/SavedMaterials.jsx"; 
 import MaterialsStudentDisplay from "../components/MaterialsStudentDisplay";
 import EventsDisplayAuth from "../components/EventsDisplayAuth";
 
@@ -13,19 +14,25 @@ function StudentPage() {
   const [materials, setMaterials] = useState([]);
   const [year, setYear] = useState();
   const [subjects, setSubjects] = useState("all");
+  const [isSavedMode, setIsSavedMode] = useState(false); 
+  const [refreshCallback, setRefreshCallback] = useState(null);
 
   const handleSubjectsClick = () => { 
     setActiveComponent("subjects");
+    setIsSavedMode(false);  
     //setYear(null);
   }
 
-  const handleOpenMaterials = (subjectName, materialsData, selectedYear, subs) => {
+  const handleOpenMaterials = (subjectName, materialsData, selectedYear, subs, savedMode = false, refreshCallback = null) => {
     setSelectedSubject(subjectName);
     setMaterials(materialsData);
     setYear(selectedYear);
     setActiveComponent("materials");
     setSubjects(subs);
+    setIsSavedMode(savedMode);
+    setRefreshCallback(() => refreshCallback);
   };
+
 
   const handleLogoutClick = () => {
     window.location.href = "/";
@@ -52,6 +59,8 @@ function StudentPage() {
                 isOpen={true}
                 onClose={handleCloseMaterials}
                 subjectName={selectedSubject}
+                isSavedMode={isSavedMode} 
+                onMaterialRemoved={refreshCallback} 
               />
             )}
           </>
@@ -60,9 +69,26 @@ function StudentPage() {
       case "Obavještenja":
         return <h2>Obavještenja</h2>;
 
-      case "Sačuvano":
-        return <h2>Sačuvano</h2>;
+      case "Sačuvano": 
+        return (
+          <>
+            {activeComponent === "subjects" && (
+              <SavedMaterials onOpenMaterials={handleOpenMaterials} />
+            )}
 
+            {activeComponent === "materials" && (
+              <MaterialsStudentDisplay
+                materials={materials}
+                isOpen={true}
+                onClose={handleCloseMaterials}
+                subjectName={selectedSubject}
+                isSavedMode={true}
+                onMaterialRemoved={refreshCallback} 
+              />
+            )}
+          </>
+        );
+        
       case "Akademski kalendar":
         return <h2>Akademski kalendar</h2>;
 
