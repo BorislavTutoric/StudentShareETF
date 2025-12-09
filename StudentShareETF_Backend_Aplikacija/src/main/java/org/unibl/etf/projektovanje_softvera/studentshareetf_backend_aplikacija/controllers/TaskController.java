@@ -31,14 +31,14 @@ public class TaskController {
     public ResponseEntity<?> createTask(@RequestBody CreateTaskRequest request) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        taskService.createTask(
+        Integer taskId = taskService.createTask(
                 request.getNaslov(),
                 request.getOpis(),
                 request.getDatum(),
                 request.getVrijeme(),
                 username
         );
-        return ResponseEntity.ok("Obaveza uspješno dodana.");
+        return ResponseEntity.ok(taskId);
     }
 
     @DeleteMapping("/delete/{id}")
