@@ -47,7 +47,7 @@ public class TaskService {
                 .collect(Collectors.toList());
     }
 
-    public void createTask(String title, String description, String date, String time, String username) {
+    public Integer createTask(String title, String description, String date, String time, String username) {
         User user = userService.getUserByUsername(username);
 
         Student student = studentService.getStudentByUser(user);
@@ -65,6 +65,8 @@ public class TaskService {
         task.setStudent(student);
 
         taskRepository.save(task);
+
+        return task.getId();
     }
 
     public void deleteTask(Integer taskId, String username) {
