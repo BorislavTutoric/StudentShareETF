@@ -8,7 +8,7 @@ import EventsDisplayAuth from "../components/EventsDisplayAuth";
 import AcademicCalendar from "../components/AcademicCalendar";
 import { getAcademicCalendarApi } from "../services/calendarService,";
 import Toast from "../components/Toast";
-import { getFacultyMonthTasksApi, checkMonthMyTasksApi } from "../services/taskService";
+import { getFacultyMonthTasksApi, getMyMonthTasksApi } from "../services/taskService";
 
 function StudentPage() {
   const [activeSection, setActiveSection] = useState("Početna");
@@ -19,7 +19,7 @@ function StudentPage() {
   const [subjects, setSubjects] = useState("all");
   const [calendarFile, setCalendarFile] = useState(null);
   const [facultyMonthTasks, setFacultyMonthTasks] = useState(null);
-  const [myTasksCheck, setMyTasksCheck] = useState(null);
+  const [myMonthTasks, setMyMonthTasks] = useState(null);
   const [toast, setToast] = useState(null);
 
   const handleSubjectsClick = () => { 
@@ -65,12 +65,12 @@ function StudentPage() {
 
   const handleMonthTasks = async (month, year) => {
     try{
-      const [facultyTasksResponse, myTasksCheckResponse] = await Promise.all([
+      const [facultyTasksResponse, myTasksResponse] = await Promise.all([
         getFacultyMonthTasksApi(month, year),
-        checkMonthMyTasksApi(month, year)
+        getMyMonthTasksApi(month, year)
       ]);
       setFacultyMonthTasks(facultyTasksResponse);
-      setMyTasksCheck(myTasksCheckResponse);
+      setMyMonthTasks(myTasksResponse);
     }catch (err){
       console.error(err);
       showToast(`${err}`, 'error');
@@ -109,8 +109,8 @@ function StudentPage() {
       case "Akademski kalendar":
         return <AcademicCalendar 
                   calendarFile={calendarFile}
-                  facultyMonthTasks={facultyMonthTasks}
-                  myTasksCheck={myTasksCheck}
+                  facultyTasks={facultyMonthTasks}
+                  myTasks={myMonthTasks}
                   handleMonthTasks={handleMonthTasks}
                 />
 

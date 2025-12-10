@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight, Plus, Trash2, GraduationCap } from 'lucide-react';
 import { openAcademicCalendar } from '../services/calendarService,';
-import { addTaskApi, deleteTask, getTasks } from '../services/taskService';
+import { addTaskApi, deleteTask, getMyMonthTasksApi } from '../services/taskService';
 import Toast from './Toast';
 import FlipPicker from './FlipPicker';
 
-function AkademskiKalendar({ calendarFile, facultyMonthTasks, myTasksCheck, handleMonthTasks}) {
+function AkademskiKalendar({ calendarFile, facultyTasks = [], myTasks = [], handleMonthTasks}) {
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();
   const currentMonthIndex = currentDate.getMonth();
@@ -25,6 +25,12 @@ function AkademskiKalendar({ calendarFile, facultyMonthTasks, myTasksCheck, hand
   const [showTaskForm, setShowTaskForm] = useState(false);
   const [toast, setToast] = useState(null);
   const [facultyTasksOnDate, setFacultyTasksOnDate] = useState(null);
+  const [myTasksOnDate, setMyTasksOnDate] = useState(null);
+  const [myMonthTasks, setMyMonthTasks] = useState(myTasks ?? []);
+  const [facultyMonthTasks, setFacultyMonthTasks] = useState(facultyTasks ?? []);
+  const [isTaskAdded, setIsTaskAdded] = useState([]);
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [showTaskDetails, setShowTaskDetails] = useState(false);
 
   const monthNames = ['Januar', 'Februar', 'Mart', 'April', 'Maj', 'Jun', 'Jul', 'August', 'Septembar', 'Oktobar', 'Novembar', 'Decembar'];
   const months = monthNames.map((name, index) => ({ name, year: displayYear }));
@@ -33,6 +39,15 @@ function AkademskiKalendar({ calendarFile, facultyMonthTasks, myTasksCheck, hand
   const showToast = (message, type = 'success', duration = 5000) => {
     setToast({ message, type });
     setTimeout(() => setToast(null), duration);
+  };
+
+  const scrollToModal = () => {
+    setTimeout(() => {
+      const modalElement = document.querySelector('[data-modal="task-details"]');
+      if (modalElement) {
+        modalElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 100);
   };
   
   const getDaysInMonth = (monthIndex) => {
@@ -65,46 +80,50 @@ function AkademskiKalendar({ calendarFile, facultyMonthTasks, myTasksCheck, hand
 
   const getTaskKey = () => `${currentMonth}-${selectedDate}`;
 
-  const handlePrevMonth = () => {
-    if (currentMonth > 0) {
-      setCurrentMonth(prev => prev - 1);
-    } else {
-      if (displayYear > currentYear) {
-        setCurrentMonth(11);
-        setDisplayYear(prev => prev - 1);
-      }
-    }
-    handleMonthTasks(currentMonth, displayYear);
-  };
+  const handlePrevMonth = () => { 
+    let month = currentMonth;
+    let year = displayYear;
+    if (currentMonth > 0) { 
+      setCurrentMonth(prev => prev - 1); 
+      month = currentMonth;
+      handleMonthTasks(month, year);
+    } else { 
+      if (displayYear > currentYear) { 
+        setCurrentMonth(11); 
+        month = 12
+        setDisplayYear(prev => prev - 1); 
+        year = year - 1;
+        handleMonthTasks(month, year);
+      } 
+    } 
+  }; 
 
-  const handleNextMonth = () => {
-    if (currentMonth < 11) {
+  const handleNextMonth = () => { 
+    let month = currentMonth;
+    let year = displayYear;
+    if (currentMonth < 11) { 
       setCurrentMonth(prev => prev + 1);
-    } else {
-      setCurrentMonth(0);
-      setDisplayYear(prev => prev + 1);
-    }
-    handleMonthTasks(currentMonth, displayYear);
+      month = currentMonth + 2;
+    } else { 
+      setCurrentMonth(0); 
+      month = 1;
+      setDisplayYear(prev => prev + 1); 
+      year = year + 1;
+    } 
+    handleMonthTasks(month, year); 
   };
 
-  const handleDateClick = async (day) => {
+  const handleDateClick = (day) => {
     if (day) {
       const year = months[currentMonth].year;
       const month = currentMonth + 1; 
       const dayString = day;
 
       setSelectedDate(day)
-
-      const formattedDate = `${year}-${month.toString().padStart(2, '0')}-${dayString.toString().padStart(2, '0')}`;
       
       handleFacultyEvents(day);
 
-      try{
-        const response = await getTasks(formattedDate);
-        setTasks(response);
-      }catch(err){
-        console.log(err);
-      }
+      getMyDayTasks(day);
     }
   };
 
@@ -126,9 +145,16 @@ function AkademskiKalendar({ calendarFile, facultyMonthTasks, myTasksCheck, hand
     setFacultyTasksOnDate(dayFacultyTasks);
   }
 
+  const getMyDayTasks = (targetDay) => {
+    const myDayTasks = myMonthTasks.filter(task => {
+      const day = Number(task.date.split("-")[2]);
+      return day === Number(targetDay);
+    });
+    setMyTasksOnDate(myDayTasks);
+  }
+
   const addTask = async () => {
     if (newTask.trim() && selectedDate) {
-      const key = getTaskKey();
       let timeString = '';
       
       if (includeTime) {
@@ -148,8 +174,21 @@ function AkademskiKalendar({ calendarFile, facultyMonthTasks, myTasksCheck, hand
           description: newTaskDescription,
           date: formattedDate,
           time: timeString,
+          isFaculcy: false
         };
-        setTasks(prev => [...prev, taskData]);
+        setMyTasksOnDate(prev => [...prev, taskData]);
+        setMyMonthTasks(prev => [...prev, taskData]);
+        setIsTaskAdded(prev => {
+          const exists = prev.some(
+            el => el.day === selectedDate && el.month === currentMonth && el.yearr === year
+          );
+  
+          if (exists) {
+            return prev; 
+          }
+
+          return [...prev, { day: selectedDate, month: currentMonth, yearr: year, isAdded: true }];
+        });
         setNewTask('');
         setNewTaskDescription('');
         setNewTaskHour(9);
@@ -164,8 +203,19 @@ function AkademskiKalendar({ calendarFile, facultyMonthTasks, myTasksCheck, hand
     }
   };
 
+  const isAdded = (day) => {
+    const item = isTaskAdded.find(el => el.day === day && el.month === currentMonth && el.yearr === months[currentMonth].year);
+    if(item){
+      return item.isAdded;
+    }
+  } 
+
   const removeTask = async (index, taskId) => {
-    setTasks(prev => prev.filter((_, i) => i !== index));
+    setMyTasksOnDate(prevTasks => prevTasks.filter(task => task.id !== taskId));
+    setMyMonthTasks(prevTasks => prevTasks.filter(task => task.id !== taskId));
+    setIsTaskAdded(prevTasks => prevTasks.filter(task => {
+      return !(task.day === selectedDate && task.month === currentMonth && task.yearr === months[currentMonth].year);
+    }));
     try{
       const response = await deleteTask(taskId);
       showToast(response, "success");
@@ -176,16 +226,17 @@ function AkademskiKalendar({ calendarFile, facultyMonthTasks, myTasksCheck, hand
   };
 
   const isFacultyTaskAdded = (title) => {
-    return tasks.some(task => { 
-      return task.title.includes(title) && task.isFaculcy;
+    //console.log(title);
+    //console.log("PROMJENA → myTasksOnDate:", myTasksOnDate);
+    return myTasksOnDate.some(task => { 
+      return task.title ===`Ispit: ${title}` && task.faculcy;
     });
   }
 
   const getFacultyTaskId = (title) => {
-    return tasks.some(task => { 
-      return task.title.includes(title) && task.isFaculcy ? task.id : 0;
-    });
-  }
+    const task = myMonthTasks.find(task => task.title.includes(`Ispit: ${title}`) && task.faculcy);
+    return task ? task.id : 0; 
+  };
 
   const addFacultyTaskToPersonal = async (task) => {
     if (!selectedDate) return;
@@ -197,26 +248,44 @@ function AkademskiKalendar({ calendarFile, facultyMonthTasks, myTasksCheck, hand
       const formattedDate = `${year}-${month.toString().padStart(2, '0')}-${dayString.toString().padStart(2, '0')}`;
 
       try{
-        const response = await addTaskApi(`Ispit: ${task.title}`, task.room, formattedDate, task.time, "faculcy");
+        const response = await addTaskApi(`Ispit: ${task.title}`, `Ispit će se održati u učionici: ${task.room}.`, formattedDate, task.time, "faculcy");
         const taskData = {
             id: response,
             title: `Ispit: ${task.title}`,
-            description: task.room,
+            description: `Ispit će se održati u učionici: ${task.room}.`,
             date: formattedDate,
             time: task.time,
+            faculcy: true
         };
-        setTasks(prev => [...prev, taskData]);
+        setMyTasksOnDate(prev => [...prev, taskData]);
+        setMyMonthTasks(prev => [...prev, taskData]);
+        setIsTaskAdded(prev => {
+          const exists = prev.some(
+            el => el.day === selectedDate && el.month === currentMonth && el.yearr === year
+          );
+  
+          if (exists) {
+            return prev; 
+          }
+
+          return [...prev, { day: selectedDate, month: currentMonth, yearr: year, isAdded: true }];
+        });
       }catch(err){
         console.error(err);
         showToast(`${err}`, 'error');
       }
     }else{
+      const taskId = getFacultyTaskId(task.title);
+      setMyTasksOnDate(prev => prev.filter(t => t.id !== taskId));
+      setMyMonthTasks(prev => prev.filter(t => t.id !== taskId));
+      setIsTaskAdded(prevTasks => prevTasks.filter(task => {
+        return !(task.day === selectedDate && task.month === currentMonth && task.yearr === months[currentMonth].year);
+      }));
       try{
-        const response = await deleteTask(getFacultyTaskId(task.title));
-        setTasks(prevTasks => prevTasks.filter(taskPrev => taskPrev.title !== task.title));
-        showToast(response, "success");
+        const response = await deleteTask(taskId);
+        //showToast(response, "success");
       }catch(err){
-          console.error(err);
+        console.error(err);
         showToast(`${err}`, 'error');
       }
     }
@@ -225,8 +294,10 @@ function AkademskiKalendar({ calendarFile, facultyMonthTasks, myTasksCheck, hand
   const calendarDays = generateCalendarDays();
 
   const hasPersonalTasksOnDate = (targetDay) => {
-    const element = myTasksCheck.find(taskCheck => taskCheck.day === targetDay);
-    return element ? element.hasTask : false;
+    return myMonthTasks.some(task => {
+      const day = task.date.split("-")[2]; 
+      return Number(day) === targetDay;
+    });
   };
 
   const hasFacultyEventsOnDate = (targetDay) => {
@@ -235,6 +306,14 @@ function AkademskiKalendar({ calendarFile, facultyMonthTasks, myTasksCheck, hand
       return Number(day) === targetDay;
     });
   };
+
+  useEffect(() => {
+    setMyMonthTasks(myTasks ?? []);
+  }, [myTasks]);
+
+  useEffect(() => {
+    setFacultyMonthTasks(facultyTasks ?? []);
+  }, [facultyTasks]);
 
   return (
     <div style={styles.container}>
@@ -283,16 +362,16 @@ function AkademskiKalendar({ calendarFile, facultyMonthTasks, myTasksCheck, hand
                   ...styles.dayButton,
                   ...(day === null ? styles.dayButtonEmpty : {}),
                   ...(selectedDate === day ? styles.dayButtonSelected : {}),
-                  ...(day && (hasPersonalTasksOnDate(day) || hasFacultyEventsOnDate(day)) ? styles.dayButtonWithTasks : {}),
+                  ...(day && (hasPersonalTasksOnDate(day) || hasFacultyEventsOnDate(day) || isAdded(day)) ? styles.dayButtonWithTasks : {}),
                 }}
                 onClick={() => handleDateClick(day)}
                 disabled={day === null}
               >
                 <div style={styles.dayButtonContent}>
                   <span>{day}</span>
-                  {day && (hasPersonalTasksOnDate(day) || hasFacultyEventsOnDate(day)) && (
+                  {day && (hasPersonalTasksOnDate(day) || hasFacultyEventsOnDate(day) || isAdded(day)) && (
                     <div style={styles.indicatorsContainer}>
-                      {hasPersonalTasksOnDate(day) && (
+                      {(hasPersonalTasksOnDate(day) || isAdded(day)) && (
                         <div style={styles.taskIndicator}></div>
                       )}
                       {hasFacultyEventsOnDate(day) && (
@@ -451,6 +530,7 @@ function AkademskiKalendar({ calendarFile, facultyMonthTasks, myTasksCheck, hand
                   <div style={styles.facultyEventsList}>
                     {facultyTasksOnDate.map((event, index) => {
                       const isAdded = isFacultyTaskAdded(event.title);
+                      console.log(isAdded);
                       return (
                         <div key={index} style={styles.facultyEventItem}>
                           <div style={styles.facultyEventContent}>
@@ -477,27 +557,34 @@ function AkademskiKalendar({ calendarFile, facultyMonthTasks, myTasksCheck, hand
               {/* MOJE OBAVEZE */}
               <h4 style={styles.personalTasksTitle}>✓ Moje Obaveze</h4>
               <div style={styles.tasksList}>
-                {tasks.length > 0 ? (
-                  tasks.map((task, index) => (
-                    <div key={index} style={styles.taskItem}>
+                {myTasksOnDate.length > 0 ? (
+                  myTasksOnDate.map((task, index) => (
+                    <div key={index} style={styles.taskItem} onClick={() => {
+                      setSelectedTask(task);
+                      setShowTaskDetails(true);
+                      scrollToModal(); 
+                    }}>
                       <div style={styles.taskContent}>
                         <span style={styles.taskText}>
                           {task.title}
                         </span>
                         {task.description && (
                           <span style={styles.taskDescriptionText}>
-                            Opis: {task.description}
+                            📝 {task.description}
                           </span>
                         )}
-                        {task.time && (
+                        {task.time !== "00:00" && (
                           <span style={styles.taskDescriptionText}>
-                            Vrijeme: {task.time}
+                            🕐 {task.time}
                           </span>
                         )}
                       </div>
                       <button
                         style={styles.deleteTaskBtn}
-                        onClick={() => removeTask(index, task.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeTask(index, task.id)
+                        }}
                       >
                         <Trash2 size={16} />
                       </button>
@@ -513,6 +600,57 @@ function AkademskiKalendar({ calendarFile, facultyMonthTasks, myTasksCheck, hand
           ) : (
             <div style={styles.noDateSelected}>
               <span>👆 Odaberi datum sa kalendara</span>
+            </div>
+          )}
+          {showTaskDetails && selectedTask && (
+            <div style={styles.modalOverlay} onClick={() => setShowTaskDetails(false)} data-modal="task-details"> 
+              <div style={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+                <button 
+                  style={styles.modalCloseBtn}
+                  onClick={() => {
+                    setShowTaskDetails(false);
+                  }}
+                >
+                  ✕
+                </button>
+      
+                <h3 style={styles.modalTitle}>Obaveza</h3>
+      
+                <div style={styles.detailsSection}>
+                  <div style={styles.detailItem}>
+                    <span style={styles.detailLabel}>Naslov:</span>
+                    <span style={styles.detailValue}>{selectedTask.title}</span>
+                  </div>
+
+                  {selectedTask.description && (
+                    <div style={styles.detailItem}>
+                      <span style={styles.detailLabel}>Opis:</span>
+                      <span style={styles.detailValue}>{selectedTask.description}</span>
+                    </div>
+                  )}
+
+                  {selectedTask.time && (
+                    <div style={styles.detailItem}>
+                      <span style={styles.detailLabel}>Vrijeme:</span>
+                      <span style={styles.detailValue}>{selectedTask.time}</span>
+                    </div>
+                  )}
+
+                  {selectedTask.date && (
+                    <div style={styles.detailItem}>
+                      <span style={styles.detailLabel}>Datum:</span>
+                      <span style={styles.detailValue}>{selectedTask.date}</span>
+                    </div>
+                  )}
+                </div>
+
+                <button
+                  style={styles.modalCloseButtonBottom}
+                  onClick={() => setShowTaskDetails(false)}
+                >
+                  Zatvori
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -1071,6 +1209,7 @@ container: {
     justifyContent: 'space-between',
     alignItems: 'flex-start',
     gap: '10px',
+    cursor: "pointer"
   },
 
   taskContent: {
@@ -1125,6 +1264,110 @@ container: {
     alignItems: 'center',
     justifyContent: 'center',
     height: '100%',
+  },
+
+  modalOverlay: {
+    position: 'absolute',  
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: 'rgba(10, 20, 87, 0.4)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1000,
+    backdropFilter: 'blur(3px)',
+    overflowY: 'auto',
+  },
+
+  modalContent: {
+    background: 'linear-gradient(135deg, rgba(168, 237, 234, 0.95) 0%, rgba(254, 214, 227, 0.95) 100%)',
+    borderRadius: '16px',
+    padding: '24px',
+    border: '2px solid rgba(168, 237, 234, 0.5)',
+    boxShadow: '0 12px 40px rgba(168, 237, 234, 0.3), 0 0 30px rgba(168, 237, 234, 0.15)',
+    maxWidth: '380px',
+    width: '90%',
+    position: 'relative',
+  },
+
+  modalCloseBtn: {
+    position: 'absolute',
+    top: '12px',
+    right: '12px',
+    background: 'rgba(255, 255, 255, 0.3)',
+    border: '2px solid rgba(255, 255, 255, 0.5)',
+    borderRadius: '50%',
+    width: '32px',
+    height: '32px',
+    cursor: 'pointer',
+    color: '#0a1457',
+    fontSize: '18px',
+    fontWeight: '700',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    outline: 'none',
+    transition: 'all 0.3s ease',
+  },
+
+  modalTitle: {
+    color: '#0a1457',
+    fontSize: '20px',
+    fontWeight: '800',
+    margin: '0 0 18px 0',
+    letterSpacing: '0.4px',
+    textAlign: 'center',
+  },
+
+  detailsSection: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '10px',
+    marginBottom: '18px',
+  },
+
+  detailItem: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '4px',
+    padding: '10px 12px',
+    background: 'rgba(255, 255, 255, 0.5)',
+    borderRadius: '10px',
+    border: '1px solid rgba(255, 255, 255, 0.6)',
+    boxShadow: '0 2px 8px rgba(10, 20, 87, 0.06)',
+  },
+
+  detailLabel: {
+    color: 'rgba(10, 20, 87, 0.6)',
+    fontSize: '10px',
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: '0.3px',
+  },
+
+  detailValue: {
+    color: '#0a1457',
+    fontSize: '13px',
+    fontWeight: '600',
+    wordWrap: 'break-word',
+    lineHeight: '1.4',
+  },
+
+  modalCloseButtonBottom: {
+    background: 'linear-gradient(135deg, #60e016 0%, #4ec70f 100%)',
+    border: 'none',
+    borderRadius: '10px',
+    padding: '12px 16px',
+    cursor: 'pointer',
+    color: '#ffffff',
+    fontWeight: '700',
+    fontSize: '14px',
+    width: '100%',
+    transition: 'all 0.3s ease',
+    outline: 'none',
+    boxShadow: '0 4px 16px rgba(96, 224, 22, 0.25)',
   },
 };
 
