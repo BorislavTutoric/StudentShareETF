@@ -1,8 +1,8 @@
 import api from "./api";
 
-export const getTasks = async (selectedDate) => {
+export const getMyMonthTasksApi = async (month, year) => {
   try {
-    const response = await api.get("api/tasks/my-tasks", { params: { date: selectedDate }});
+    const response = await api.get("api/tasks/my-tasks", { params: { month, year }});
     return response.data; 
   } catch (err) {
     throw err;
@@ -30,15 +30,6 @@ export const addTaskApi = async (naslov, opis, datum, vrijeme, nacin) => {
 export const getFacultyMonthTasksApi = async (month, year) => {
   try {
     const response = await api.get("api/tasks/faculty-tasks", { params: { month, year } });
-    return response.data; 
-  } catch (err) {
-    throw err;
-  }
-};
-
-export const checkMonthMyTasksApi = async (month, year) => {
-  try {
-    const response = await api.get("api/tasks/check-my-tasks", { params: { month, year } });
     return response.data; 
   } catch (err) {
     throw err;
