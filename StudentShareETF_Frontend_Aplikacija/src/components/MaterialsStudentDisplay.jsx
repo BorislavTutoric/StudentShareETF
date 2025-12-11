@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { getMaterial } from '../services/materialsService';
+import { getComments, getMaterial, getReviews, saveMaterialApi } from '../services/materialsService';
 import DocumentUploadForm from './DocumentUploadForm';
 import CommentsSection from './CommentsSection';
 import Toast from './Toast';
 
-function MaterialsStudentDisplay({ materials, isOpen, onClose, subjectName }) {
+function MaterialsStudentDisplay({ materials, isOpen, onClose, subjectName, materialsAvgRatings }) {
   const [expandedSections, setExpandedSections] = useState({
     predavanja: true,
     vjezbe: true,
@@ -16,16 +16,33 @@ function MaterialsStudentDisplay({ materials, isOpen, onClose, subjectName }) {
   const [currentMaterial, setCurrentMaterial] = useState("");
   const [toast, setToast] = useState(null);
   const [currentMaterialId, setCurrentMaterialId] = useState(null);
+  const [allReviews, setAllReviews] = useState([]);
+  const [allMaterialComments, setAllMaterialComments] = useState([]);
+  const [avgRatings, setAvgRatings] = useState(materialsAvgRatings);
 
   const showToast = (message, type = 'success', duration = 10000) => {
     setToast({ message, type });
     setTimeout(() => setToast(null), duration);
   };
 
+  const getMaterialAvgRating = (materialId) => {
+    const rating = avgRatings.find(avg => avg.materialId === materialId);
+    return rating ? Number(rating.averageRating).toFixed(1) : null; 
+  };
+
+  const setMaterialNewAvgRating = (materialId, newRating) => {
+    setAvgRatings(prev => 
+      prev.map(rating => 
+        rating.materialId === materialId ? { ...rating, averageRating: newRating } : rating
+      )
+    );
+  }
+
   const handleOpenForm = () => setIsUploadFormOpen(true);
   const handleCloseForm = () => setIsUploadFormOpen(false);
 
   const handleOpenCommentSection = (materialName, matId) => {
+    getAllMaterialCommentsAndReviews(matId);
     setCurrentMaterialId(matId);
     setCurrentMaterial(materialName);
     setIsCommentSectionOpen(true);
@@ -46,6 +63,76 @@ function MaterialsStudentDisplay({ materials, isOpen, onClose, subjectName }) {
       console.error(err);
       showToast("Greška pri otvaranju materijala", 'error');
     }
+  };
+
+  const getAllMaterialCommentsAndReviews = async (materialId) => {
+    try{
+      const [reviewsResponse, commentsResponse] = await Promise.all([
+        getReviews(materialId),
+        getComments(materialId)
+      ]);
+      setAllReviews(reviewsResponse);
+      setAllMaterialComments(commentsResponse);
+    } catch(err){
+      console.error(err);
+      showToast("Greška pri ucitavanju komentara i recenzija", 'error');
+    }
+  }
+
+  const handleSaveMaterial = async (materialId, name) => {
+    try{
+      const response = await saveMaterialApi(materialId);
+      showToast(`Uspješno ste sačuvali materijal: ${name}`, 'success');
+    }catch(err){
+      console.error(err);
+      showToast(`Greška: ${err}`, 'error');
+    }
+  }
+
+  const renderStarRating = (materialId) => {
+    const avgRating = getMaterialAvgRating(materialId);
+    if (!avgRating) return null;
+
+    const rating = parseFloat(avgRating);
+    
+    return (
+      <div style={styles.ratingContainer}>
+        {[1, 2, 3, 4, 5].map((star) => {
+          let starDisplay = '☆';
+          let starColor = '#6b7280';
+          let starShadow = 'none';
+
+          if (star <= Math.floor(rating)) {
+            starDisplay = '★';
+            starColor = '#facc15';
+            starShadow = '0 2px 6px rgba(250, 204, 21, 0.3)';
+          } else if (star === Math.ceil(rating) && rating % 1 !== 0) {
+            starDisplay = '⯨';
+            starColor = '#facc15';
+            starShadow = '0 2px 6px rgba(250, 204, 21, 0.3)';
+          }
+
+          return (
+            <button
+              key={star}
+              style={{
+                ...styles.starButton,
+                color: starColor,
+                textShadow: starShadow,
+              }}
+              onClick={(e) => {
+                e.stopPropagation();
+              }}
+              onMouseEnter={(e) => e.target.style.transform = 'scale(1.2)'}
+              onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+            >
+              {starDisplay}
+            </button>
+          );
+        })}
+        <span style={styles.ratingText}>{avgRating}</span>
+      </div>
+    );
   };
 
   const renderMaterialsList = (arr) => {
@@ -102,7 +189,7 @@ function MaterialsStudentDisplay({ materials, isOpen, onClose, subjectName }) {
                   title="Sačuvaj"
                   onClick={(e) => {
                     e.stopPropagation();
-                    showToast(`Uspješno ste sačuvali materijal: ${mat.name}`, 'success');
+                    handleSaveMaterial(mat.materialId, mat.name);
                   }}
                   onMouseEnter={(e) => {
                     e.target.style.backgroundColor = 'rgba(96, 224, 22, 0.15)';
@@ -116,21 +203,7 @@ function MaterialsStudentDisplay({ materials, isOpen, onClose, subjectName }) {
                   📑
                 </button>
 
-                <div style={styles.ratingContainer}>
-                  {[1, 2, 3, 4, 5].map(star => (
-                    <button
-                      key={star}
-                      style={styles.starButton}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                      }}
-                      onMouseEnter={(e) => e.target.style.transform = 'scale(1.2)'}
-                      onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
-                    >
-                      ⭐
-                    </button>
-                  ))}
-                </div>
+                {renderStarRating(mat.materialId)}
               </div>
             </div>
           </li>
@@ -164,6 +237,11 @@ function MaterialsStudentDisplay({ materials, isOpen, onClose, subjectName }) {
         documentName={currentMaterial}
         showToast={showToast}
         materialId={currentMaterialId}
+        allReviews={allReviews}
+        setAllReviews={setAllReviews}
+        setNewRating={setMaterialNewAvgRating}
+        allMaterialComments={allMaterialComments}
+        setAllMaterialComments={setAllMaterialComments}
       />
       
       <div style={styles.headerRow}>
@@ -441,17 +519,25 @@ const styles = {
     display: 'flex',
     gap: '2px',
     marginLeft: '8px',
+    alignItems: 'center',
   },
   starButton: {
     background: 'transparent',
     border: 'none',
-    fontSize: '18px',
+    fontSize: '30px',
     cursor: 'pointer',
     padding: '2px',
     transition: 'transform 0.2s ease',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  ratingText: {
+    fontSize: '18px',
+    fontWeight: '700',
+    color: '#facc15',
+    marginLeft: '6px',
+    minWidth: '20px',
   },
   emptyMessage: {
     padding: '16px 24px',

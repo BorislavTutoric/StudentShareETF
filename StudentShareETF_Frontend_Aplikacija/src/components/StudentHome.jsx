@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getSubjects, getMaterials, getFilteredSubjects } from "../services/materialsService";
+import { getSubjects, getMaterials, getFilteredSubjects, getAvgRatings } from "../services/materialsService";
 import { Filter, Search } from 'lucide-react';
 import SearchInput from './SearchInput';
 import FilterComponent from './FilterComponent';
@@ -38,8 +38,11 @@ function StudentHome({ onOpenMaterials, startYear = 1, subjectsView = "all" }) {
 
   const fetchMaterials = async (name) => {
     try {
-      const data = await getMaterials(name);
-      onOpenMaterials(name, data, selectedYear, subjects);
+      const [materialsResponse, avgRatingsResponse] = await Promise.all([
+        getMaterials(name),
+        getAvgRatings(name)
+      ]);
+      onOpenMaterials(name, materialsResponse, avgRatingsResponse, selectedYear, subjects);
     } catch (err) {
       console.error(err);
     }

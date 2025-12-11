@@ -13,15 +13,17 @@ function StudentPage() {
   const [materials, setMaterials] = useState([]);
   const [year, setYear] = useState();
   const [subjects, setSubjects] = useState("all");
+  const [averageRatings, setAverageRatings] = useState([]);
 
   const handleSubjectsClick = () => { 
     setActiveComponent("subjects");
     //setYear(null);
   }
 
-  const handleOpenMaterials = (subjectName, materialsData, selectedYear, subs) => {
+  const handleOpenMaterials = (subjectName, materialsData, averages, selectedYear, subs) => {
     setSelectedSubject(subjectName);
     setMaterials(materialsData);
+    setAverageRatings(averages);
     setYear(selectedYear);
     setActiveComponent("materials");
     setSubjects(subs);
@@ -52,6 +54,7 @@ function StudentPage() {
                 isOpen={true}
                 onClose={handleCloseMaterials}
                 subjectName={selectedSubject}
+                materialsAvgRatings={averageRatings}
               />
             )}
           </>
