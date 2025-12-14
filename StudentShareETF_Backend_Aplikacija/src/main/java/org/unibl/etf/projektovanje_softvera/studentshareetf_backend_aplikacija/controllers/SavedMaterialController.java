@@ -34,7 +34,7 @@ public class SavedMaterialController {
         }
     }
 
-    @PostMapping("/{materialId}")
+    /*@PostMapping("/{materialId}")
     public ResponseEntity<Void> saveMaterial(@PathVariable Integer materialId) {
         try {
             String username = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -43,7 +43,7 @@ public class SavedMaterialController {
         } catch (UserNotFoundException | EntityNotFoundException ex) {
             return ResponseEntity.badRequest().build();
         }
-    }
+    }*/
 
     @DeleteMapping("/{materialId}/remove")
     public ResponseEntity<?> removeSavedMaterial(@PathVariable Integer materialId) {

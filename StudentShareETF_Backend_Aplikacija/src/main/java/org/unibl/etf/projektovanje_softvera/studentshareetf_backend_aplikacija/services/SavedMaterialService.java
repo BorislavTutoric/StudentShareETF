@@ -24,27 +24,13 @@ public class SavedMaterialService {
     private final StudentService studentService;
 
     @Transactional
-    public void materialSave(String username, Integer materialId)
-            throws UserNotFoundException, EntityNotFoundException {
-
-        User user = userService.getUserByUsername(username);
-        Material material = materialService.getMaterialById(materialId);
-        Student student = studentService.getStudentByUser(user);
-
-        if (!savedMaterialRepository.existsByMaterial_MaterialIdAndStudent_UserId(materialId, student.getUserId())) {
-            SavedMaterial savedMaterial = new SavedMaterial(material, student);
-            savedMaterialRepository.save(savedMaterial);
-        } else {
-            throw new IllegalStateException("Materijal je već sačuvan");
-        }
-    }
-
-    @Transactional
     public void removeSavedMaterial(String username, Integer materialId) throws UserNotFoundException {
         User user = userService.getUserByUsername(username);
         Student student = studentService.getStudentByUser(user);
 
         savedMaterialRepository.deleteByMaterial_MaterialIdAndStudent_UserId(materialId, student.getUserId());
+    }
+
     public void materialSave(String username, Integer materialId)throws UserNotFoundException, EntityNotFoundException, AlreadySavedException {
         User user = userService.getUserByUsername(username);
         Material material = materialService.getMaterialById(materialId);

@@ -76,6 +76,7 @@ public class MajorSubjectService {
         } else {
             return majorSubjectRepository.findByMajorAndSemesterIn(major, Arrays.asList(7, 8));
         }
+    }
 
     public List<MajorSubject> getMajorSubjectList() {
         return majorSubjectRepository.findAllWithSubjectAndMajor();

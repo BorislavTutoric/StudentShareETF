@@ -110,27 +110,29 @@ public class SubjectService {
         User user = userService.getUserByUsername(username);
         Student student = studentService.getStudentByUser(user);
         Major major = majorService.getMajorByName(student.getMajor());
-        if(year == 1){
-            return subjectRepository.findFilteredSubjectsWithSavedMaterialsForStudent(student, major, Arrays.asList(1,2))
+        if (year == 1) {
+            return subjectRepository.findFilteredSubjectsWithSavedMaterialsForStudent(student, major, Arrays.asList(1, 2))
                     .stream()
                     .map(subject -> new SubjectSimple(subject.getName(), calculateSemester(subject.getSemester())))
                     .toList();
         } else if (year == 2) {
-            return subjectRepository.findFilteredSubjectsWithSavedMaterialsForStudent(student, major, Arrays.asList(3,4))
+            return subjectRepository.findFilteredSubjectsWithSavedMaterialsForStudent(student, major, Arrays.asList(3, 4))
                     .stream()
                     .map(subject -> new SubjectSimple(subject.getName(), calculateSemester(subject.getSemester())))
                     .toList();
-        }else if (year == 3) {
-            return subjectRepository.findFilteredSubjectsWithSavedMaterialsForStudent(student, major, Arrays.asList(5,6))
+        } else if (year == 3) {
+            return subjectRepository.findFilteredSubjectsWithSavedMaterialsForStudent(student, major, Arrays.asList(5, 6))
                     .stream()
                     .map(subject -> new SubjectSimple(subject.getName(), calculateSemester(subject.getSemester())))
                     .toList();
-        } else{
-            return subjectRepository.findFilteredSubjectsWithSavedMaterialsForStudent(student, major, Arrays.asList(7,8))
+        } else {
+            return subjectRepository.findFilteredSubjectsWithSavedMaterialsForStudent(student, major, Arrays.asList(7, 8))
                     .stream()
                     .map(subject -> new SubjectSimple(subject.getName(), calculateSemester(subject.getSemester())))
                     .toList();
         }
+    }
+
     public Map<String, Integer> getSubjectNameToIdMap() {
         List<Subject> subjects = subjectRepository.findAll();
 
