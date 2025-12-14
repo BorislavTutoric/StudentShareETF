@@ -1,5 +1,6 @@
 package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.MaterialCommentRequest;
@@ -41,22 +42,33 @@ public class MaterialCommentService {
         return commentResponses;
     }
 
-    public void postComment(String username, String content, Integer materialId) throws UserNotFoundException, EntityNotFoundException {
+    public MaterialCommentResponse postComment(String username, String content, Integer materialId) throws UserNotFoundException, EntityNotFoundException {
         User user = userService.getUserByUsername(username);
         Material material = materialService.getMaterialById(materialId);
         LocalDateTime  dateTime = LocalDateTime.now();
         MaterialComments materialComment = new MaterialComments(content, dateTime, material, user);
         materialCommentRepository.save(materialComment);
+        return new MaterialCommentResponse(materialComment.getId(), materialComment.getSadrzaj(), dateTime, user.getName(), user.getSurname(), true);
     }
 
     public void commentReport(Integer commentId) throws EntityNotFoundException {
         Optional<MaterialComments> materialComment = materialCommentRepository.findById(commentId);
         if (materialComment.isPresent()){
             MaterialComments matComment = materialComment.get();
-            matComment.setPrijavljen(true);
-            materialCommentRepository.save(matComment);
+            if(!matComment.getPrijavljen()){
+                matComment.setPrijavljen(true);
+                materialCommentRepository.save(matComment);
+            }
         }else{
             throw new EntityNotFoundException("Komentar nije pronadjen!");
         }
+    }
+
+    @Transactional
+    public void commentDelete(Integer commentId) throws EntityNotFoundException {
+        if (!materialCommentRepository.existsById(commentId)) {
+            throw new EntityNotFoundException("Komentar nije pronađen!");
+        }
+        materialCommentRepository.deleteById(commentId);
     }
 }

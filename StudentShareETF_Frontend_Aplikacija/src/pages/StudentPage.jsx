@@ -21,6 +21,7 @@ function StudentPage() {
   const [facultyMonthTasks, setFacultyMonthTasks] = useState(null);
   const [myMonthTasks, setMyMonthTasks] = useState(null);
   const [toast, setToast] = useState(null);
+  const [averageRatings, setAverageRatings] = useState([]);
 
   const handleSubjectsClick = () => { 
     setActiveComponent("subjects");
@@ -31,10 +32,11 @@ function StudentPage() {
     setToast({ message, type });
     setTimeout(() => setToast(null), duration);
   };
-
-  const handleOpenMaterials = (subjectName, materialsData, selectedYear, subs) => {
+  
+  const handleOpenMaterials = (subjectName, materialsData, averages, selectedYear, subs) => {
     setSelectedSubject(subjectName);
     setMaterials(materialsData);
+    setAverageRatings(averages);
     setYear(selectedYear);
     setActiveComponent("materials");
     setSubjects(subs);
@@ -95,6 +97,7 @@ function StudentPage() {
                 isOpen={true}
                 onClose={handleCloseMaterials}
                 subjectName={selectedSubject}
+                materialsAvgRatings={averageRatings}
               />
             )}
           </>

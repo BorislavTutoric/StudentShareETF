@@ -35,6 +35,7 @@ public class AuthController {
     private final StudentRepository studentRepository;
     private final StudentService studentService;
     private final ChangePasswordService changePasswordService;
+    private final UserService userService;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
@@ -52,7 +53,9 @@ public class AuthController {
 
             String token = jwtService.generateToken(user);
 
-            return ResponseEntity.ok(new LoginResponse(token, user.getAuthorities().iterator().next().getAuthority()));
+            String name = userService.getNameByUsername(user.getUsername());
+
+            return ResponseEntity.ok(new LoginResponse(token, user.getAuthorities().iterator().next().getAuthority(), user.getUsername(), name));
         }
         catch (AuthenticationException ex) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Neispravno korisničko ime ili lozinka"));

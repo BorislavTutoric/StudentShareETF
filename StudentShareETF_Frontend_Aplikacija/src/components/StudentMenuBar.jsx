@@ -26,7 +26,7 @@ function StudentMenuBar({ onLogoutClick, onMenuClick, onHomeCLick, onCalendarCli
         <div style={styles.menuAvatar}>
           👤
         </div>
-        <div style={styles.menuTitle}>Moj Profil</div>
+        <div style={styles.menuTitle}>{localStorage.getItem("username")}</div>
       </div>
 
       <nav style={styles.menuNav}>
