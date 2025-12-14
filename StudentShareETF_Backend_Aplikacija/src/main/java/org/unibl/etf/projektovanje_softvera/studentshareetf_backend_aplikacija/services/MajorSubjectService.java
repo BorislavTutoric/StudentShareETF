@@ -20,7 +20,6 @@ public class MajorSubjectService {
     private final MajorSubjectRepository majorSubjectRepository;
     private final UserService userService;
     private final StudentService studentService;
-    private final SubjectService subjectService;
 
     public List<SubjectSimple> getFilteredSubjects(String username, Integer year) throws UserNotFoundException, EntityNotFoundException
     {
@@ -30,26 +29,48 @@ public class MajorSubjectService {
             return majorSubjectRepository.findByMajorAndSemesterIn(major, Arrays.asList(1,2))
                     .stream()
                     .map(MajorSubject::getSubject)
-                    .map(s -> new SubjectSimple(s.getName(), subjectService.calculateSemester(s.getSemester())))
+                    .map(s -> new SubjectSimple(s.getName(), calculateSemester(s.getSemester())))
                     .toList();
         } else if (year == 2) {
             return majorSubjectRepository.findByMajorAndSemesterIn(major, Arrays.asList(3,4))
                     .stream()
                     .map(MajorSubject::getSubject)
-                    .map(s -> new SubjectSimple(s.getName(), subjectService.calculateSemester(s.getSemester())))
+                    .map(s -> new SubjectSimple(s.getName(), calculateSemester(s.getSemester())))
                     .toList();
         }else if (year == 3) {
             return majorSubjectRepository.findByMajorAndSemesterIn(major, Arrays.asList(5,6))
                     .stream()
                     .map(MajorSubject::getSubject)
-                    .map(s -> new SubjectSimple(s.getName(), subjectService.calculateSemester(s.getSemester())))
+                    .map(s -> new SubjectSimple(s.getName(), calculateSemester(s.getSemester())))
                     .toList();
         } else{
             return majorSubjectRepository.findByMajorAndSemesterIn(major, Arrays.asList(7,8))
                     .stream()
                     .map(MajorSubject::getSubject)
-                    .map(s -> new SubjectSimple(s.getName(), subjectService.calculateSemester(s.getSemester())))
+                    .map(s -> new SubjectSimple(s.getName(), calculateSemester(s.getSemester())))
                     .toList();
+        }
+    }
+
+    public Integer calculateSemester(Integer semester)
+    {
+        if(semester % 2 == 0){
+            return 2;
+        }
+        else{
+            return 1;
+        }
+    }
+
+    public List<MajorSubject> getSubjectsForMajorAndYear(Major major, Integer year) {
+        if (year == 1) {
+            return majorSubjectRepository.findByMajorAndSemesterIn(major, Arrays.asList(1, 2));
+        } else if (year == 2) {
+            return majorSubjectRepository.findByMajorAndSemesterIn(major, Arrays.asList(3, 4));
+        } else if (year == 3) {
+            return majorSubjectRepository.findByMajorAndSemesterIn(major, Arrays.asList(5, 6));
+        } else {
+            return majorSubjectRepository.findByMajorAndSemesterIn(major, Arrays.asList(7, 8));
         }
     }
 }

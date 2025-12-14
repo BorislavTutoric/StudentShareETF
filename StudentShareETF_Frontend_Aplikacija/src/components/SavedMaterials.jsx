@@ -1,85 +1,60 @@
 import React, { useState, useEffect } from 'react';
-import { getSubjects } from "../services/materialsService";
-import { getSavedMaterials } from "../services/savedMaterialsService";
+import { getFilteredSubjectsWithSavedMaterials, getSavedMaterials, getSubjectsWithSavedMaterials } from "../services/savedMaterialsService";
 import { Filter, Search, Bookmark, Loader } from 'lucide-react';
 import SearchInput from './SearchInput';
 import FilterComponent from './FilterComponent';
 import Toast from './Toast';
 
-function SavedMaterials({ onOpenMaterials }) {
+function SavedMaterials({ onOpenMaterials, startYear = 1, subjects = "all" }) {
   const [courses, setCourses] = useState([]);
-  const [savedMaterials, setSavedMaterials] = useState([]);
   const [selectedYear, setSelectedYear] = useState(1);
   const [hoverId, setHoverId] = useState(null);
   const [filterHover, setFilterHover] = useState(false);
   const [searchHover, setSearchHover] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [isFilterOpen, setFilterOpen] = useState(false);
-  const [subjects, setSubjects] = useState("all");
   const [isSearchButtonClicked, setIsClicked] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [toast, setToast] = useState(null);
+  const [subjectsView, setSubjectsView] = useState("all");
 
   const showToast = (message, type = 'success', duration = 3000) => {
     setToast({ message, type });
     setTimeout(() => setToast(null), duration);
   };
 
-  const filterMySubjects = () => setSubjects("my");
-  const setAllSubjects = () => setSubjects("all");
+  const filterMySubjects = () => setSubjectsView("my");
+  const setAllSubjects = () => setSubjectsView("all");
 
   const handleFilterClick = () => setFilterOpen(true);
   const handleFilterClose = () => setFilterOpen(false);
 
-  const fetchSavedMaterials = async () => {
-    try {
-      setIsLoading(true);
-      const data = await getSavedMaterials();
-      setSavedMaterials(data);
-    } catch (error) {
-      console.error('Greška pri učitavanju sačuvanih materijala:', error);
-      showToast('Greška pri učitavanju sačuvanih materijala', 'error');
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   const fetchSubjects = async (year) => {
     try {
-      const data = await getSubjects(year);
-      setCourses(data);
+      if(subjectsView === "all")
+      {
+        const data = await getSubjectsWithSavedMaterials(year);
+        setCourses(data);
+      }else{
+        const data = await getFilteredSubjectsWithSavedMaterials(year);
+        setCourses(data);
+      }
     } catch (error) {
       console.error('Greška pri učitavanju predmeta:', error);
-      showToast('Greška pri učitavanju predmeta', 'error');
     }
   };
 
-  const handleOpenSubjectMaterials = (subjectName) => {
-    const materialsForSubject = savedMaterials.filter(
-      mat => mat.subjectName === subjectName
-    );
-    
-    if (materialsForSubject.length > 0) {
-      onOpenMaterials(
-        subjectName, 
-        materialsForSubject, 
-        selectedYear, 
-        subjects, 
-        true,
-        fetchSavedMaterials 
-      );
-    } else {
-      showToast(`Nemate sačuvanih materijala za predmet: ${subjectName}`, 'info');
+  const handleOpenSubjectMaterials = async (subjectName) => {
+    try{
+      const response = await getSavedMaterials(subjectName);
+      onOpenMaterials(subjectName, response, selectedYear, subjectsView);
+    }catch(err){
+      console.error(err);
     }
-  };
-
-  const hasSubjectSavedMaterials = (subjectName) => {
-    if (!savedMaterials || savedMaterials.length === 0) return false;
-    return savedMaterials.some(mat => mat.subjectName === subjectName);
   };
 
   const filterSubjectsFirstSemester = (course) => {
-    if(course.semester === 1 && hasSubjectSavedMaterials(course.name)) {
+    if(course.semester === 1) {
       if(isSearchButtonClicked) {
         return course.name.toLowerCase().includes(searchTerm.toLowerCase());
       }
@@ -89,7 +64,7 @@ function SavedMaterials({ onOpenMaterials }) {
   }
 
   const filterSubjectsSecondSemester = (course) => {
-    if(course.semester === 2 && hasSubjectSavedMaterials(course.name)) {
+    if(course.semester === 2) {
       if(isSearchButtonClicked) {
         return course.name.toLowerCase().includes(searchTerm.toLowerCase());
       }
@@ -113,9 +88,14 @@ function SavedMaterials({ onOpenMaterials }) {
   }
 
   useEffect(() => {
-    fetchSavedMaterials();
-    fetchSubjects(1);
+    setSelectedYear(startYear)
+    fetchSubjects(startYear);
+    setSubjectsView(subjects);
   }, []);
+
+  useEffect(() => {
+    fetchSubjects(selectedYear);
+  }, [subjectsView, selectedYear]);
 
   useEffect(() => {
     if (searchTerm.trim() === "") {
@@ -125,16 +105,12 @@ function SavedMaterials({ onOpenMaterials }) {
     }
   }, [searchTerm]);
 
-  useEffect(() => {
-    fetchSubjects(selectedYear);
-  }, [subjects, selectedYear]);
 
   const firstSemester = courses.filter(filterSubjectsFirstSemester);
   const secondSemester = courses.filter(filterSubjectsSecondSemester);
 
   return (
     <div style={styles.container}>
-      {/* ✅ Toast notifikacije */}
       {toast && <Toast message={toast.message} type={toast.type} />}
 
       <FilterComponent 
@@ -142,16 +118,12 @@ function SavedMaterials({ onOpenMaterials }) {
         onClose={handleFilterClose}
         setMySubjects={filterMySubjects}
         setAllSubjects={setAllSubjects}
-        subjectsView={subjects}
+        subjectsView={subjectsView}
       />
 
       <div style={styles.filterSearchContainer}>
         <div style={styles.filterSearchContent}>
           <div style={styles.inlineWrapper}>
-            <div style={styles.titleSection}>
-              <Bookmark size={32} color="#60e016" style={{ marginRight: '12px' }} />
-              <h2 style={styles.pageTitle}>SAČUVANI MATERIJALI</h2>
-            </div>
             
             <div style={styles.searchGroup}>
               <label style={styles.labelUnos}>Unesite naziv predmeta:</label>
@@ -208,27 +180,11 @@ function SavedMaterials({ onOpenMaterials }) {
           <div style={styles.semesterHeader}>I SEMESTAR</div>
           <div style={styles.semesterHeader}>II SEMESTAR</div>
         </div>
-
-        {/* ✅ Loading state */}
-        {isLoading ? (
-          <div style={styles.loadingContainer}>
-            <Loader size={48} color="#60e016" style={styles.spinner} />
-            <p style={styles.loadingText}>Učitavanje sačuvanih materijala...</p>
-          </div>
-        ) : savedMaterials.length === 0 ? (
-          <div style={styles.noMaterialsContainer}>
-            <Bookmark size={64} color="rgba(255, 255, 255, 0.3)" />
-            <h3 style={styles.noMaterialsTitle}>Nemate sačuvanih materijala</h3>
-            <p style={styles.noMaterialsText}>
-              Idite na "Početna" i sačuvajte materijale klikom na 📑 ikonicu
-            </p>
-          </div>
-        ) : (
           <div style={styles.courseListsContainer}>
             <div style={styles.semesterColumn}>
               {firstSemester.length === 0 ? (
                 <div style={styles.emptyMessage}>
-                  Nemate sačuvanih materijala u I semestru
+                  Nemate sačuvanih materijala iz predmeta I semestra
                 </div>
               ) : (
                 firstSemester.map((course, index) => (
@@ -252,7 +208,7 @@ function SavedMaterials({ onOpenMaterials }) {
             <div style={styles.semesterColumn}>
               {secondSemester.length === 0 ? (
                 <div style={styles.emptyMessage}>
-                  Nemate sačuvanih materijala u II semestru
+                  Nemate sačuvanih materijala iz predmeta II semestra
                 </div>
               ) : (
                 secondSemester.map((course, index) => (
@@ -273,7 +229,6 @@ function SavedMaterials({ onOpenMaterials }) {
               )}
             </div>
           </div>
-        )}
       </div>
     </div>
   );

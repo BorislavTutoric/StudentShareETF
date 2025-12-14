@@ -3,9 +3,10 @@ import StudentMenuBar from "../components/StudentMenuBar";
 import WelcomeHeader from "../components/WelcomeHeader";
 import ProfileDisplay from "../components/ProfileDisplay";
 import StudentHome from "../components/StudentHome";
-import SavedMaterials from "../components/SavedMaterials.jsx"; 
 import MaterialsStudentDisplay from "../components/MaterialsStudentDisplay";
 import EventsDisplayAuth from "../components/EventsDisplayAuth";
+import SavedMaterials from "../components/SavedMaterials";
+import SavedMaterialsDisplay from "../components/SavedMaterialsDisplay";
 
 function StudentPage() {
   const [activeSection, setActiveSection] = useState("Početna");
@@ -14,24 +15,31 @@ function StudentPage() {
   const [materials, setMaterials] = useState([]);
   const [year, setYear] = useState();
   const [subjects, setSubjects] = useState("all");
-  const [isSavedMode, setIsSavedMode] = useState(false); 
-  const [refreshCallback, setRefreshCallback] = useState(null);
+  const [savedMaterials, setSavedMaterials] = useState([]);
+  const [selectedSubjectSM, setSelectedSubjectSM] = useState("");
+  const [activeComponentSavedMaterials, setActiveComponentSavedMaterials] = useState("subjects");
+  const [yearSM, setYearSM] = useState();
+  const [subjectsSM, setSubjectsSM] = useState("all");
 
   const handleSubjectsClick = () => { 
     setActiveComponent("subjects");
-    setIsSavedMode(false);  
-    //setYear(null);
   }
 
-  const handleOpenMaterials = (subjectName, materialsData, selectedYear, subs, savedMode = false, refreshCallback = null) => {
+  const handleOpenMaterials = (subjectName, materialsData, selectedYear, subs) => {
     setSelectedSubject(subjectName);
     setMaterials(materialsData);
     setYear(selectedYear);
     setActiveComponent("materials");
     setSubjects(subs);
-    setIsSavedMode(savedMode);
-    setRefreshCallback(() => refreshCallback);
   };
+
+  const handleOpenSavedMaterials = (subjectName, savedMaterialsData, selectedYear, subs) => {
+    setSelectedSubjectSM(subjectName);
+    setSavedMaterials(savedMaterialsData);
+    setActiveComponentSavedMaterials("materials");
+    setYearSM(selectedYear);
+    setSubjectsSM(subs);
+  }
 
 
   const handleLogoutClick = () => {
@@ -40,6 +48,8 @@ function StudentPage() {
   };
 
   const handleCloseMaterials = () => {setActiveComponent("subjects")}
+
+  const handleCloseSavedMaterials = () => {setActiveComponentSavedMaterials("subjects")}
 
   const renderContent = () => {
     switch (activeSection) {
@@ -59,36 +69,33 @@ function StudentPage() {
                 isOpen={true}
                 onClose={handleCloseMaterials}
                 subjectName={selectedSubject}
-                isSavedMode={isSavedMode} 
-                onMaterialRemoved={refreshCallback} 
               />
             )}
           </>
         );
 
       case "Obavještenja":
-        return <h2>Obavještenja</h2>;
+        return <h2>Obavjestenja</h2>;
 
-      case "Sačuvano": 
+      case "Sačuvano":
         return (
           <>
-            {activeComponent === "subjects" && (
-              <SavedMaterials onOpenMaterials={handleOpenMaterials} />
+            {activeComponentSavedMaterials === "subjects" && (
+              <SavedMaterials onOpenMaterials={handleOpenSavedMaterials} startYear={yearSM} subjectsView={subjectsSM}/>
             )}
 
-            {activeComponent === "materials" && (
-              <MaterialsStudentDisplay
-                materials={materials}
+            {activeComponentSavedMaterials === "materials" && (
+              <SavedMaterialsDisplay
+                materials={savedMaterials}
+                setMaterials={setSavedMaterials}
                 isOpen={true}
-                onClose={handleCloseMaterials}
-                subjectName={selectedSubject}
-                isSavedMode={true}
-                onMaterialRemoved={refreshCallback} 
+                onClose={handleCloseSavedMaterials}
+                subjectName={selectedSubjectSM}
               />
             )}
           </>
         );
-        
+
       case "Akademski kalendar":
         return <h2>Akademski kalendar</h2>;
 

@@ -38,16 +38,6 @@ public class SavedMaterialService {
         }
     }
 
-    public List<Material> getSavedMaterials(String username) throws UserNotFoundException {
-        User user = userService.getUserByUsername(username);
-        Student student = studentService.getStudentByUser(user);
-
-        return savedMaterialRepository.findByStudentWithMaterialAndSubject(student.getUserId())
-                .stream()
-                .map(SavedMaterial::getMaterial)
-                .toList();
-    }
-
     @Transactional
     public void removeSavedMaterial(String username, Integer materialId) throws UserNotFoundException {
         User user = userService.getUserByUsername(username);

@@ -33,23 +33,4 @@ public class MaterialController {
         return url.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-
-    @GetMapping("/materials/{id}")
-    public ResponseEntity<MaterialResponse> getMaterialById(@PathVariable Integer id) throws EntityNotFoundException {
-        Material material = materialService.getMaterialById(id);
-        MaterialResponse response = new MaterialResponse(material.getMaterialId(), material.getName(), material.getCategory(), material.getSubject().getName());
-        return ResponseEntity.ok(response);
-    }
-
-    @PostMapping("/materials/upload")
-    public ResponseEntity<String> uploadMaterial(
-            @RequestParam String subjectName,
-            @RequestParam String username,
-            @RequestParam("file") MultipartFile file,
-            @RequestParam(required = false) String description,
-            @RequestParam String category
-    ) throws IOException, EntityNotFoundException, UserNotFoundException {
-        materialService.uploadMaterial(subjectName, username, file, description, category);
-        return ResponseEntity.ok("Materijal uspješno dodat i čeka odobrenje moderatora.");
-    }
 }

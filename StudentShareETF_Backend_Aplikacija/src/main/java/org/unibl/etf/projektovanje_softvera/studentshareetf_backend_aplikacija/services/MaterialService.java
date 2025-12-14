@@ -79,4 +79,15 @@ public class MaterialService {
 
         materialRepository.save(material);
     }
+
+    public List<MaterialResponse> getSavedMaterialsForStudentFromSubject(String username, String subjectName) throws EntityNotFoundException, UserNotFoundException {
+        User user = userService.getUserByUsername(username);
+        Student student = studentService.getStudentByUser(user);
+        Subject subject = subjectService.getSubjectByName(subjectName);
+
+        return materialRepository.findSavedMaterialsByStudentAndSubject(student, subject)
+                .stream()
+                .map(material -> new MaterialResponse(material.getMaterialId(), material.getName(), material.getCategory(), subjectName))
+                .toList();
+    }
 }

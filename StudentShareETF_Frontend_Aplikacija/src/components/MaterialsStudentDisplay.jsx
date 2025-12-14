@@ -1,12 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { getMaterial } from '../services/materialsService';
-import { saveMaterial, removeSavedMaterial, getSavedMaterials } from '../services/savedMaterialsService';
 import DocumentUploadForm from './DocumentUploadForm';
 import CommentsSection from './CommentsSection';
 import Toast from './Toast';
-import { useCallback } from 'react';
 
-function MaterialsStudentDisplay({ materials, isOpen, onClose, subjectName, isSavedMode = false }) {
+function MaterialsStudentDisplay({ materials, isOpen, onClose, subjectName }) {
   const [expandedSections, setExpandedSections] = useState({
     predavanja: true,
     vjezbe: true,
@@ -18,8 +16,6 @@ function MaterialsStudentDisplay({ materials, isOpen, onClose, subjectName, isSa
   const [currentMaterial, setCurrentMaterial] = useState("");
   const [toast, setToast] = useState(null);
   const [currentMaterialId, setCurrentMaterialId] = useState(null);
-  const [savedMaterialIds, setSavedMaterialIds] = useState([]);
-  const [localMaterials, setLocalMaterials] = useState(materials);
 
   const showToast = (message, type = 'success', duration = 10000) => {
     setToast({ message, type });
@@ -35,23 +31,6 @@ function MaterialsStudentDisplay({ materials, isOpen, onClose, subjectName, isSa
     setIsCommentSectionOpen(true);
   }
   const handleCloseCommentSection = () => setIsCommentSectionOpen(false);
-
-  useEffect(() => {
-    const fetchSavedMaterials = async () => {
-      try {
-        const saved = await getSavedMaterials();
-        const ids = saved.map(m => m.materialId);
-        setSavedMaterialIds(ids);
-      } catch (error) {
-        console.error('Greška pri učitavanju sačuvanih materijala:', error);
-      }
-    };
-    fetchSavedMaterials();
-  }, []);
-
-  useEffect(() => {
-    setLocalMaterials(materials);
-  }, [materials]);
 
   if (!isOpen) return null;
 
@@ -69,139 +48,102 @@ function MaterialsStudentDisplay({ materials, isOpen, onClose, subjectName, isSa
     }
   };
 
- const handleSaveToggle = async (materialId, materialName) => {
-    const matId = Number(materialId);
-    const isSaved = savedMaterialIds.includes(matId);
-
-    try {
-      if (isSaved) {
-        await removeSavedMaterial(matId);
-
-        setSavedMaterialIds(prev => prev.filter(id => id !== matId));
-
-        if (isSavedMode) {
-          setLocalMaterials(prev =>
-            prev.filter(m => Number(m.materialId) !== matId)
-          );
-        }
-
-        showToast(`Uspješno ste uklonili materijal: ${materialName}`, 'info');
-      } else {
-        await saveMaterial(matId);
-
-        setSavedMaterialIds(prev => [...prev, matId]);
-
-        showToast(`Uspješno ste sačuvali materijal: ${materialName}`, 'success');
-      }
-    } catch (error) {
-      console.error('Greška pri čuvanju materijala:', error);
-      showToast('Greška pri čuvanju materijala', 'error');
-    }
-  };
-
-
-
   const renderMaterialsList = (arr) => {
     if (!arr.length) return <p style={styles.emptyMessage}>Nema dostupnih materijala</p>;
     return (
       <ul style={styles.materialsList}>
-        {arr.map(mat => {
-          const isSaved = savedMaterialIds.includes(mat.materialId);
-          
-          return (
-            <li key={mat.materialId} style={styles.materialItem}>
-              <div style={styles.materialRow}>
-                <span
-                  style={styles.materialText}
-                  onClick={() => handleMaterialClick(mat.materialId)}
+        {arr.map(mat => (
+          <li key={mat.materialId} style={styles.materialItem}>
+            <div style={styles.materialRow}>
+              <span
+                style={styles.materialText}
+                onClick={() => handleMaterialClick(mat.materialId)}
+                onMouseEnter={(e) => {
+                  e.target.style.color = '#60e016';
+                  e.target.style.transform = 'translateX(5px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.color = '#ffffff';
+                  e.target.style.transform = 'translateX(0)';
+                }}
+              >
+                📄 {mat.name}
+              </span>
+              
+              <div style={styles.actionsContainer}>
+                <button
+                  style={styles.actionButton}
+                  title="Komentari"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleOpenCommentSection(mat.name, mat.materialId);
+                  }}
+                  onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(96, 224, 22, 0.15)'}
+                  onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                >
+                  💬
+                </button>
+
+                <button
+                  style={styles.actionButton}
+                  title="Preuzmi"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleMaterialClick(mat.materialId);
+                  }}
+                  onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(96, 224, 22, 0.15)'}
+                  onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                >
+                  ⬇️
+                </button>
+
+                <button
+                  style={styles.saveButton}
+                  title="Sačuvaj"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    showToast(`Uspješno ste sačuvali materijal: ${mat.name}`, 'success');
+                  }}
                   onMouseEnter={(e) => {
-                    e.target.style.color = '#60e016';
-                    e.target.style.transform = 'translateX(5px)';
+                    e.target.style.backgroundColor = 'rgba(96, 224, 22, 0.15)';
+                    e.target.textContent = '🔖';
                   }}
                   onMouseLeave={(e) => {
-                    e.target.style.color = '#ffffff';
-                    e.target.style.transform = 'translateX(0)';
+                    e.target.style.backgroundColor = 'transparent';
+                    e.target.textContent = '📑';
                   }}
                 >
-                  📄 {mat.name}
-                </span>
-                
-                <div style={styles.actionsContainer}>
-                  <button
-                    style={styles.actionButton}
-                    title="Komentari"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleOpenCommentSection(mat.name, mat.materialId);
-                    }}
-                    onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(96, 224, 22, 0.15)'}
-                    onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
-                  >
-                    💬
-                  </button>
+                  📑
+                </button>
 
-                  <button
-                    style={styles.actionButton}
-                    title="Preuzmi"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleMaterialClick(mat.materialId);
-                    }}
-                    onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(96, 224, 22, 0.15)'}
-                    onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
-                  >
-                    ⬇️
-                  </button>
-
-                  <button
-                    style={{
-                      ...styles.saveButton,
-                      ...(isSaved ? styles.savedButtonActive : {})
-                    }}
-                    title={isSaved ? "Ukloni iz sačuvanih" : "Sačuvaj"}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleSaveToggle(mat.materialId, mat.name);
-                    }}
-                    onMouseEnter={(e) => {
-                      e.target.style.backgroundColor = isSaved ? 'rgba(239, 68, 68, 0.2)' : 'rgba(96, 224, 22, 0.15)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.backgroundColor = 'transparent';
-                    }}
-                  >
-                    {isSaved ? '❌' : '📑'}
-                  </button>
-
-                  <div style={styles.ratingContainer}>
-                    {[1, 2, 3, 4, 5].map(star => (
-                      <button
-                        key={star}
-                        style={styles.starButton}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                        }}
-                        onMouseEnter={(e) => e.target.style.transform = 'scale(1.2)'}
-                        onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
-                      >
-                        ⭐
-                      </button>
-                    ))}
-                  </div>
+                <div style={styles.ratingContainer}>
+                  {[1, 2, 3, 4, 5].map(star => (
+                    <button
+                      key={star}
+                      style={styles.starButton}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                      }}
+                      onMouseEnter={(e) => e.target.style.transform = 'scale(1.2)'}
+                      onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+                    >
+                      ⭐
+                    </button>
+                  ))}
                 </div>
               </div>
-            </li>
-          );
-        })}
+            </div>
+          </li>
+        ))}
       </ul>
     );
   };
 
   const categories = {
-    predavanja: localMaterials.filter(m => m.category === 'predavanja'),
-    vjezbe: localMaterials.filter(m => m.category === 'vjezbe'),
-    rokovi: localMaterials.filter(m => m.category === 'rokovi'),
-    ostalo: localMaterials.filter(m => m.category === 'ostalo')
+    predavanja: materials.filter(m => m.category === 'predavanja'),
+    vjezbe: materials.filter(m => m.category === 'vjezbe'),
+    rokovi: materials.filter(m => m.category === 'rokovi'),
+    ostalo: materials.filter(m => m.category === 'ostalo')
   };
 
   return (
@@ -242,30 +184,28 @@ function MaterialsStudentDisplay({ materials, isOpen, onClose, subjectName, isSa
         </button>
 
         <div style={styles.titleContainer}>
-          <div style={styles.titleIcon}>{isSavedMode ? '🔖' : '📚'}</div>
+          <div style={styles.titleIcon}>📚</div>
           <div style={styles.titleWrapper}>
-            <span style={styles.titleLabel}>{isSavedMode ? 'Sačuvani materijali' : 'Predmet'}</span>
+            <span style={styles.titleLabel}>Predmet</span>
             <h2 style={styles.title}>{subjectName || 'Odaberi predmet'}</h2>
           </div>
         </div>
-        {!isSavedMode && (
-          <button 
-            style={styles.addButton}
-            onClick={handleOpenForm}
-            onMouseEnter={(e) => {
-              e.target.style.backgroundColor = '#50c012';
-              e.target.style.transform = 'translateY(-2px)';
-              e.target.style.boxShadow = '0 6px 12px rgba(96, 224, 22, 0.4)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.backgroundColor = '#60e016';
-              e.target.style.transform = 'translateY(0)';
-              e.target.style.boxShadow = '0 4px 8px rgba(96, 224, 22, 0.3)';
-            }}
-          >
-            + Dodaj materijal
-          </button>
-        )}
+        <button 
+          style={styles.addButton}
+          onClick={handleOpenForm}
+          onMouseEnter={(e) => {
+            e.target.style.backgroundColor = '#50c012';
+            e.target.style.transform = 'translateY(-2px)';
+            e.target.style.boxShadow = '0 6px 12px rgba(96, 224, 22, 0.4)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.backgroundColor = '#60e016';
+            e.target.style.transform = 'translateY(0)';
+            e.target.style.boxShadow = '0 4px 8px rgba(96, 224, 22, 0.3)';
+          }}
+        >
+          + Dodaj materijal
+        </button>
       </div>
 
       {Object.keys(categories).map(cat => (
@@ -497,9 +437,6 @@ const styles = {
     justifyContent: 'center',
     marginRight: '4px',
   },
-  savedButtonActive: {
-    color: '#ef4444',
-  },
   ratingContainer: {
     display: 'flex',
     gap: '2px',
@@ -524,4 +461,4 @@ const styles = {
   }
 };
 
-export default MaterialsStudentDisplay; 
+export default MaterialsStudentDisplay;

@@ -13,8 +13,4 @@ public class MaterialResponse {
     private String name;
     private String category;
     private String subjectName;
-
-    public static MaterialResponse fromMaterial(Material material) {
-        return new MaterialResponse(material.getMaterialId(), material.getName(), material.getCategory(), material.getSubject().getName());
-    }
 }

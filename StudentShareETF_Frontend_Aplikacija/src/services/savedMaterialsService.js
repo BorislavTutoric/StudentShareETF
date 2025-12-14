@@ -1,33 +1,40 @@
 import axios from 'axios';
+import api from './api';
 
 const API_BASE_URL = 'http://localhost:8080/api';
 
-export const getSavedMaterials = async () => {
+export const getSubjectsWithSavedMaterials = async (year) => {
   try {
-    const token = localStorage.getItem('jwtToken');
-    const response = await axios.get(`${API_BASE_URL}/saved-materials`, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
+    const res = await api.get("api/saved-materials/subjects", { params: { year } }); 
+    return res.data; 
+  } catch (err) {
+    throw err;
+  }
+};
+
+export const getFilteredSubjectsWithSavedMaterials = async (year) => {
+  try {
+    const res = await api.get("api/saved-materials/filtered-subjects", { params: { year } }); 
+    return res.data; 
+  } catch (err) {
+    throw err;
+  }
+};
+
+export const getSavedMaterials = async (name) => {
+  try {
+    const response = await api.get("api/saved-materials", { params: { subjectName: name} });
     return response.data;
-  } catch (error) {
-    console.error('Greška pri učitavanju sačuvanih materijala:', error);
-    throw error;
+  } catch (err) {
+    throw err;
   }
 };
 
 export const removeSavedMaterial = async (materialId) => {
   try {
-    const token = localStorage.getItem('jwtToken');
-    await axios.delete(`${API_BASE_URL}/saved-materials/${materialId}`, {
-      headers: {
-        'Authorization': `Bearer ${token}`
-      }
-    });
-    return true;
+    const response = await api.delete(`api/saved-materials/${materialId}/remove`)
+    return response.data;
   } catch (error) {
-    console.error('Greška pri uklanjanju materijala:', error);
     throw error;
   }
 };
@@ -60,3 +67,4 @@ export const saveMaterial = async (materialId) => {
     throw error;
   }
 };
+
