@@ -1,18 +1,14 @@
 package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class NotificationsResponse {
-    private Integer notificationId;
+public class AcademicCalendarResponse {
     private String title;
-    private String message;
-    private boolean read;
-    private LocalDateTime dateTime;
+    private Integer id;
 }

@@ -9,9 +9,13 @@ import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.m
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.MajorSubject;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.User;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories.MajorSubjectRepository;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Subject;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -51,5 +55,10 @@ public class MajorSubjectService {
                     .map(s -> new SubjectSimple(s.getName(), subjectService.calculateSemester(s.getSemester())))
                     .toList();
         }
+    }
+
+
+    public List<MajorSubject> getMajorSubjectList() {
+        return majorSubjectRepository.findAllWithSubjectAndMajor();
     }
 }
