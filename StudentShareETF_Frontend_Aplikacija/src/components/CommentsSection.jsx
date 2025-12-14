@@ -1,18 +1,9 @@
-import React, { useState } from 'react';
-import { Star, X, Trash2 } from 'lucide-react';
-import { addReview, deleteReview, getReviews } from '../services/materialsService';
+import React, { useState, useEffect } from 'react';
+import { Star, X, Trash2,  Flag } from 'lucide-react';
+import { addCommentApi, addReview, deleteCommentApi, deleteReview, getReviews, reportCommentApi } from '../services/materialsService';
 
-function CommentsSection({ isOpen, onClose, documentName, showToast, materialId }) {
-  const [comments, setComments] = useState([
-    {
-      id: 1,
-      name: "Milan",
-      surname: "Milanović",
-      text: "Jako korisni materijali, sve lepo objašnjeno!",
-      dateTime: new Date(),
-      isMyComment: false,
-    },
-  ]);
+function CommentsSection({ isOpen, onClose, documentName, materialId, showToast, 
+  allReviews, setAllReviews, setNewRating, allMaterialComments, setAllMaterialComments }) {
 
   const [otherReviews, setOtherReviews] = useState([]);
   const [myReview, setMyReview] = useState(null);
@@ -22,29 +13,72 @@ function CommentsSection({ isOpen, onClose, documentName, showToast, materialId 
   const [activeTab, setActiveTab] = useState('comments');
   const [submittingComment, setSubmittingComment] = useState(false);
   const [submittingReview, setSubmittingReview] = useState(false);
+  const [averageRating, setAverageRating] = useState(0);
+  const [materialComments, setMaterialComments] = useState(allMaterialComments);
+
+
+  useEffect(() => {
+    const newAverageRating = otherReviews.length > 0 || myReview
+      ? ((otherReviews.reduce((sum, review) => sum + review.ocjena, 0) + (myReview ? myReview.ocjena : 0)) / (otherReviews.length + (myReview ? 1 : 0))).toFixed(1)
+      : 0;
+    setNewRating(materialId, newAverageRating);
+    setAverageRating(newAverageRating);
+  }, [otherReviews, myReview]);
+
+  useEffect(() => {
+    const sortedComments = allMaterialComments.sort((a, b) => {
+      if (a.myComment && !b.myComment) return -1;
+      if (!a.myComment && b.myComment) return 1;
+
+      return new Date(b.datum) - new Date(a.datum);
+    });
+    setMaterialComments(sortedComments);
+  }, [allMaterialComments]);
 
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
     try {
       setSubmittingComment(true);
-      // TODO: Dodaj API call - await addMaterialComment(documentName, newComment);
+      const response = await addCommentApi(materialId, newComment);
       const newCommentObj = {
-        id: Date.now(),
-        name: "Vi",
-        surname: "(Trenutni korisnik)",
-        text: newComment,
-        dateTime: new Date(),
-        isMyComment: true,
+        commentId: response.commentId,
+        sadrzaj: newComment,
+        datum: response.datum,
+        name: response.name,
+        surname: response.surname,
+        myComment: true,
       };
-      setComments([newCommentObj, ...comments]);
+      setAllMaterialComments(prevComments => [...prevComments, newCommentObj]);
       setNewComment('');
+      showToast(`Dodali ste komentar za materijal: ${documentName}`, 'success')
     } catch (err) {
       console.error(err);
-      alert('Greška pri dodavanju komentara');
+      showToast('Greška pri dodavanju komentara', 'error');
     } finally {
       setSubmittingComment(false);
     }
   };
+
+  const handleDeleteComment = async (commentId) => {
+    try{
+      const response = await deleteCommentApi(commentId);
+      setAllMaterialComments(allMaterialComments.filter(comment => comment.commentId !== commentId));
+      showToast('Uspješno ste obrisali komentar!', 'success');
+    }catch(err){
+      console.error(err);
+      showToast('Greška pri brisanju komentara', 'error');
+    }
+  };
+
+  const handleCommentReport = async (commentId) => {
+    try{
+      const response = await reportCommentApi(commentId);
+      showToast('Prijavili ste komentar!', 'success');
+    }catch(err){
+      console.error(err);
+      showToast('Greška pri brisanju komentara', 'error');
+    }
+  }
 
   const handleAddReview = async (rating) => {
     try {
@@ -55,6 +89,7 @@ function CommentsSection({ isOpen, onClose, documentName, showToast, materialId 
         ...response,
         isMyReview: response.myReview,
       };
+      setAllReviews(prev => [...prev, newReview]);
       setMyReview(newReview);
       showToast(`Ocjenili ste materijal: ${documentName}`, 'success')
     } catch (err) {
@@ -66,40 +101,28 @@ function CommentsSection({ isOpen, onClose, documentName, showToast, materialId 
   };
 
   const handleReviewTab = async () => {
-    try {
-      const res = await getReviews(materialId);
-
-      if (!Array.isArray(res)) {
-        console.error("Odgovor nije niz:", res);
-        return;
-      }
-
-      const mappedReviews = res.map(r => ({
-        ...r,
-        isMyReview: r.myReview, 
-      }));
-
-      const myReviewFound = mappedReviews.find(r => r.myReview) || null;
-      const otherReviews = mappedReviews.filter(r => !r.myReview);
-
-      setMyReview(myReviewFound);
-      setOtherReviews(otherReviews);
-
-    } catch (err) {
-      console.error(err);
-      showToast(`Greška: ${err}`, "error");
+    if (!Array.isArray(allReviews)) {
+      console.error("Odgovor nije niz:", res);
+      return;
     }
-  };
 
-  const handleDeleteComment = (id) => {
-    setComments(comments.filter(c => c.id !== id));
-    alert('Komentar uspješno obrisan!');
+    const mappedReviews = allReviews.map(r => ({
+      ...r,
+      isMyReview: r.myReview, 
+    }));
+
+    const myReviewFound = mappedReviews.find(r => r.myReview) || null;
+    const otherReviews = mappedReviews.filter(r => !r.myReview);
+
+    setMyReview(myReviewFound);
+    setOtherReviews(otherReviews);
   };
 
   const handleDeleteReview = async (materialId) => {
     try{
       const res = await deleteReview(materialId);
       setMyReview(null);
+      setAllReviews(otherReviews);
       showToast(`Obrisali ste vašu recenziju za materijal: ${documentName}`, 'success')
     } catch (err) {
       console.error(err);
@@ -108,10 +131,6 @@ function CommentsSection({ isOpen, onClose, documentName, showToast, materialId 
   };
 
   if (!isOpen) return null;
-
-  const otherComments = comments.filter(c => !c.isMyComment);
-  const myComment = comments.find(c => c.isMyComment);
-
 
   return (
     <div style={styles.modalOverlay} onClick={onClose}>
@@ -144,7 +163,7 @@ function CommentsSection({ isOpen, onClose, documentName, showToast, materialId 
               ...(activeTab === 'comments' ? styles.activeTab : {})
             }}
           >
-            💬 Komentari ({comments.length})
+            💬 Komentari ({allMaterialComments.length})
           </button>
           <button
             onClick={() => {
@@ -157,116 +176,102 @@ function CommentsSection({ isOpen, onClose, documentName, showToast, materialId 
               ...(activeTab === 'reviews' ? styles.activeTab : {})
             }}
           >
-            ⭐ Recenzije ({otherReviews.length + (myReview ? 1 : 0)})
+            ⭐ Recenzije ({allReviews.length})
           </button>
         </div>
 
         {/* KOMENTARI TAB */}
         {activeTab === 'comments' && (
           <div style={styles.tabContent}>
-            {/* Forma za dodavanje komentara */}
-            {!myComment ? (
-              <div style={styles.addCommentSection}>
-                <h3 style={styles.sectionTitle}>✍️ Dodaj komentar</h3>
-                <textarea
-                  value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
-                  rows={4}
-                  style={styles.textarea}
-                  placeholder="Napišite vaš komentar..."
-                  disabled={submittingComment}
-                />
-                <button
-                  onClick={handleAddComment}
-                  disabled={submittingComment || !newComment.trim()}
-                  style={{
-                    ...styles.submitButton,
-                    ...(submittingComment || !newComment.trim() ? styles.disabledButton : {})
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!submittingComment && newComment.trim()) {
-                      e.currentTarget.style.backgroundColor = '#50c012';
-                      e.currentTarget.style.boxShadow = '0 6px 16px rgba(96, 224, 22, 0.4)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = '#60e016';
-                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(96, 224, 22, 0.3)';
-                  }}
-                >
-                  {submittingComment ? 'Dodavanje...' : 'Objavi komentar'}
-                </button>
-              </div>
-            ) : null}
+            {/* Forma za dodavanje komentara - UVIJEK VIDLJIVA */}
+            <div style={styles.addCommentSection}>
+              <h3 style={styles.sectionTitle}>✍️ Dodaj komentar</h3>
+              <textarea
+                value={newComment}
+                onChange={(e) => setNewComment(e.target.value)}
+                rows={4}
+                style={styles.textarea}
+                placeholder="Napišite vaš komentar..."
+                disabled={submittingComment}
+              />
+              <button
+                onClick={handleAddComment}
+                disabled={submittingComment || !newComment.trim()}
+                style={{
+                  ...styles.submitButton,
+                  ...(submittingComment || !newComment.trim() ? styles.disabledButton : {})
+                }}
+                onMouseEnter={(e) => {
+                  if (!submittingComment && newComment.trim()) {
+                    e.currentTarget.style.backgroundColor = '#50c012';
+                    e.currentTarget.style.boxShadow = '0 6px 16px rgba(96, 224, 22, 0.4)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#60e016';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(96, 224, 22, 0.3)';
+                }}
+              >
+                {submittingComment ? 'Dodavanje...' : 'Objavi komentar'}
+              </button>
+            </div>
 
-            {/* MOJI KOMENTARI */}
-            {myComment && (
-              <div style={styles.listSection}>
-                <h3 style={styles.sectionTitle}>Moj komentar</h3>
-                <div style={styles.commentsList}>
-                  <div 
-                    style={{
-                      ...styles.commentCard,
-                      ...styles.myCommentCard
-                    }}
-                  >
-                    <div style={styles.commentHeader}>
-                      <div style={{
-                        ...styles.avatarCircle,
-                        ...styles.myAvatar
-                      }}>
-                        {myComment.name.charAt(0)}{myComment.surname.charAt(0)}
-                      </div>
-                      <div style={styles.commentMeta}>
-                        <strong style={styles.commentAuthor}>
-                          {myComment.name} {myComment.surname}
-                          <span style={styles.myBadge}> (Vi)</span>
-                        </strong>
-                        <span style={styles.commentDate}>
-                          {new Date(myComment.dateTime).toLocaleString('sr-RS')}
-                        </span>
-                      </div>
-                      <button 
-                        style={styles.deleteButton}
-                        onClick={() => handleDeleteComment(myComment.id)}
-                        onMouseEnter={(e) => e.currentTarget.style.color = '#ef4444'}
-                        onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(239, 68, 68, 0.7)'}
-                      >
-                        <Trash2 size={20} />
-                      </button>
-                    </div>
-                    <p style={styles.commentText}>{myComment.text}</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* OSTALI KOMENTARI */}
+            {/* SVI KOMENTARI - uključujući i moje */}
             <div style={styles.listSection}>
               <h3 style={styles.sectionTitle}>💬 Svi komentari</h3>
-              {otherComments.length === 0 ? (
+              {materialComments.length === 0 ? (
                 <div style={styles.emptyState}>
-                  <p>Još uvijek nema komentara.</p>
+                  <p>Još uvijek nema komentara.{materialComments.length}</p>
                   <p style={styles.emptyStateSubtext}>Budite prvi koji će komentarisati!</p>
                 </div>
               ) : (
                 <div style={styles.commentsList}>
-                  {otherComments.map((comment) => (
-                    <div key={comment.id} style={styles.commentCard}>
+                  {materialComments.map((comment) => (
+                    <div 
+                      key={comment.commentId} 
+                      style={{
+                        ...styles.commentCard,
+                        ...(comment.myComment ? styles.myCommentCard : {})
+                      }}
+                    >
                       <div style={styles.commentHeader}>
-                        <div style={styles.avatarCircle}>
+                        <div style={{
+                          ...styles.avatarCircle,
+                          ...(comment.myComment ? styles.myAvatar : {})
+                        }}>
                           {comment.name.charAt(0)}{comment.surname.charAt(0)}
                         </div>
                         <div style={styles.commentMeta}>
                           <strong style={styles.commentAuthor}>
                             {comment.name} {comment.surname}
+                            {comment.myComment && <span style={styles.myBadge}> (Vi)</span>}
                           </strong>
                           <span style={styles.commentDate}>
-                            {new Date(comment.dateTime).toLocaleString('sr-RS')}
+                            {new Date(comment.datum).toLocaleString('sr-RS')}
                           </span>
                         </div>
+                        {comment.myComment ? (
+                          <button 
+                            style={styles.deleteButton}
+                            onClick={() => handleDeleteComment(comment.commentId)}
+                            onMouseEnter={(e) => e.currentTarget.style.color = '#ef4444'}
+                            onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(239, 68, 68, 0.7)'}
+                          >
+                            <Trash2 size={20} />
+                          </button>
+                        ) : (
+                          <button 
+                            style={styles.reportButton}
+                            onClick={() => handleCommentReport(comment.commentId)}
+                            onMouseEnter={(e) => e.currentTarget.style.color = '#f59e0b'}
+                            onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(245, 158, 11, 0.7)'}
+                            title="Prijavi komentar"
+                          >
+                            <Flag size={20} />
+                          </button>
+                        )}
                       </div>
-                      <p style={styles.commentText}>{comment.text}</p>
+                      <p style={styles.commentText}>{comment.sadrzaj}</p>
                     </div>
                   ))}
                 </div>
@@ -278,6 +283,22 @@ function CommentsSection({ isOpen, onClose, documentName, showToast, materialId 
         {/* RECENZIJE TAB */}
         {activeTab === 'reviews' && (
           <div style={styles.tabContent}>
+            
+            {/* PROSJEČNA RECENZIJA */}
+            {otherReviews.length > 0 && (
+              <div style={styles.averageRatingSection}>
+                <h3 style={styles.averageRatingTitle}>Prosječna ocjena</h3>
+                <div style={styles.averageRatingContent}>
+                  <div style={styles.averageRatingNumber}>{averageRating}</div>
+                  <div style={styles.averageRatingStars}>
+                    {'★'.repeat(Math.round(averageRating))}
+                    {'☆'.repeat(5 - Math.round(averageRating))}
+                  </div>
+                  <p style={styles.averageRatingText}>na osnovu {otherReviews.length + (myReview ? 1 : 0)} {otherReviews.length + (myReview ? 1 : 0) < 5 ? 'ocjene' : 'ocjena'}</p>
+                </div>
+              </div>
+            )}
+
             {/* Forma za dodavanje recenzije */}
             {!myReview ? (
               <div style={styles.addReviewSection}>
@@ -493,50 +514,124 @@ const styles = {
   },
 
   addCommentSection: {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    padding: '20px',
-    borderRadius: '8px',
+    background: 'linear-gradient(135deg, rgba(26, 42, 94, 0.95) 0%, rgba(10, 20, 87, 0.95) 100%)',
+    padding: '24px',
+    borderRadius: '12px',
     marginBottom: '20px',
-    border: '1px solid rgba(0, 0, 0, 0.1)',
+    border: '2px solid rgba(96, 224, 22, 0.3)',
+    boxShadow: '0 4px 12px rgba(96, 224, 22, 0.15)',
   },
 
   addReviewSection: {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    backgroundColor: '#ffffff',
     padding: '25px',
-    borderRadius: '8px',
+    borderRadius: '12px',
     marginBottom: '20px',
     textAlign: 'center',
-    border: '1px solid rgba(0, 0, 0, 0.1)',
+    border: '1px solid #e5e7eb',
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
   },
 
   listSection: {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    backgroundColor: '#ffffff',
     padding: '20px',
-    borderRadius: '8px',
-    border: '1px solid rgba(0, 0, 0, 0.1)',
+    borderRadius: '12px',
+    border: '1px solid #e5e7eb',
     marginBottom: '20px',
+    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08)',
+  },
+
+  averageRatingSection: {
+    background: 'linear-gradient(135deg, #f0fde8 0%, #e8fce0 100%)',
+    padding: '22px 26px',
+    borderRadius: '14px',
+    border: '2px solid #d4f77d',
+    marginBottom: '20px',
+    textAlign: 'center',
+    boxShadow: '0 6px 16px rgba(96, 224, 22, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
+    position: 'relative',
+    overflow: 'hidden',
+  },
+
+  averageRatingTitle: {
+    fontSize: '13px',
+    fontWeight: '950',
+    color: '#3ba519',
+    margin: '0 0 14px 0',
+    letterSpacing: '2px',
+    textTransform: 'uppercase',
+    opacity: 1,
+    fontFamily: '"Segoe UI", "Helvetica Neue", sans-serif',
+    textShadow: '0 2px 4px rgba(96, 224, 22, 0.1)',
+    transform: 'scale(1.02)',
+    fontStyle: 'italic',
+  },
+
+  averageRatingContent: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '22px',
+  },
+
+  averageRatingNumber: {
+    fontSize: '54px',
+    fontWeight: '950',
+    background: 'linear-gradient(135deg, #60e016 0%, #3ba519 100%)',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    lineHeight: 1,
+    fontFamily: '"Segoe UI", "Helvetica Neue", sans-serif',
+    letterSpacing: '-2px',
+    filter: 'drop-shadow(0 2px 6px rgba(96, 224, 22, 0.15))',
+  },
+
+  averageRatingStars: {
+    fontSize: '22px',
+    color: '#facc15',
+    letterSpacing: '4px',
+    textShadow: '0 3px 8px rgba(250, 204, 21, 0.25)',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '8px',
+    filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))',
+  },
+
+  averageRatingText: {
+    fontSize: '12px',
+    color: '#2d5016',
+    margin: 0,
+    fontWeight: '800',
+    fontFamily: '"Segoe UI", "Helvetica Neue", sans-serif',
+    letterSpacing: '0.8px',
+    opacity: 1,
+    textTransform: 'lowercase',
   },
 
   sectionTitle: {
-    fontSize: '18px',
+    fontSize: '16px',
     fontWeight: '800',
-    color: '#1f2937',
+    color: '#60e016',
     marginBottom: '15px',
     margin: 0,
+    letterSpacing: '0.3px',
+    textShadow: '0 2px 4px rgba(96, 224, 22, 0.3)',
   },
 
   textarea: {
     width: '100%',
     borderRadius: '8px',
     padding: '12px',
-    border: '2px solid #e5e7eb',
+    border: '2px solid rgba(96, 224, 22, 0.3)',
     fontSize: '15px',
     marginBottom: '12px',
     fontFamily: 'inherit',
     resize: 'vertical',
-    transition: 'border-color 0.2s ease',
+    transition: 'all 0.2s ease',
     boxSizing: 'border-box',
-    color: '#1f2937',
+    color: '#ffffff',
+    backgroundColor: 'rgba(10, 20, 87, 0.6)',
   },
 
   submitButton: {
@@ -563,7 +658,7 @@ const styles = {
   starsContainer: {
     display: 'flex',
     justifyContent: 'center',
-    gap: '5px',
+    gap: '8px',
     marginTop: '15px',
     marginBottom: '10px',
   },
@@ -581,49 +676,54 @@ const styles = {
     fontSize: '14px',
     color: '#6b7280',
     marginTop: '5px',
+    fontWeight: '500',
   },
 
   starLabel: {
     fontSize: '16px',
-    fontWeight: '600',
-    color: '#1f2937',
-    marginTop: '10px',
+    fontWeight: '700',
+    color: '#60e016',
+    marginTop: '12px',
   },
 
   commentsList: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '15px',
+    gap: '12px',
   },
 
   reviewsList: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '15px',
+    gap: '12px',
   },
 
   commentCard: {
-    padding: '15px',
+    padding: '14px',
     backgroundColor: '#f9fafb',
-    borderRadius: '8px',
-    border: '1px solid #e5e7eb',
+    borderRadius: '10px',
+    border: '1.5px solid #e5e7eb',
+    transition: 'all 0.2s ease',
   },
 
   myCommentCard: {
-    backgroundColor: '#e0f7e5',
+    backgroundColor: '#f0fde8',
     border: '2px solid #60e016',
+    boxShadow: '0 2px 8px rgba(96, 224, 22, 0.15)',
   },
 
   reviewCard: {
-    padding: '15px',
+    padding: '14px',
     backgroundColor: '#f9fafb',
-    borderRadius: '8px',
-    border: '1px solid #e5e7eb',
+    borderRadius: '10px',
+    border: '1.5px solid #e5e7eb',
+    transition: 'all 0.2s ease',
   },
 
   myReviewCard: {
-    backgroundColor: '#e0f7e5',
+    backgroundColor: '#f0fde8',
     border: '2px solid #60e016',
+    boxShadow: '0 2px 8px rgba(96, 224, 22, 0.15)',
   },
 
   commentHeader: {
@@ -728,14 +828,27 @@ const styles = {
 
   emptyState: {
     textAlign: 'center',
-    padding: '30px',
+    padding: '30px 20px',
     color: '#6b7280',
   },
 
   emptyStateSubtext: {
     fontSize: '14px',
-    marginTop: '5px',
+    marginTop: '8px',
     color: '#9ca3af',
+    fontWeight: '500',
+  },
+
+  reportButton: {
+    background: 'none',
+    border: 'none',
+    color: 'rgba(245, 158, 11, 0.7)',
+    cursor: 'pointer',
+    padding: '4px',
+    transition: 'color 0.2s ease',
+    display: 'flex',
+    alignItems: 'center',
+    flexShrink: 0,
   },
 };
 

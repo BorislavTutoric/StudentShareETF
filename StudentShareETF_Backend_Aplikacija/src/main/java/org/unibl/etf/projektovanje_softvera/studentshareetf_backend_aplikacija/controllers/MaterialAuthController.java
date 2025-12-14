@@ -6,10 +6,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.MaterialCommentRequest;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.MaterialCommentResponse;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.MaterialReviewRequest;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.MaterialReviewResponse;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.*;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.AlreadySavedException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.EntityNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.UserNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.generics.UserHolder;
@@ -48,9 +46,19 @@ public class MaterialAuthController {
     public ResponseEntity<?> addComment(@PathVariable Integer materialId, @RequestParam String content){
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         try {
-            materialCommentService.postComment(username, content, materialId);
-            return ResponseEntity.ok().build();
+            MaterialCommentResponse materialCommentResponse = materialCommentService.postComment(username, content, materialId);
+            return ResponseEntity.ok(materialCommentResponse);
         } catch (UserNotFoundException | EntityNotFoundException ex){
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{commentId}/delete-comment")
+    public ResponseEntity<?> deleteComment(@PathVariable Integer commentId){
+        try{
+            materialCommentService.commentDelete(commentId);
+            return ResponseEntity.ok().build();
+        } catch (EntityNotFoundException ex){
             return ResponseEntity.badRequest().body(ex.getMessage());
         }
     }
@@ -83,7 +91,7 @@ public class MaterialAuthController {
         try {
             savedMaterialService.materialSave(username, materialId);
             return ResponseEntity.ok().build();
-        } catch (UserNotFoundException | EntityNotFoundException ex){
+        } catch (UserNotFoundException | EntityNotFoundException | AlreadySavedException ex){
             return ResponseEntity.badRequest().body(ex.getMessage());
         }
     }
@@ -113,5 +121,10 @@ public class MaterialAuthController {
         } catch (IOException | EntityNotFoundException | UserNotFoundException ex) {
             return ResponseEntity.badRequest().body("Greška pri upload-u fajla!");
         }
+    }
+
+    @GetMapping("/reviews-average")
+    public List<AverageReview> getReviewsAverage(@RequestParam String subjectName){
+        return materialReviewService.getAverageRatings(subjectName);
     }
 }

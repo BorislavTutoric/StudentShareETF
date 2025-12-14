@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import StudentMenuBar from "../components/StudentMenuBar";
 import WelcomeHeader from "../components/WelcomeHeader";
 import ProfileDisplay from "../components/ProfileDisplay";
@@ -7,6 +7,12 @@ import MaterialsStudentDisplay from "../components/MaterialsStudentDisplay";
 import EventsDisplayAuth from "../components/EventsDisplayAuth";
 import SavedMaterials from "../components/SavedMaterials";
 import SavedMaterialsDisplay from "../components/SavedMaterialsDisplay";
+import Notifications from "../components/Notifications";
+import { getNotificationsApi } from "../services/notificationsService";
+import AcademicCalendar from "../components/AcademicCalendar";
+import { getAcademicCalendarApi } from "../services/calendarService,";
+import Toast from "../components/Toast";
+import { getFacultyMonthTasksApi, getMyMonthTasksApi } from "../services/taskService";
 
 function StudentPage() {
   const [activeSection, setActiveSection] = useState("Početna");
@@ -20,14 +26,26 @@ function StudentPage() {
   const [activeComponentSavedMaterials, setActiveComponentSavedMaterials] = useState("subjects");
   const [yearSM, setYearSM] = useState();
   const [subjectsSM, setSubjectsSM] = useState("all");
+  const [notifications, setNotifications] = useState(null);
+  const [calendarFile, setCalendarFile] = useState(null);
+  const [facultyMonthTasks, setFacultyMonthTasks] = useState(null);
+  const [myMonthTasks, setMyMonthTasks] = useState(null);
+  const [toast, setToast] = useState(null);
+  const [averageRatings, setAverageRatings] = useState([]);
 
   const handleSubjectsClick = () => { 
     setActiveComponent("subjects");
   }
 
-  const handleOpenMaterials = (subjectName, materialsData, selectedYear, subs) => {
+  const showToast = (message, type = 'success', duration = 5000) => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), duration);
+  };
+  
+  const handleOpenMaterials = (subjectName, materialsData, averages, selectedYear, subs) => {
     setSelectedSubject(subjectName);
     setMaterials(materialsData);
+    setAverageRatings(averages);
     setYear(selectedYear);
     setActiveComponent("materials");
     setSubjects(subs);
@@ -42,6 +60,15 @@ function StudentPage() {
   }
 
 
+  const handleNotificationsClick = async () => {
+    try{
+      const response = await getNotificationsApi();
+      setNotifications(response);
+    } catch(err){
+      console.log(err);
+    }
+  }
+
   const handleLogoutClick = () => {
     window.location.href = "/";
     localStorage.removeItem("jwtToken");
@@ -50,6 +77,36 @@ function StudentPage() {
   const handleCloseMaterials = () => {setActiveComponent("subjects")}
 
   const handleCloseSavedMaterials = () => {setActiveComponentSavedMaterials("subjects")}
+  
+  const handleCalendarClick = async () => {
+    const now = new Date();
+    const currentYear = now.getFullYear();  
+    const currentMonth = now.getMonth() + 1; 
+    try{
+      const [calendarResponse] = await Promise.all([
+        getAcademicCalendarApi(),
+        handleMonthTasks(currentMonth, currentYear)
+      ]);
+      setCalendarFile(calendarResponse)
+    }catch (err){
+      console.error(err);
+      showToast(`${err}`, 'error');
+    }
+  }
+
+  const handleMonthTasks = async (month, year) => {
+    try{
+      const [facultyTasksResponse, myTasksResponse] = await Promise.all([
+        getFacultyMonthTasksApi(month, year),
+        getMyMonthTasksApi(month, year)
+      ]);
+      setFacultyMonthTasks(facultyTasksResponse);
+      setMyMonthTasks(myTasksResponse);
+    }catch (err){
+      console.error(err);
+      showToast(`${err}`, 'error');
+    }
+  }
 
   const renderContent = () => {
     switch (activeSection) {
@@ -69,13 +126,14 @@ function StudentPage() {
                 isOpen={true}
                 onClose={handleCloseMaterials}
                 subjectName={selectedSubject}
+                materialsAvgRatings={averageRatings}
               />
             )}
           </>
         );
 
       case "Obavještenja":
-        return <h2>Obavjestenja</h2>;
+        return <Notifications studentNotifications={notifications}/>;
 
       case "Sačuvano":
         return (
@@ -97,7 +155,12 @@ function StudentPage() {
         );
 
       case "Akademski kalendar":
-        return <h2>Akademski kalendar</h2>;
+        return <AcademicCalendar 
+                  calendarFile={calendarFile}
+                  facultyTasks={facultyMonthTasks}
+                  myTasks={myMonthTasks}
+                  handleMonthTasks={handleMonthTasks}
+                />
 
       case "Savjeti":
         return <h2>Savjeti</h2>;
@@ -111,11 +174,14 @@ function StudentPage() {
 };
   return (
     <div style={styles.mainLayout}>
+      {toast && <Toast message={toast.message} type={toast.type} />}
       <div style={styles.leftMenu}>
         <StudentMenuBar 
           onLogoutClick={handleLogoutClick}
           onMenuClick={setActiveSection}
           onHomeCLick={handleSubjectsClick}
+          onNotificationsClick={handleNotificationsClick}
+          onCalendarClick={handleCalendarClick}
         />
       </div>
 

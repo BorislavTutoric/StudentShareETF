@@ -11,6 +11,11 @@ import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.r
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories.SubjectRepository;
 
 import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -126,5 +131,13 @@ public class SubjectService {
                     .map(subject -> new SubjectSimple(subject.getName(), calculateSemester(subject.getSemester())))
                     .toList();
         }
+    public Map<String, Integer> getSubjectNameToIdMap() {
+        List<Subject> subjects = subjectRepository.findAll();
+
+        return subjects.stream()
+                .collect(Collectors.toMap(
+                        Subject::getName,
+                        Subject::getSubjectId
+                ));
     }
 }
