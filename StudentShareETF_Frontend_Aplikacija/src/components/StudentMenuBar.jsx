@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { LogOut, Home, Bell, Bookmark, Calendar, Lightbulb, Users } from 'lucide-react';
 
-function StudentMenuBar({ onLogoutClick, onMenuClick, onHomeCLick, onCalendarClick}) {
+function StudentMenuBar({ onLogoutClick, onMenuClick, onHomeCLick, onCalendarClick, onNotificationsClick}) {
   const [hoveredItem, setHoveredItem] = useState(null);
 
   const menuItems = [
@@ -44,6 +44,9 @@ function StudentMenuBar({ onLogoutClick, onMenuClick, onHomeCLick, onCalendarCli
               {
                 onMenuClick(item.name);
                 onHomeCLick();
+              }else if(item.name === "Obavještenja"){
+                onNotificationsClick();
+                onMenuClick(item.name);
               }else if(item.name === "Akademski kalendar"){
                 onMenuClick(item.name);
                 onCalendarClick();
