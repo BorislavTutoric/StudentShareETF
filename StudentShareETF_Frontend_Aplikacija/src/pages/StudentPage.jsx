@@ -5,6 +5,8 @@ import ProfileDisplay from "../components/ProfileDisplay";
 import StudentHome from "../components/StudentHome";
 import MaterialsStudentDisplay from "../components/MaterialsStudentDisplay";
 import EventsDisplayAuth from "../components/EventsDisplayAuth";
+import SavedMaterials from "../components/SavedMaterials";
+import SavedMaterialsDisplay from "../components/SavedMaterialsDisplay";
 import Notifications from "../components/Notifications";
 import { getNotificationsApi } from "../services/notificationsService";
 import AcademicCalendar from "../components/AcademicCalendar";
@@ -19,6 +21,11 @@ function StudentPage() {
   const [materials, setMaterials] = useState([]);
   const [year, setYear] = useState();
   const [subjects, setSubjects] = useState("all");
+  const [savedMaterials, setSavedMaterials] = useState([]);
+  const [selectedSubjectSM, setSelectedSubjectSM] = useState("");
+  const [activeComponentSavedMaterials, setActiveComponentSavedMaterials] = useState("subjects");
+  const [yearSM, setYearSM] = useState();
+  const [subjectsSM, setSubjectsSM] = useState("all");
   const [notifications, setNotifications] = useState(null);
   const [calendarFile, setCalendarFile] = useState(null);
   const [facultyMonthTasks, setFacultyMonthTasks] = useState(null);
@@ -28,7 +35,6 @@ function StudentPage() {
 
   const handleSubjectsClick = () => { 
     setActiveComponent("subjects");
-    //setYear(null);
   }
 
   const showToast = (message, type = 'success', duration = 5000) => {
@@ -44,6 +50,15 @@ function StudentPage() {
     setActiveComponent("materials");
     setSubjects(subs);
   };
+
+  const handleOpenSavedMaterials = (subjectName, savedMaterialsData, selectedYear, subs) => {
+    setSelectedSubjectSM(subjectName);
+    setSavedMaterials(savedMaterialsData);
+    setActiveComponentSavedMaterials("materials");
+    setYearSM(selectedYear);
+    setSubjectsSM(subs);
+  }
+
 
   const handleNotificationsClick = async () => {
     try{
@@ -61,6 +76,8 @@ function StudentPage() {
 
   const handleCloseMaterials = () => {setActiveComponent("subjects")}
 
+  const handleCloseSavedMaterials = () => {setActiveComponentSavedMaterials("subjects")}
+  
   const handleCalendarClick = async () => {
     const now = new Date();
     const currentYear = now.getFullYear();  
@@ -119,7 +136,23 @@ function StudentPage() {
         return <Notifications studentNotifications={notifications}/>;
 
       case "Sačuvano":
-        return <h2>Sačuvano</h2>;
+        return (
+          <>
+            {activeComponentSavedMaterials === "subjects" && (
+              <SavedMaterials onOpenMaterials={handleOpenSavedMaterials} startYear={yearSM} subjectsView={subjectsSM}/>
+            )}
+
+            {activeComponentSavedMaterials === "materials" && (
+              <SavedMaterialsDisplay
+                materials={savedMaterials}
+                setMaterials={setSavedMaterials}
+                isOpen={true}
+                onClose={handleCloseSavedMaterials}
+                subjectName={selectedSubjectSM}
+              />
+            )}
+          </>
+        );
 
       case "Akademski kalendar":
         return <AcademicCalendar 
