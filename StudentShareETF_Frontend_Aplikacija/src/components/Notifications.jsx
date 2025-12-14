@@ -1,13 +1,13 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Bell, X, Trash2 } from 'lucide-react';
 import { deleteNotificationApi, setReadNotification } from '../services/notificationsService';
 import Toast from './Toast';
 
-function NotificationsPanel({ studentNotifications}) {
+function NotificationsPanel({ studentNotifications }) {
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [selectedNotification, setSelectedNotification] = useState(null);
   const [toast, setToast] = useState(null);
-  const [notifications, setNotifications] = useState(studentNotifications ?? []);
+  const [notifications, setNotifications] = useState([]);
 
   const showToast = (message, type = 'success', duration = 5000) => {
     setToast({ message, type });
@@ -63,6 +63,10 @@ function NotificationsPanel({ studentNotifications}) {
     return bDate - aDate; 
   });
 
+  useEffect(() => {
+      setNotifications(studentNotifications ?? []);
+  }, [studentNotifications]);
+
   return (
     <>
       <div style={styles.container}>
@@ -76,7 +80,13 @@ function NotificationsPanel({ studentNotifications}) {
         </div>
 
         <div style={styles.notificationsList}>
-          {sortedNotifications.map((notification, index) => {
+        {sortedNotifications.length === 0 ? (
+          <div style={styles.emptyState}>
+              <Bell size={48} color="rgba(96, 224, 22, 0.3)" />
+              <p style={styles.emptyStateText}>Nema novih notifikacija</p>
+          </div>
+        ) : (
+          sortedNotifications.map((notification, index) => {
             const isRead = notification.read;
             const isHovered = hoveredIndex === index;
             return (
@@ -111,7 +121,8 @@ function NotificationsPanel({ studentNotifications}) {
                 )}
               </div>
             );
-          })}
+          })
+        )}
         </div>
       </div>
 
@@ -141,7 +152,7 @@ function NotificationsPanel({ studentNotifications}) {
 
 const styles = {
   container: {
-    background: 'linear-gradient(180deg, #0a1457 0%, #1a1f6b 100%)',
+    background: 'linear-gradient(135deg, #0a1457 0%, #1a2a5e 50%, #2a1f5e 100%)',
     borderRadius: '20px',
     padding: '24px',
     boxShadow: '0 10px 40px rgba(0, 0, 0, 0.4)',
@@ -149,6 +160,7 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     maxWidth: '100%',
+    height: '100%'
   },
 
   header: {
@@ -230,6 +242,23 @@ const styles = {
   notificationDotRead: {
     background: 'rgba(255, 255, 255, 0.3)',
     boxShadow: 'none',
+  },
+
+  emptyState: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '60px 20px',
+    gap: '16px',
+  },
+
+  emptyStateText: {
+    color: 'rgba(255, 255, 255, 0.6)',
+    fontSize: '16px',
+    fontWeight: '500',
+    margin: 0,
+    letterSpacing: '0.3px',
   },
 
   notificationContent: {
