@@ -379,7 +379,6 @@ function CommentsSection({ isOpen, onClose, documentName, materialId, showToast,
               </div>
             )}
 
-            {/* SVE RECENZIJE */}
             <div style={styles.listSection}>
               <h3 style={styles.sectionTitle}>⭐ Sve recenzije</h3>
               {otherReviews.length === 0 ? (

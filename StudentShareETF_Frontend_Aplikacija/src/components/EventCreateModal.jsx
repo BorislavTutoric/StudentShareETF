@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { X } from 'lucide-react';
 import { createEvent } from '../services/eventService'; 
 
-export default function EventCreateModal({ onClose, onCreated }) {
+export default function EventCreateModal({ onClose, onCreated, showToast }) {
   const [form, setForm] = useState({
     title: "",
     location: "",
@@ -11,6 +11,7 @@ export default function EventCreateModal({ onClose, onCreated }) {
     description: "",
     image: null,
   });
+  const [submitting, setSubmitting] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -29,12 +30,15 @@ export default function EventCreateModal({ onClose, onCreated }) {
     };
 
     try {
+      setSubmitting(true);
       await createEvent(eventDataToSend);
+      showToast('Događaj uspješno kreiran!', 'success');
       onCreated();
       onClose();
     } catch (error) {
-      console.error("Greška prilikom kreiranja događaja:", error);
-      alert("Došlo je do greške!");
+      showToast('Greška pri dodavanju dogadjaja', 'error');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -146,19 +150,27 @@ export default function EventCreateModal({ onClose, onCreated }) {
         <div style={styles.buttonContainer}>
           <button
             onClick={handleSubmit}
-            style={styles.submitButton}
+            disabled={submitting}
+            style={{
+              ...styles.submitButton,
+              ...(submitting ? styles.disabledButton : {})
+            }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#50c012';
-              e.currentTarget.style.transform = 'translateY(-2px)';
-              e.currentTarget.style.boxShadow = '0 6px 16px rgba(96, 224, 22, 0.4)';
+              if (!submitting) {
+                e.currentTarget.style.backgroundColor = '#50c012';
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 6px 16px rgba(96, 224, 22, 0.4)';
+              }
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#60e016';
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = '0 4px 12px rgba(96, 224, 22, 0.3)';
+              if (!submitting) {
+                e.currentTarget.style.backgroundColor = '#60e016';
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(96, 224, 22, 0.3)';
+              }
             }}
           >
-            Kreiraj događaj
+            {submitting ? 'Kreiranje...' : 'Kreiraj događaj'}
           </button>
         </div>
       </div>
@@ -296,5 +308,10 @@ const styles = {
     boxShadow: '0 4px 12px rgba(96, 224, 22, 0.3)',
     transition: 'all 0.3s',
     letterSpacing: '0.5px',
+  },
+  disabledButton: {
+    backgroundColor: '#d1d5db',
+    cursor: 'not-allowed',
+    opacity: 0.6,
   },
 };

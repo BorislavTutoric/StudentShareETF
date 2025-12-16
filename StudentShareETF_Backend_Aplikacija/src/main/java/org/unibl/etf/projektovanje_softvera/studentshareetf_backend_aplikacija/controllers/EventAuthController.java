@@ -76,6 +76,18 @@ public class EventAuthController {
     }
 
 
+    @DeleteMapping("/{eventId}/reviews")
+    public ResponseEntity<?> deleteReview(@PathVariable Integer eventId) {
+        try {
+            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            reviewService.deleteReview(eventId, username);
+            return ResponseEntity.ok(Map.of("message", "Recenzija uspješno obrisana"));
+        } catch (RuntimeException ex) {
+            return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
+        }
+    }
+
+
     @GetMapping("/{eventId}/comments")
     public ResponseEntity<?> getCommentsForEvent(@PathVariable Integer eventId) {
         try {
@@ -107,6 +119,28 @@ public class EventAuthController {
         } catch (IOException e) {
             throw new ResponseStatusException(
                     HttpStatus.INTERNAL_SERVER_ERROR, "Greška prilikom kreiranja dogadjaja", e);
+        }
+    }
+
+    @DeleteMapping("/{commentId}/comments")
+    public ResponseEntity<?> deleteComment(@PathVariable Integer commentId) {
+        try {
+            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            commentService.deleteComment(commentId, username);
+            return ResponseEntity.ok(Map.of("message", "Komentar obrisan"));
+        } catch (RuntimeException ex) {
+            return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
+        }
+    }
+
+    @PostMapping("/{commentId}/report-comment")
+    public ResponseEntity<?> reportComment(@PathVariable Integer commentId) {
+        try {
+            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            commentService.reportComment(commentId, username);
+            return ResponseEntity.ok(Map.of("message", "Komentar prijavljen"));
+        } catch (RuntimeException ex) {
+            return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
         }
     }
 }
