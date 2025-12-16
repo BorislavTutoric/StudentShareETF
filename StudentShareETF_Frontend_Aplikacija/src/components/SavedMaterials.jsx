@@ -244,14 +244,14 @@ const styles = {
   },
   filterSearchContainer: {
     background: 'linear-gradient(90deg, #0f1643 0%, #1a2a5e 100%)',
-    padding: '25px 20px',
-    width: '100%',
+    padding: '25px 40px',
+    //width: '100%',
     boxShadow: '0 4px 15px rgba(0, 0, 0, 0.3)',
   },
   filterSearchContent: {
-    maxWidth: '1200px',
-    margin: '0 auto',
-    width: '100%',
+    //maxWidth: '1200px',
+    //margin: '0 auto',
+    //width: '100%',
   },
   inlineWrapper: {
     display: 'flex',
@@ -329,10 +329,10 @@ const styles = {
   },
   contentContainer: {
     flex: 1,
-    padding: '40px 20px',
-    maxWidth: '1200px',
-    width: '100%',
-    margin: '0 auto',
+    padding: '40px 35px',
+    //maxWidth: '1200px',
+    //width: '100%',
+    //margin: '0 auto',
   },
   yearButtonsContainer: {
     display: 'flex',

@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class NotificationsResponse {
-    private Integer id;
+    private Integer notificationId;
     private String title;
     private String message;
     private boolean read;
