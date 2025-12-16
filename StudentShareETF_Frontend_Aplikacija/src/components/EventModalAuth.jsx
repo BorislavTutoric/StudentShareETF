@@ -1,16 +1,22 @@
 import React, { useEffect, useState } from 'react';
-import { X } from 'lucide-react';
-import { getEventComments, getEventReviews, addEventComment, addEventReview } from '../services/eventService';
+import { X, Trash2, Flag } from 'lucide-react';
+import { getEventComments, getEventReviews, addEventComment, addEventReview, deleteEventReview,
+  reportEventComment,deleteEventComment } from '../services/eventService';
+import Toast from './Toast';
 
 function EventModalAuth({ event, onClose }) {
-  const [comments, setComments] = useState([]);
-  const [reviews, setReviews] = useState([]);
+  const [allComments, setAllComments] = useState([]);
+  const [allReviews, setAllReviews] = useState([]);
+  const [myReview, setMyReview] = useState(null);
+  const [otherReviews, setOtherReviews] = useState([]);
   const [newComment, setNewComment] = useState('');
   const [activeTab, setActiveTab] = useState('comments');
   const [hoveredStar, setHoveredStar] = useState(0);
   const [loading, setLoading] = useState(true);
   const [submittingComment, setSubmittingComment] = useState(false);
   const [submittingReview, setSubmittingReview] = useState(false);
+  const [averageRating, setAverageRating] = useState(0);
+  const [toast, setToast] = useState(null);
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -19,8 +25,19 @@ function EventModalAuth({ event, onClose }) {
         setLoading(true);
         const commentsData = await getEventComments(event.dogadjajId);
         const reviewsData = await getEventReviews(event.dogadjajId);
-        setComments(commentsData);
-        setReviews(reviewsData);
+
+        const myComments = commentsData.filter(c => c.isMyComment);
+        const otherComments = commentsData
+          .filter(c => !c.isMyComment)
+          .sort((a, b) => new Date(b.dateTime) - new Date(a.dateTime));
+
+        setAllComments([...myComments, ...otherComments]);
+        setAllReviews(reviewsData);
+        
+        const myReviewFound = reviewsData.find(r => r.isMyRating) || null;
+        const others = reviewsData.filter(r => !r.isMyRating);
+        setMyReview(myReviewFound);
+        setOtherReviews(others);
       } catch (err) {
         console.error(err);
       } finally {
@@ -33,20 +50,59 @@ function EventModalAuth({ event, onClose }) {
     };
   }, [event.dogadjajId]);
 
+  useEffect(() => {
+    const totalReviews = otherReviews.length + (myReview ? 1 : 0);
+    if (totalReviews > 0) {
+      const totalRating = otherReviews.reduce((sum, review) => sum + review.rating, 0) + (myReview ? myReview.rating : 0);
+      const newAverageRating = (totalRating / totalReviews).toFixed(1);
+      setAverageRating(newAverageRating);
+    } else {
+      setAverageRating(0);
+    }
+  }, [otherReviews, myReview]);
+
+  const showToast = (message, type = 'success', duration = 10000) => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), duration);
+  };
+
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) onClose();
   };
+
+  const handleDeleteComment = async (commentId) => {
+    try {
+      await deleteEventComment(commentId);
+      setAllComments(prev => prev.filter(c => c.id !== commentId));
+      showToast('Uspješno ste obrisali komentar!', 'success');
+    } catch (err) {
+      console.error(err);
+      showToast('Greška pri brisanju komentara!','error');
+    }
+  };
+
+  const handleReportComment = async (commentId) => {
+    try {
+      await reportEventComment(commentId);
+      showToast("Komentar je uspješno prijavljen!",'success');
+    } catch (err) {
+      console.error(err);
+      showToast("Greška pri prijavljivanju komentara!",'error');
+    }
+  };
+
 
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
     try {
       setSubmittingComment(true);
       const savedComment = await addEventComment(event.dogadjajId, newComment);
-      setComments([savedComment, ...comments]);
+      setAllComments([savedComment, ...allComments]);
       setNewComment('');
+      showToast("Komentar je uspješno dodan!",'success');
     } catch (err) {
       console.error(err);
-      alert('Greška pri dodavanju komentara');
+      showToast('Greška pri dodavanju komentara.','error');
     } finally {
       setSubmittingComment(false);
     }
@@ -56,13 +112,34 @@ function EventModalAuth({ event, onClose }) {
     try {
       setSubmittingReview(true);
       const savedReview = await addEventReview(event.dogadjajId, rating);
-      setReviews([savedReview, ...reviews]);
-      alert(`Uspješno ste dodali recenziju sa ${rating} zvjezdica!`);
+      const newReview = {
+        ...savedReview,
+        isMyRating: true,
+      };
+      
+      setAllReviews(prev => [...prev, newReview]);
+      setMyReview(newReview);
+      showToast(`Uspješno ste dodali recenziju sa ${rating} zvjezdica!`,'success');
     } catch (err) {
       console.error(err);
-      alert('Greška pri dodavanju recenzije');
+      showToast('Greška pri dodavanju recenzije','error');
     } finally {
       setSubmittingReview(false);
+    }
+  };
+
+
+  const handleDeleteReview = async () => {
+    try {
+      await deleteEventReview(event.dogadjajId);
+      
+      setMyReview(null);
+      setAllReviews(otherReviews);
+      
+      showToast('Obrisali ste vašu recenziju!','success');
+    } catch (err) {
+      console.error(err);
+      showToast('Greška pri brisanju recenzije','error');
     }
   };
 
@@ -81,9 +158,10 @@ function EventModalAuth({ event, onClose }) {
 
   return (
     <div style={styles.modalBackdrop} onClick={handleBackdropClick}>
+      {toast && <Toast message={toast.message} type={toast.type} />}
       <div style={styles.modal}>
         <button style={styles.closeButton} onClick={onClose}>
-          <X size={24} />
+          <X size={24} color="white" strokeWidth={2} />
         </button>
 
         <div style={styles.modalContent}>
@@ -100,10 +178,12 @@ function EventModalAuth({ event, onClose }) {
               <div style={styles.modalInfoItem}>
                 <span style={styles.modalLabel}>Datum:</span>
                 <span style={styles.modalValue}>
-                  {new Date(event.dateTime).toLocaleDateString('sr-RS', { 
-                    day: '2-digit', 
-                    month: '2-digit', 
-                    year: 'numeric' 
+                  {new Date(event.datumVrijeme).toLocaleString('sr-RS', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
                   })}
                 </span>
               </div>
@@ -122,7 +202,7 @@ function EventModalAuth({ event, onClose }) {
               <p style={styles.descriptionText}>{event.opis}</p>
             </div>
 
-            {/* TABOVI */}
+
             <div style={styles.tabsContainer}>
               <button
                 onClick={() => setActiveTab('comments')}
@@ -131,7 +211,7 @@ function EventModalAuth({ event, onClose }) {
                   ...(activeTab === 'comments' ? styles.activeTab : {})
                 }}
               >
-                💬 Komentari ({comments.length})
+                💬 Komentari ({allComments.length})
               </button>
               <button
                 onClick={() => setActiveTab('reviews')}
@@ -140,14 +220,12 @@ function EventModalAuth({ event, onClose }) {
                   ...(activeTab === 'reviews' ? styles.activeTab : {})
                 }}
               >
-                ⭐ Recenzije ({reviews.length})
+                ⭐ Recenzije ({allReviews.length})
               </button>
             </div>
 
-            {/* SADRŽAJ KOMENTARA */}
             {activeTab === 'comments' && (
               <div style={styles.tabContent}>
-                {/* Forma za dodavanje komentara */}
                 <div style={styles.addCommentSection}>
                   <h3 style={styles.sectionTitle}>✍️ Dodaj komentar</h3>
                   <textarea
@@ -170,17 +248,16 @@ function EventModalAuth({ event, onClose }) {
                   </button>
                 </div>
 
-                {/* Lista komentara */}
                 <div style={styles.listSection}>
                   <h3 style={styles.sectionTitle}>💬 Svi komentari</h3>
-                  {comments.length === 0 ? (
+                  {allComments.length === 0 ? (
                     <div style={styles.emptyState}>
                       <p>Još uvijek nema komentara.</p>
                       <p style={styles.emptyStateSubtext}>Budite prvi koji će komentarisati!</p>
                     </div>
                   ) : (
                     <div style={styles.commentsList}>
-                      {comments.map((com) => (
+                      {allComments.map((com) => (
                         <div 
                           key={com.id} 
                           style={{
@@ -204,6 +281,27 @@ function EventModalAuth({ event, onClose }) {
                                 {new Date(com.dateTime).toLocaleString('sr-RS')}
                               </span>
                             </div>
+                            {com.isMyComment ? (
+                              <button 
+                                style={styles.deleteButton}
+                                onClick={() => handleDeleteComment(com.id)}
+                                onMouseEnter={(e) => e.currentTarget.style.color = '#ef4444'}
+                                onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(239, 68, 68, 0.7)'}
+                                title="Obriši komentar"
+                              >
+                                <Trash2 size={20} />
+                              </button>
+                            ) : (
+                              <button 
+                                style={styles.reportButton}
+                                onClick={() => handleReportComment(com.id)}
+                                onMouseEnter={(e) => e.currentTarget.style.color = '#f59e0b'}
+                                onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(245, 158, 11, 0.7)'}
+                                title="Prijavi komentar"
+                              >
+                                <Flag size={20} />
+                              </button>
+                            )}
                           </div>
                           <p style={styles.commentText}>{com.content}</p>
                         </div>
@@ -214,86 +312,148 @@ function EventModalAuth({ event, onClose }) {
               </div>
             )}
 
-            {/* SADRŽAJ RECENZIJA */}
             {activeTab === 'reviews' && (
               <div style={styles.tabContent}>
-                {/* Forma za dodavanje recenzije */}
-                <div style={styles.addReviewSection}>
-                  <h3 style={styles.sectionTitle}>⭐ Ocijenite događaj</h3>
-                  <p style={styles.reviewSubtext}>Kliknite na broj zvjezdica za ocjenu:</p>
-                  <div style={styles.starsContainer}>
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <button
-                        key={star}
-                        onClick={() => handleAddReview(star)}
-                        onMouseEnter={() => setHoveredStar(star)}
-                        onMouseLeave={() => setHoveredStar(0)}
-                        disabled={submittingReview}
-                        style={{
-                          ...styles.starButton,
-                          color: star <= hoveredStar ? '#facc15' : '#d1d5db',
-                          transform: star <= hoveredStar ? 'scale(1.2)' : 'scale(1)',
-                        }}
-                      >
-                        ★
-                      </button>
-                    ))}
-                  </div>
-                  {hoveredStar > 0 && (
-                    <p style={styles.starLabel}>
-                      {hoveredStar === 1 && '⭐ Loše'}
-                      {hoveredStar === 2 && '⭐⭐ Osrednje'}
-                      {hoveredStar === 3 && '⭐⭐⭐ Dobro'}
-                      {hoveredStar === 4 && '⭐⭐⭐⭐ Vrlo dobro'}
-                      {hoveredStar === 5 && '⭐⭐⭐⭐⭐ Odlično'}
-                    </p>
-                  )}
-                </div>
-
-                {/* Lista recenzija */}
-                <div style={styles.listSection}>
-                  <h3 style={styles.sectionTitle}>⭐ Sve recenzije</h3>
-                  {reviews.length === 0 ? (
-                    <div style={styles.emptyState}>
-                      <p>Još uvijek nema recenzija.</p>
-                      <p style={styles.emptyStateSubtext}>Budite prvi koji će ocijeniti!</p>
+                
+                {(otherReviews.length > 0 || myReview) && (
+                  <div style={styles.averageRatingSection}>
+                    <h3 style={styles.averageRatingTitle}>Prosječna ocjena</h3>
+                    <div style={styles.averageRatingContent}>
+                      <div style={styles.averageRatingNumber}>{averageRating}</div>
+                      <div style={styles.averageRatingStarsWrapper}>
+                        <div style={styles.averageRatingStars}>
+                          {[1, 2, 3, 4, 5].map((star) => {
+                            const fill = Math.min(Math.max(averageRating - star + 1, 0), 1);
+                            return (
+                              <span
+                                key={star}
+                                style={{
+                                  background: `linear-gradient(90deg, #facc15 ${fill * 100}%, #d1d5db ${fill * 100}%)`,
+                                  WebkitBackgroundClip: 'text',
+                                  WebkitTextFillColor: 'transparent',
+                                  backgroundClip: 'text',
+                                }}
+                              >
+                                ★
+                              </span>
+                            );
+                          })}
+                        </div>
+                        <p style={styles.averageRatingText}>
+                          na osnovu {otherReviews.length + (myReview ? 1 : 0)} {otherReviews.length + (myReview ? 1 : 0) < 5 ? 'ocjene' : 'ocjena'}
+                        </p>
+                      </div>
                     </div>
-                  ) : (
+                  </div>
+                )}
+
+                {myReview && (
+                  <div style={styles.listSection}>
+                    <h3 style={styles.sectionTitle}>Moja ocjena</h3>
                     <div style={styles.reviewsList}>
-                      {reviews.map((rev, idx) => (
-                        <div 
-                          key={idx} 
+                      <div style={{...styles.reviewCard, ...styles.myReviewCard}}>
+                        <div style={styles.reviewHeader}>
+                          <div style={{...styles.avatarCircle, ...styles.myAvatar}}>
+                            {myReview.name.charAt(0)}{myReview.surname.charAt(0)}
+                          </div>
+                          <div style={styles.reviewMeta}>
+                            <strong style={styles.reviewAuthor}>
+                              {myReview.name} {myReview.surname}
+                              <span style={styles.myBadge}> (Vi)</span>
+                            </strong>
+                            <div style={styles.reviewStars}>
+                              {'★'.repeat(myReview.rating)}
+                              {'☆'.repeat(5 - myReview.rating)}
+                            </div>
+                            <span style={styles.reviewDate}>
+                              {new Date(myReview.dateTime).toLocaleString('sr-RS')}
+                            </span>
+                          </div>
+                          <button 
+                            style={styles.deleteButton}
+                            onClick={handleDeleteReview}
+                            onMouseEnter={(e) => e.currentTarget.style.color = '#ef4444'}
+                            onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(239, 68, 68, 0.7)'}
+                          >
+                            <Trash2 size={20} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {!myReview && (
+                  <div style={styles.addReviewSection}>
+                    <h3 style={styles.sectionTitle}>⭐ Ocijenite događaj</h3>
+                    <p style={styles.reviewSubtext}>Kliknite na broj zvjezdica za ocjenu:</p>
+                    <div style={styles.starsContainer}>
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          onClick={() => handleAddReview(star)}
+                          onMouseEnter={() => setHoveredStar(star)}
+                          onMouseLeave={() => setHoveredStar(0)}
+                          disabled={submittingReview}
                           style={{
-                            ...styles.reviewCard,
-                            ...(rev.isMyRating ? styles.myReviewCard : {})
+                            ...styles.starButton,
+                            color: star <= hoveredStar ? '#facc15' : '#d1d5db',
+                            transform: star <= hoveredStar ? 'scale(1.2)' : 'scale(1)',
                           }}
                         >
-                          <div style={styles.reviewHeader}>
-                            <div style={{
-                              ...styles.avatarCircle,
-                              ...(rev.isMyRating ? styles.myAvatar : {})
-                            }}>
-                              {rev.name.charAt(0)}{rev.surname.charAt(0)}
-                            </div>
-                            <div style={styles.reviewMeta}>
-                              <strong style={styles.reviewAuthor}>
-                                {rev.name} {rev.surname}
-                                {rev.isMyRating && <span style={styles.myBadge}> (Vi)</span>}
-                              </strong>
-                              <div style={styles.reviewStars}>
-                                {'★'.repeat(rev.rating)}
-                                {'☆'.repeat(5 - rev.rating)}
-                              </div>
-                              <span style={styles.reviewDate}>
-                                {new Date(rev.dateTime).toLocaleString('sr-RS')}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
+                          ★
+                        </button>
                       ))}
                     </div>
-                  )}
-                </div>
+                    {hoveredStar > 0 && (
+                      <p style={styles.starLabel}>
+                        {hoveredStar === 1 && '⭐ Loše'}
+                        {hoveredStar === 2 && '⭐⭐ Osrednje'}
+                        {hoveredStar === 3 && '⭐⭐⭐ Dobro'}
+                        {hoveredStar === 4 && '⭐⭐⭐⭐ Vrlo dobro'}
+                        {hoveredStar === 5 && '⭐⭐⭐⭐⭐ Odlično'}
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                  <div style={styles.listSection}>
+                    <h3 style={styles.sectionTitle}>⭐ Sve recenzije</h3>
+
+                    {otherReviews.length === 0 && !myReview && (
+                      <div style={styles.emptyState}>
+                        <p>Još uvijek nema recenzija.</p>
+                        <p style={styles.emptyStateSubtext}>Budite prvi koji će ocijeniti!</p>
+                      </div>
+                    )}
+
+                    {otherReviews.length > 0 && (
+                      <div style={styles.reviewsList}>
+                        {otherReviews.map((rev, idx) => (
+                          <div key={idx} style={styles.reviewCard}>
+                            <div style={styles.reviewHeader}>
+                              <div style={styles.avatarCircle}>
+                                {rev.name.charAt(0)}{rev.surname.charAt(0)}
+                              </div>
+                              <div style={styles.reviewMeta}>
+                                <strong style={styles.reviewAuthor}>
+                                  {rev.name} {rev.surname}
+                                </strong>
+                                <div style={styles.reviewStars}>
+                                  {'★'.repeat(rev.rating)}
+                                  {'☆'.repeat(5 - rev.rating)}
+                                </div>
+                                <span style={styles.reviewDate}>
+                                  {new Date(rev.dateTime).toLocaleString('sr-RS')}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                  </div>
               </div>
             )}
 
@@ -343,7 +503,9 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 10,
-    transition: 'all 0.2s ease',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 4px 10px rgba(0,0,0,0.2)',
+    padding: 0,
   },
   loadingContainer: {
     display: 'flex',
@@ -486,7 +648,74 @@ const styles = {
     padding: '20px',
     borderRadius: '8px',
     border: '1px solid rgba(0,0,0,0.1)',
+    marginBottom: '20px',
   },
+
+  averageRatingSection: {
+    background: 'linear-gradient(135deg, #f0fde8 0%, #e8fce0 100%)',
+    padding: '22px 26px',
+    borderRadius: '14px',
+    border: '2px solid #d4f77d',
+    marginBottom: '20px',
+    textAlign: 'center',
+    boxShadow: '0 6px 16px rgba(96, 224, 22, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
+    position: 'relative',
+    overflow: 'hidden',
+  },
+  averageRatingTitle: {
+    fontSize: '13px',
+    fontWeight: '950',
+    color: '#3ba519',
+    margin: '0 0 14px 0',
+    letterSpacing: '2px',
+    textTransform: 'uppercase',
+    opacity: 1,
+    fontFamily: '"Segoe UI", "Helvetica Neue", sans-serif',
+    textShadow: '0 2px 4px rgba(96, 224, 22, 0.1)',
+    transform: 'scale(1.02)',
+    fontStyle: 'italic',
+  },
+  averageRatingContent: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '22px',
+  },
+  averageRatingNumber: {
+    fontSize: '54px',
+    fontWeight: '950',
+    background: 'linear-gradient(135deg, #60e016 0%, #3ba519 100%)',
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    lineHeight: 1,
+    fontFamily: '"Segoe UI", "Helvetica Neue", sans-serif',
+    letterSpacing: '-2px',
+    filter: 'drop-shadow(0 2px 6px rgba(96, 224, 22, 0.15))',
+  },
+  averageRatingStarsWrapper: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '8px',
+  },
+  averageRatingStars: {
+    fontSize: '22px',
+    color: '#facc15',
+    letterSpacing: '4px',
+    textShadow: '0 3px 8px rgba(250, 204, 21, 0.25)',
+    filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))',
+  },
+  averageRatingText: {
+    fontSize: '12px',
+    color: '#2d5016',
+    margin: 0,
+    fontWeight: '800',
+    fontFamily: '"Segoe UI", "Helvetica Neue", sans-serif',
+    letterSpacing: '0.8px',
+    opacity: 1,
+    textTransform: 'lowercase',
+  },
+
   sectionTitle: {
     fontSize: '18px',
     fontWeight: '800',
@@ -591,6 +820,7 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     gap: '2px',
+    flex: 1,
   },
   commentAuthor: {
     fontSize: '15px',
@@ -637,6 +867,7 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     gap: '4px',
+    flex: 1,
   },
   reviewAuthor: {
     fontSize: '15px',
@@ -652,12 +883,38 @@ const styles = {
     fontSize: '12px',
     color: '#6b7280',
   },
+
+  deleteButton: {
+    background: 'none',
+    border: 'none',
+    color: 'rgba(239, 68, 68, 0.7)',
+    cursor: 'pointer',
+    padding: '4px',
+    transition: 'color 0.2s ease',
+    display: 'flex',
+    alignItems: 'center',
+    flexShrink: 0,
+  },
+  
+  reportButton: {
+    background: 'none',
+    border: 'none',
+    color: 'rgba(245, 158, 11, 0.7)',
+    cursor: 'pointer',
+    padding: '4px',
+    fontSize: '20px',
+    transition: 'color 0.2s ease',
+    display: 'flex',
+    alignItems: 'center',
+    flexShrink: 0,
+  },
   
   emptyState: {
     textAlign: 'center',
     padding: '30px',
     color: '#6b7280',
   },
+
   emptyStateSubtext: {
     fontSize: '14px',
     marginTop: '5px',

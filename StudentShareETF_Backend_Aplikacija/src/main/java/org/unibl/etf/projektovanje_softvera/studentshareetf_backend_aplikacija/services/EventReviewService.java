@@ -98,4 +98,22 @@ public class EventReviewService {
                 })
                 .collect(Collectors.toList());
     }
+
+
+
+    public void deleteReview(Integer eventId, String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException(username));
+
+        Student student = studentRepository.findByUser(user)
+                .orElseThrow(() -> new RuntimeException("Student ne postoji"));
+
+        EventReviewKey key = new EventReviewKey(eventId, student.getUserId());
+
+        if (!reviewRepository.existsById(key)) {
+            throw new RuntimeException("Recenzija ne postoji");
+        }
+
+        reviewRepository.deleteById(key);
+    }
 }

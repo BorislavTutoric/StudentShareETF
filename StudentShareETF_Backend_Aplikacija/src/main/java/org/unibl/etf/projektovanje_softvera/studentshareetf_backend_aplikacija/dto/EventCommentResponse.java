@@ -1,5 +1,6 @@
 package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -15,5 +16,6 @@ public class EventCommentResponse {
     private String dateTime;
     private String name;
     private String surname;
+    @JsonProperty("isMyComment")
     private boolean isMyComment;
 }

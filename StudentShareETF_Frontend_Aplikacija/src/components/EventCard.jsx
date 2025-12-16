@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Image } from 'lucide-react';
 
 function EventCard({ event, onClick }) {
   const [isHovered, setIsHovered] = useState(false);
@@ -13,16 +14,23 @@ function EventCard({ event, onClick }) {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {event.slikaUrl && (
-        <div style={styles.imageContainer}>
-          <img
-            src={event.slikaUrl}
-            alt={event.naziv}
-            style={styles.cardImage}
-          />
-          <div style={styles.imageOverlay}></div>
-        </div>
-      )}
+      <div style={styles.imageContainer}>
+        {event.slikaUrl ? (
+          <>
+            <img
+              src={event.slikaUrl}
+              alt={event.naziv}
+              style={styles.cardImage}
+            />
+            <div style={styles.imageOverlay} />
+          </>
+        ) : (
+          <div style={styles.placeholderContainer}>
+            <Image size={48} style={styles.placeholderIcon} />
+            <p style={styles.placeholderText}>Nema slike</p>
+          </div>
+        )}
+      </div>
       
       <div style={styles.cardContent}>
         <h3 style={styles.cardTitle}>{event.naziv}</h3>
@@ -119,6 +127,26 @@ const styles = {
     fontWeight: '600',
     cursor: 'pointer',
     transition: 'all 0.3s ease',
+  },
+  placeholderContainer: {
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#1f2937',
+    background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%)",
+  },
+  placeholderIcon: {
+    color: 'rgba(255, 255, 255, 0.6)',
+    marginBottom: '8px',
+  },
+  placeholderText: {
+    color: 'rgba(255, 255, 255, 0.8)',
+    fontSize: '14px',
+    fontWeight: '600',
+    margin: 0,
   },
 };
 

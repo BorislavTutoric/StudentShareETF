@@ -46,3 +46,39 @@ export const createEvent = async (eventData) => {
 
   return res.data;
 };
+
+export const deleteEventComment = async (commentId) => {
+  try {
+    const response = await api.delete(`api/events/${commentId}/comments`);
+    return response.data; 
+  } catch (err) {
+    throw err;
+  }
+};
+
+export const reportEventComment = async (commentId) => {
+  try {
+    const response = await api.post(`api/events/${commentId}/report-comment`);
+    return response.data; 
+  } catch (err) {
+    throw err;
+  }
+}
+
+export const getEventAvgRating = async (eventId) => {
+  try {
+    const response = await api.get(`api/events/${eventId}/reviews-average`);
+    return response.data; 
+  } catch (err) {
+    throw err;
+  }
+};
+
+export const deleteEventReview = async (eventId) => {
+  try {
+    const response = await api.delete(`/api/events/${eventId}/reviews`);
+    return response.data;
+  } catch (err) {
+    throw err;
+  }
+};
