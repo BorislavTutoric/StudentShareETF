@@ -3,6 +3,7 @@ import { LogOut, Home, Bell, Bookmark, Calendar, Lightbulb, Users } from 'lucide
 
 function StudentMenuBar({ onLogoutClick, onMenuClick, onHomeCLick, onCalendarClick, onNotificationsClick}) {
   const [hoveredItem, setHoveredItem] = useState(null);
+  const [activeItem, setActiveItem] = useState('Početna');
 
   const menuItems = [
     { name: 'Profil', icon: '👤' },
@@ -37,9 +38,11 @@ function StudentMenuBar({ onLogoutClick, onMenuClick, onHomeCLick, onCalendarCli
             onMouseLeave={() => setHoveredItem(null)}
             style={{
               ...styles.menuButton,
-              ...(hoveredItem === item.name ? styles.menuButtonHover : {})
+	      ...(activeItem === item.name ? styles.menuButtonActive : {}),
+              ...(hoveredItem === item.name && activeItem !== item.name ? styles.menuButtonHover : {})
             }}
             onClick={() => {
+              setActiveItem(item.name);
               if(item.name === "Početna")
               {
                 onMenuClick(item.name);
@@ -62,7 +65,7 @@ function StudentMenuBar({ onLogoutClick, onMenuClick, onHomeCLick, onCalendarCli
               <span
                 style={{
                   ...styles.menuItem,
-                  ...(hoveredItem === item.name ? styles.menuItemActive : {}),
+                  ...(activeItem === item.name ? styles.menuItemActive : {}),
                 }}
               >
                 {item.name}
@@ -97,7 +100,7 @@ function StudentMenuBar({ onLogoutClick, onMenuClick, onHomeCLick, onCalendarCli
 
 const styles = {
   menuBar: {
-    width: '300px',
+    width: '270px',
     background: 'linear-gradient(180deg, #0a1457 0%, #1a1f6b 100%)',
     padding: '24px',
     display: 'flex',
@@ -159,6 +162,12 @@ const styles = {
     outline: 'none',
     transition: 'all 0.3s ease',
     backdropFilter: 'blur(10px)',
+  },
+
+  menuButtonActive: {
+    background: 'rgba(96, 224, 22, 0.15)',
+    borderLeft: '4px solid #60e016',
+    paddingLeft: '12px',
   },
 
   menuButtonHover: {

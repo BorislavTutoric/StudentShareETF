@@ -22,8 +22,6 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class NotificationsService {
     private final NotificationsRepository notificationsRepository;
-    private final StudentRepository studentRepository;
-    private final UserRepository userRepository;
     private final UserService userService;
     private final StudentService studentService;
 

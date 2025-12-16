@@ -206,7 +206,7 @@ const styles = {
   },
 
   leftMenu: {
-    width: "300px",
+    width: "270px",
     padding: "16px",
   },
 
