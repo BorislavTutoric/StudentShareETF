@@ -18,4 +18,7 @@ public interface MaterialCommentRepository extends JpaRepository<MaterialComment
     List<MaterialComments> findByMaterijal_MaterialId(Integer materialId);
 
     Optional<MaterialComments> findById(Integer commentId);
+
+    List<MaterialComments> findByPrijavljenTrue();
+
 }

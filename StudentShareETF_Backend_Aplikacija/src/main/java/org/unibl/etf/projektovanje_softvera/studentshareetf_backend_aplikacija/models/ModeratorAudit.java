@@ -10,7 +10,7 @@ public class ModeratorAudit {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "AuditId", nullable = false)
-    private Long id;
+    private Integer id;
 
     @ManyToOne()
     @JoinColumn(name = "ModeratorId", nullable = false)
@@ -30,7 +30,7 @@ public class ModeratorAudit {
         this.datumVrijeme = datumVrijeme;
     }
 
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 

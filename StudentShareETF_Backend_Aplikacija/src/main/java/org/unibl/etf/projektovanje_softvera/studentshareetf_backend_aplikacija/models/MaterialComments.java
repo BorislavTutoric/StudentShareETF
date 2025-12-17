@@ -26,8 +26,13 @@ public class MaterialComments {
     @JoinColumn(name = "KorisnikId", nullable = false)
     private User korisnik;
 
+
     @Column(name = "Prijavljen", nullable = false)
     private Boolean prijavljen = false;
+
+    @Version
+    @Column(name = "Version")
+    private Long version = 0L;
 
     public MaterialComments() {}
 
@@ -55,4 +60,7 @@ public class MaterialComments {
 
     public Boolean getPrijavljen() { return prijavljen; }
     public void setPrijavljen(Boolean prijavljen) { this.prijavljen = prijavljen; }
+
+    public Long getVersion() { return version; }
+    public void setVersion(Long version) { this.version = version; }
 }

@@ -1,6 +1,6 @@
 package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.MaterialCommentRequest;
@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +27,8 @@ public class MaterialCommentService {
     private final MaterialCommentRepository materialCommentRepository;
     private final UserService userService;
     private final MaterialService materialService;
+    private final ModeratorAuditService moderatorAuditService;
+    private final NotificationsService  notificationsService;
 
     public List<MaterialCommentResponse> getCommentsByMaterialId(Integer materialId, String username) {
 
@@ -70,5 +73,51 @@ public class MaterialCommentService {
             throw new EntityNotFoundException("Komentar nije pronađen!");
         }
         materialCommentRepository.deleteById(commentId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<MaterialCommentResponse> getPendingMaterialCommentForModerator() {
+
+        List<MaterialComments> pendingMaterials = materialCommentRepository.findByPrijavljenTrue();
+
+        return pendingMaterials.stream().map(comment -> {
+            MaterialCommentResponse response = new MaterialCommentResponse();
+            response.setCommentId(comment.getId());
+            response.setSadrzaj(comment.getSadrzaj());
+            response.setDatum(comment.getDatumVrijeme());
+            response.setName(comment.getKorisnik().getName());
+            response.setSurname(comment.getKorisnik().getSurname());
+            response.setMyComment(false);
+            return response;
+        }).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void reviewMaterialComment(Integer commentId, boolean approved, String username) throws EntityNotFoundException {
+
+        User moderator = userService.getUserByUsername(username);
+
+        MaterialComments materialComments = materialCommentRepository.findById(commentId)
+                .orElseThrow(() -> new EntityNotFoundException("Komentar ne postoji"));
+
+        if(approved) {
+            materialComments.setPrijavljen(false);
+            materialCommentRepository.save(materialComments);
+
+            String description = "Moderator " + moderator.getName() + " je odbio zahtjev za uklanjanje komentara " + materialComments.getKorisnik().getUsername() + ".";
+            moderatorAuditService.logAction(moderator,description);
+
+        }
+        else
+        {
+            materialCommentRepository.delete(materialComments);
+
+            String description = "Moderator " + moderator.getName() + " je obrisao komentar korisnika " + materialComments.getKorisnik().getUsername() + " čiji je sadržaj " + materialComments.getSadrzaj();
+            moderatorAuditService.logAction(moderator,description);
+
+            String title = "Obavještenje o uklanjanju komentara";
+            String message = "Vaš komentar " +  materialComments.getSadrzaj() + " je uklonjen.";
+            notificationsService.createNotification(title, message);
+        }
     }
 }
