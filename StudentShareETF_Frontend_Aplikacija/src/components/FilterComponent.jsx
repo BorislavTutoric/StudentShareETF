@@ -74,7 +74,7 @@ const styles = {
   filterBubble: {
     position: 'absolute',
     top: '305px',
-    right: '40px',
+    right: '100px',
     backgroundColor: '#a8d5ba',
     borderRadius: '20px',
     padding: '16px 20px',

@@ -6,6 +6,8 @@ import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.d
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.EntityNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Subject;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories.SubjectRepository;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.SubjectAdvice;
+import java.util.stream.Collectors;
 
 import java.util.Arrays;
 import java.util.List;
@@ -66,5 +68,26 @@ public class SubjectService {
         }else{
             throw new EntityNotFoundException("Predmet nije pronadjen!");
         }
+    }
+
+    public List<SubjectAdvice> getSubjectsForAdvice(Integer year){
+        List<Subject> subjects;
+
+        if(year == 1){
+            subjects = subjectRepository.findBySemesterIn(Arrays.asList(1,2));
+        } else if (year == 2) {
+            subjects = subjectRepository.findBySemesterIn(Arrays.asList(3,4));
+        }else if (year == 3) {
+            subjects = subjectRepository.findBySemesterIn(Arrays.asList(5,6));
+        } else{
+            subjects = subjectRepository.findBySemesterIn(Arrays.asList(7,8));
+        }
+
+        return subjects.stream()
+                .map(s -> new SubjectAdvice(
+                        s.getSubjectId(),
+                        s.getName(),
+                        calculateSemester(s.getSemester())))
+                .collect(Collectors.toList());
     }
 }

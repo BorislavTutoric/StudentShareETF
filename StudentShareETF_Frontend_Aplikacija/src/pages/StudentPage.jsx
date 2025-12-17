@@ -3,6 +3,7 @@ import StudentMenuBar from "../components/StudentMenuBar";
 import WelcomeHeader from "../components/WelcomeHeader";
 import ProfileDisplay from "../components/ProfileDisplay";
 import StudentHome from "../components/StudentHome";
+import AdviceHome from "../components/AdviceHome";
 import MaterialsStudentDisplay from "../components/MaterialsStudentDisplay";
 import EventsDisplayAuth from "../components/EventsDisplayAuth";
 
@@ -67,7 +68,7 @@ function StudentPage() {
         return <h2>Akademski kalendar</h2>;
 
       case "Savjeti":
-        return <h2>Savjeti</h2>;
+        return <AdviceHome startYear={1} subjectsView={"all"} />;
 
       case "Događaji":
         return <EventsDisplayAuth />;
