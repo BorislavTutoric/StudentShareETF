@@ -79,17 +79,17 @@ public class SubjectService {
         }
     }
 
-    public List<SubjectAdvice> getSubjectsForAdvice(Integer year){
+    public List<SubjectAdvice> getSubjectsForAdvice(Integer year) {
         List<Subject> subjects;
 
-        if(year == 1){
-            subjects = subjectRepository.findBySemesterIn(Arrays.asList(1,2));
+        if (year == 1) {
+            subjects = subjectRepository.findBySemesterIn(Arrays.asList(1, 2));
         } else if (year == 2) {
-            subjects = subjectRepository.findBySemesterIn(Arrays.asList(3,4));
-        }else if (year == 3) {
-            subjects = subjectRepository.findBySemesterIn(Arrays.asList(5,6));
-        } else{
-            subjects = subjectRepository.findBySemesterIn(Arrays.asList(7,8));
+            subjects = subjectRepository.findBySemesterIn(Arrays.asList(3, 4));
+        } else if (year == 3) {
+            subjects = subjectRepository.findBySemesterIn(Arrays.asList(5, 6));
+        } else {
+            subjects = subjectRepository.findBySemesterIn(Arrays.asList(7, 8));
         }
 
         return subjects.stream()
@@ -98,6 +98,7 @@ public class SubjectService {
                         s.getName(),
                         calculateSemester(s.getSemester())))
                 .collect(Collectors.toList());
+    }
     public List<SubjectSimple> getSubjectsWithSavedMaterials(Integer year, String username) throws UserNotFoundException {
         User user = userService.getUserByUsername(username);
         Student student = studentService.getStudentByUser(user);

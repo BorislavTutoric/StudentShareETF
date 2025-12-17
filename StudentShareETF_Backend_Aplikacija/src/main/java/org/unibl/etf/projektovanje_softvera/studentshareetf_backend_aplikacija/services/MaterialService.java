@@ -1,6 +1,6 @@
 package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +31,8 @@ public class MaterialService {
     private final SubjectService subjectService;
     private final StudentService studentService;
     private final UserService userService;
+    private final ModeratorAuditService moderatorAuditService;
+    private final NotificationsService notificationsService;
 
     public List<MaterialResponse> getMaterials(String name) {
         Optional<Subject> subject = subjectRepository.findByName(name);
@@ -89,5 +92,57 @@ public class MaterialService {
                 .stream()
                 .map(material -> new MaterialResponse(material.getMaterialId(), material.getName(), material.getCategory(), subjectName))
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<MaterialResponse> getPendingMaterialsForModerator() {
+        List<Material> pendingMaterials = materialRepository.findByApprovedFalseAndModeratorIsNull();
+
+        return pendingMaterials.stream().map(material -> {
+            MaterialResponse response = new MaterialResponse();
+            response.setMaterialId(material.getMaterialId());
+            response.setName(material.getName());
+            response.setCategory(material.getCategory());
+            return response;
+        }).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void reviewMaterial(Integer materialId, boolean approved, String username) throws EntityNotFoundException {
+
+        User moderator = userService.getUserByUsername(username);
+
+        Material material = materialRepository.findById(materialId)
+                .orElseThrow(() -> new EntityNotFoundException("Materijal ne postoji"));
+
+        if (material.isApproved() && approved) {
+            throw new RuntimeException("Materijal je već odobren");
+        }
+
+        if(approved) {
+            material.setApproved(true);
+            material.setModerator(moderator);
+            materialRepository.save(material);
+
+            String description = "Moderator " + moderator.getName() + " je odobrio materijal " + material.getName() + ".";
+            moderatorAuditService.logAction(moderator,description);
+
+            String title = "Zahtjev postavljanja materijala";
+            String message = "Vaš zahtjev za postavljanje materijala " +  material.getName() + " je odobren!";
+            notificationsService.createNotification(title, message);
+        }
+        else
+        {
+            material.setApproved(false);
+            material.setModerator(moderator);
+            materialRepository.save(material);
+
+            String description = "Moderator " + moderator.getName() + " je dobio materijal " + material.getName() + ".";
+            moderatorAuditService.logAction(moderator,description);
+
+            String title = "Zahtjev postavljanja materijala";
+            String message = "Vaš zahtjev za postavljanje materijala " +  material.getName() + " je odbijen.";
+            notificationsService.createNotification(title, message);
+        }
     }
 }

@@ -45,6 +45,10 @@ public class Material {
     @Column(name = "Odobren", nullable = false)
     private boolean approved;
 
+    @Version
+    @Column(name = "Version")
+    private Long version = 0L;
+
     public Material() {}
 
     public Subject getSubject() {
@@ -118,5 +122,13 @@ public class Material {
     }
     public void setApproved(boolean approved) {
         this.approved = approved;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 }

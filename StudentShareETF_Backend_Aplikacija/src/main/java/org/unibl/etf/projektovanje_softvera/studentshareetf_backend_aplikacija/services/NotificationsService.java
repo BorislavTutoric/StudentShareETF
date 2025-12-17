@@ -14,6 +14,7 @@ import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.r
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories.StudentRepository;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -54,5 +55,14 @@ public class NotificationsService {
         } else{
             throw new EntityNotFoundException("Obavještenje nije pronadjeno!");
         }
+    }
+
+    public void createNotification(String title, String message)
+    {
+        LocalDateTime now = LocalDateTime.now();
+        Notification notification = new Notification();
+        notification.setTitle(title);
+        notification.setMessage(message);
+        notificationsRepository.save(notification);
     }
 }
