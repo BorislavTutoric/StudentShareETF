@@ -60,11 +60,4 @@ public class TaskController {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return examService.getExamsForMajor(username,month,year);
     }
-
-    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> addFaculcyTasks(@RequestParam("file") MultipartFile file)
-    {
-        return examScheduleService.createExamsFromPdf(file);
-    }
-
 }
