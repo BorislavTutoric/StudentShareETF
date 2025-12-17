@@ -86,4 +86,36 @@ public class EventCommentService {
             );
         }).collect(Collectors.toList());
     }
+
+
+    public void deleteComment(Integer commentId, String username) {
+
+        EventComment comment = commentRepo.findById(commentId)
+                .orElseThrow(() -> new RuntimeException("Komentar ne postoji"));
+
+        User user = userRepo.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException(username));
+
+        if (!comment.getUser().getUserId().equals(user.getUserId())) {
+            throw new RuntimeException("Ne možete obrisati tuđi komentar");
+        }
+
+        commentRepo.delete(comment);
+    }
+
+    public void reportComment(Integer commentId, String username) {
+
+        EventComment comment = commentRepo.findById(commentId)
+                .orElseThrow(() -> new RuntimeException("Komentar ne postoji"));
+
+        User user = userRepo.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException(username));
+
+        if (comment.getUser().getUserId().equals(user.getUserId())) {
+            throw new RuntimeException("Ne možete prijaviti vlastiti komentar");
+        }
+
+        comment.setReported(true);
+        commentRepo.save(comment);
+    }
 }

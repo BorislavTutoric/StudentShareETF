@@ -73,7 +73,7 @@ function FilterComponent({ isOpen, onClose, setMySubjects, setAllSubjects, subje
 const styles = {
   filterBubble: {
     position: 'absolute',
-    top: '305px',
+    top: '270px',
     right: '100px',
     backgroundColor: '#a8d5ba',
     borderRadius: '20px',

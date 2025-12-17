@@ -6,7 +6,8 @@ const api = axios.create({ baseURL: API_URL });
 
 api.interceptors.request.use(config => {
     const token = localStorage.getItem("jwtToken");
-    if (token){
+    const isPublicEndpoint = config.url.startsWith("all/");
+    if (!isPublicEndpoint && token){
         config.headers.Authorization = `Bearer ${token}`;
     }
     return config;

@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
+import { Image } from 'lucide-react';
 
 function EventCardAuth({ event, onClick }) {
   const [isHovered, setIsHovered] = useState(false);
-
+  
   return (
-    <div
+    <div 
       style={{
         ...styles.card,
         ...(isHovered ? styles.cardHover : {})
@@ -13,17 +14,24 @@ function EventCardAuth({ event, onClick }) {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {event.slikaUrl && (
-        <div style={styles.imageContainer}>
-          <img
-            src={event.slikaUrl}
-            alt={event.naziv}
-            style={styles.cardImage}
-          />
-          <div style={styles.imageOverlay}></div>
-        </div>
-      )}
-      
+      <div style={styles.imageContainer}>
+        {event.slikaUrl ? (
+          <>
+            <img
+              src={event.slikaUrl}
+              alt={event.naziv}
+              style={styles.cardImage}
+            />
+            <div style={styles.imageOverlay} />
+          </>
+        ) : (
+          <div style={styles.placeholderContainer}>
+            <Image size={40} style={styles.placeholderIcon} />
+            <p style={styles.placeholderText}>Nema slike</p>
+          </div>
+        )}
+      </div>
+
       <div style={styles.cardContent}>
         <h3 style={styles.cardTitle}>{event.naziv}</h3>
         
@@ -62,8 +70,9 @@ const styles = {
   imageContainer: {
     position: 'relative',
     width: '100%',
-    height: '200px',
+    height: '210px',
     overflow: 'hidden',
+    backgroundColor: '#e5e7eb',
   },
   cardImage: {
     width: '100%',
@@ -78,44 +87,64 @@ const styles = {
     bottom: 0,
     background: 'linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.3) 100%)',
   },
+  placeholderContainer: {
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#9ae6b4',
+    background: 'linear-gradient(135deg, #9ae6b4 0%, #68d391 100%)',
+  },
+  placeholderIcon: {
+    color: 'rgba(255, 255, 255, 0.6)',
+    marginBottom: '6px',
+  },
+  placeholderText: {
+    color: 'rgba(255, 255, 255, 0.8)',
+    fontSize: '13px',
+    fontWeight: '600',
+    margin: 0,
+  },
   cardContent: {
-    padding: '20px',
+    padding: '15px',
     backgroundColor: '#d4f6daff',
   },
   cardTitle: {
-    fontSize: '20px',
+    fontSize: '18px',
     fontWeight: '800',
     color: '#1f2937',
-    marginBottom: '15px',
+    marginBottom: '12px',
     lineHeight: '1.3',
   },
   infoRow: {
     display: 'flex',
     justifyContent: 'space-between',
-    marginBottom: '10px',
-    paddingBottom: '8px',
+    marginBottom: '8px',
+    paddingBottom: '6px',
     borderBottom: '1px solid rgba(0,0,0,0.1)',
   },
   infoLabel: {
-    fontSize: '14px',
+    fontSize: '13px',
     fontWeight: '600',
     color: '#4b5563',
   },
   infoValue: {
-    fontSize: '14px',
+    fontSize: '13px',
     fontWeight: '500',
     color: '#1f2937',
     textAlign: 'right',
   },
   viewMoreButton: {
-    marginTop: '15px',
+    marginTop: '12px',
     width: '100%',
-    padding: '12px',
+    padding: '10px',
     backgroundColor: '#60e016',
     color: 'white',
     border: 'none',
     borderRadius: '8px',
-    fontSize: '15px',
+    fontSize: '14px',
     fontWeight: '600',
     cursor: 'pointer',
     transition: 'all 0.3s ease',

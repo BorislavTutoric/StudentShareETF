@@ -3,6 +3,7 @@ package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.AverageReview;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.MaterialCommentResponse;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.MaterialReviewResponse;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.EntityNotFoundException;
@@ -56,6 +57,10 @@ public class MaterialReviewService {
         Material material = materialService.getMaterialById(materialId);
         User student  = userService.getUserByUsername(username);
         materialReviewRepository.deleteByMaterijalIdAndStudentId(material.getMaterialId(), student.getUserId());
+    }
+
+    public List<AverageReview> getAverageRatings(String subjectName) {
+        return materialReviewRepository.findAvgRatingsBySubjectName(subjectName);
     }
 
 }

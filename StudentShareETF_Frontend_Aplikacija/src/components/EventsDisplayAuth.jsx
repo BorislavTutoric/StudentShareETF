@@ -3,6 +3,7 @@ import { getAllEvents } from "../services/eventService"
 import EventCardAuth from "./EventCardAuth";
 import EventModalAuth from "./EventModalAuth";
 import EventCreateModal from "./EventCreateModal";
+import Toast from "./Toast";
 
 export default function EventsDisplayAuth() {
   const [events, setEvents] = useState([]);
@@ -10,6 +11,7 @@ export default function EventsDisplayAuth() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [toast, setToast] = useState(null);
 
   const loadEvents = async () => {
     try {
@@ -23,6 +25,11 @@ export default function EventsDisplayAuth() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const showToast = (message, type = 'success', duration = 10000) => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), duration);
   };
 
   useEffect(() => {
@@ -73,6 +80,7 @@ export default function EventsDisplayAuth() {
 
   return (
     <div style={styles.container}>
+      {toast && <Toast message={toast.message} type={toast.type} />}
       <div style={styles.buttonContainer}>
         <button style={styles.addButton} onClick={() => setShowCreateModal(true)}>
           + Dodaj događaj
@@ -100,6 +108,7 @@ export default function EventsDisplayAuth() {
         <EventCreateModal
           onClose={() => setShowCreateModal(false)}
           onCreated={loadEvents}
+          showToast={showToast}
         />
       )}
     </div>
@@ -144,7 +153,7 @@ const styles = {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
     gap: '25px',
-    marginTop: '10px',
+    marginTop: '60px',
   },
 
   loadingContainer: {

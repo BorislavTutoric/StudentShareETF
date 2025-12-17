@@ -5,14 +5,15 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.MaterialResponse;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.EntityNotFoundException;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.UserNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Material;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Student;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Subject;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.User;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories.MaterialRepository;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories.SubjectRepository;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.UserNotFoundException;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.EntityNotFoundException;
+
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -35,7 +36,7 @@ public class MaterialService {
         List<MaterialResponse> materials =  materialRepository.findBySubjectAndApproved(subject.get(), true)
                 .stream()
                 .filter(Material::isApproved)
-                .map(m -> new MaterialResponse(m.getMaterialId(), m.getName(), m.getCategory()))
+                .map(m -> new MaterialResponse(m.getMaterialId(), m.getName(), m.getCategory(), m.getSubject().getName()))
                 .toList();
         return materials;
     }
@@ -77,5 +78,16 @@ public class MaterialService {
         material.setApproved(false);
 
         materialRepository.save(material);
+    }
+
+    public List<MaterialResponse> getSavedMaterialsForStudentFromSubject(String username, String subjectName) throws EntityNotFoundException, UserNotFoundException {
+        User user = userService.getUserByUsername(username);
+        Student student = studentService.getStudentByUser(user);
+        Subject subject = subjectService.getSubjectByName(subjectName);
+
+        return materialRepository.findSavedMaterialsByStudentAndSubject(student, subject)
+                .stream()
+                .map(material -> new MaterialResponse(material.getMaterialId(), material.getName(), material.getCategory(), subjectName))
+                .toList();
     }
 }
