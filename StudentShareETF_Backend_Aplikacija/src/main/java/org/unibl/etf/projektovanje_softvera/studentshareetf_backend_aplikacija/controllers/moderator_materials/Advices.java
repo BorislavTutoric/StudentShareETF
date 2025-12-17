@@ -8,18 +8,14 @@ import org.springframework.web.bind.annotation.*;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.*;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.EntityNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.AdviceService;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.MaterialCommentService;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.MaterialService;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.UserService;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/moderator/materials/posts")
 @RequiredArgsConstructor
-public class Posts {
+public class Advices {
 
     private final AdviceService adviceService;
 
@@ -41,12 +37,12 @@ public class Posts {
         try {
             String username = SecurityContextHolder.getContext().getAuthentication().getName();
 
-            adviceService.reviewMaterialComment(request.getCommentId(), request.isApproved(), username);
+            adviceService.reviewAdvice(request.getAdviceId(), request.isApproved(), username);
 
-            return ResponseEntity.ok(Map.of("message", "Komentar je obrađen"));
+            return ResponseEntity.ok(Map.of("message", "Post je obrađen"));
         } catch (OptimisticLockException ex) {
             return ResponseEntity.status(409)
-                    .body(Map.of("error", "Komentar je već obrađen od strane drugog moderatora"));
+                    .body(Map.of("error", "Post je već obrađen od strane drugog moderatora"));
         } catch (EntityNotFoundException ex) {
             return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
         }

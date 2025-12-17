@@ -23,4 +23,6 @@ public interface AdviceCommentRepository extends JpaRepository<AdviceComment, In
     List<AdviceComment> findByAdvice(Advice advice);
 
     void deleteByAdvice(Advice advice);
+
+    List<AdviceComment> findByReportedTrue();
 }
