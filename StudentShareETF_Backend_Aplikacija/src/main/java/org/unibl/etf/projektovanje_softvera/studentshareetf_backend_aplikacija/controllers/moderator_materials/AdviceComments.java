@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/moderator/materials/posts")
+@RequestMapping("/api/moderator/materials/post-comments")
 @RequiredArgsConstructor
 public class AdviceComments {
 
