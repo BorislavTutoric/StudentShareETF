@@ -4,7 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.StudentAccountResponse;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.StudentResponse;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.EmailNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.UnverifiedException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.UserNotFoundException;
@@ -75,20 +75,20 @@ public class StudentService {
         }
     }
 
-    public List<StudentAccountResponse> getStudentAccounts() throws  EntityNotFoundException {
+    public List<StudentResponse> getStudentAccounts() throws  EntityNotFoundException {
         List<User> users = userService.getUsersByRole("STUDENT");
-        List<StudentAccountResponse> accounts = new ArrayList<>();
+        List<StudentResponse> accounts = new ArrayList<>();
         for(User user : users){
             Student student = getStudentByUser(user);
-            accounts.add(new StudentAccountResponse(user.getUsername(), user.getName(),
-                    user.getSurname(), user.getRole(), user.isActive(),
+            accounts.add(new StudentResponse(user.getUserId(), user.getName(),
+                    user.getSurname(), user.getUsername(), user.getRole(), user.isActive(),
                     student.getEmail(), student.getStudyProgram(), student.getMajor()));
         }
         return accounts;
     }
 
-    public void deleteStudentAccount(String username) throws UserNotFoundException {
-        User user = userService.getUserByUsername(username);
+    public void deleteStudentAccount(Integer id) throws UserNotFoundException {
+        User user = userService.getUserById(id);
         Student student = getStudentByUser(user);
         studentRepository.delete(student);
         userService.deleteAccount(user);

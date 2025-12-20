@@ -19,17 +19,6 @@ public class AccountsManagementController {
     private final UserService userService;
     private final StudentService studentService;
 
-    @GetMapping("/profile")
-    public ResponseEntity<?> getProfileInformations(){
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        try {
-            AccountResponse account = userService.getAdminProfileInformations(username);
-            return ResponseEntity.ok(account);
-        } catch (UserNotFoundException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
     @GetMapping("/accounts/moderator")
     public ResponseEntity<?> getModeratorAccounts(){
         return ResponseEntity.ok(userService.getModeratorAccounts());
@@ -38,7 +27,7 @@ public class AccountsManagementController {
     @GetMapping("/accounts/student")
     public ResponseEntity<?> getStudentAccounts(){
         try {
-            List<StudentAccountResponse> accounts = studentService.getStudentAccounts();
+            List<StudentResponse> accounts = studentService.getStudentAccounts();
             return ResponseEntity.ok(accounts);
         } catch (UserNotFoundException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -55,20 +44,16 @@ public class AccountsManagementController {
         }
     }
 
-    @DeleteMapping("/accounts/moderator/delete")
-    public ResponseEntity<?> deleteModeratorAccount (@RequestParam String username){
-        try{
-            userService.deleteModeratorAccount(username);
-            return ResponseEntity.ok("Nalog uspješno obrisan!");
-        } catch (UserNotFoundException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+    @DeleteMapping("/accounts/moderator/{id}/delete")
+    public ResponseEntity<?> deleteModeratorAccount (@PathVariable Integer id){
+        userService.deleteModeratorAccount(id);
+        return ResponseEntity.ok("Nalog uspješno obrisan!");
     }
 
-    @DeleteMapping("/accounts/student/delete")
-    public ResponseEntity<?> deleteStudentAccount (@RequestParam String username){
+    @DeleteMapping("/accounts/student/{id}/delete")
+    public ResponseEntity<?> deleteStudentAccount (@PathVariable Integer id){
         try{
-            studentService.deleteStudentAccount(username);
+            studentService.deleteStudentAccount(id);
             return ResponseEntity.ok("Nalog uspješno obrisan!");
         } catch (UserNotFoundException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -79,28 +64,6 @@ public class AccountsManagementController {
     public ResponseEntity<?> changeModeratorPassword (@RequestBody UpdateModeratorPasswordRequest request){
         try{
             userService.changeModeratorPassword(request);
-            return ResponseEntity.ok("Lozinka je uspješno promijenjena!");
-        } catch (UserNotFoundException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
-    @GetMapping("/check-password")
-    public ResponseEntity<?> checkAdminPassword (@RequestParam String password){
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        try{
-            boolean check = userService.checkPassword(password, username);
-            return ResponseEntity.ok(check);
-        } catch (UserNotFoundException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
-    @PostMapping("/change-password")
-    public ResponseEntity<?> changeAdminPassword (@RequestBody UpdateAdminPasswordRequest request){
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        try{
-            userService.changeAdminPassword(username, request);
             return ResponseEntity.ok("Lozinka je uspješno promijenjena!");
         } catch (UserNotFoundException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

@@ -5,10 +5,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.AccountResponse;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.CreateModeratorAccountRequest;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.UpdateAdminPasswordRequest;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.UpdateModeratorPasswordRequest;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.*;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.UserNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.User;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories.UserRepository;
@@ -53,19 +50,14 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    public AccountResponse getAdminProfileInformations(String username) throws UserNotFoundException {
-        User user = getUserByUsername(username);
-        return new AccountResponse(user.getUsername(), user.getName(), user.getSurname(), user.getRole(), user.isActive());
-    }
-
     public List<User> getUsersByRole(String role){
         return userRepository.findByRoleContaining(role);
     }
 
-    public List<AccountResponse> getModeratorAccounts(){
+    public List<UserResponse> getModeratorAccounts(){
         return userRepository.findByRoleContaining("MODERATOR")
                 .stream()
-                .map(user -> new AccountResponse(user.getUsername(), user.getName(), user.getSurname(), user.getRole(), user.isActive()))
+                .map(user -> new UserResponse(user.getUserId(), user.getName(), user.getSurname(), user.getUsername(),  user.getRole(), user.isActive()))
                 .toList();
     }
 
@@ -85,13 +77,21 @@ public class UserService implements UserDetailsService {
         return user.getUserId();
     }
 
+    public User getUserById(Integer id) throws UserNotFoundException{
+        Optional<User> user = userRepository.findById(id);
+        if(user.isPresent()){
+            return user.get();
+        }else {
+            throw new UserNotFoundException();
+        }
+    }
+
     public void deleteAccount(User user){
         userRepository.delete(user);
     }
 
-    public void deleteModeratorAccount(String username) throws UserNotFoundException {
-        User user = getUserByUsername(username);
-        deleteAccount(user);
+    public void deleteModeratorAccount(Integer id) {
+        userRepository.deleteById(id);
     }
 
     public void changeModeratorPassword(UpdateModeratorPasswordRequest request) throws UserNotFoundException {
@@ -100,14 +100,13 @@ public class UserService implements UserDetailsService {
         userRepository.save(user);
     }
 
-    public boolean checkPassword(String username, String password) throws UserNotFoundException {
+    public boolean checkPassword(String username, CheckPasswordRequest request) throws UserNotFoundException {
         User user = getUserByUsername(username);
-        return passwordEncoder.matches(password, user.getPassword());
+        return passwordEncoder.matches(request.getPassword(), user.getPassword());
     }
 
-    public void changeAdminPassword(String username, UpdateAdminPasswordRequest request) throws UserNotFoundException {
+    public ReloginResponse getCurrentLoginUserInfo(String username) throws UserNotFoundException {
         User user = getUserByUsername(username);
-        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
-        userRepository.save(user);
+        return new ReloginResponse(user.getUsername(), user.getRole());
     }
 }

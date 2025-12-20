@@ -7,10 +7,6 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class AccountResponse {
-    protected String username;
-    protected String firstName;
-    protected String lastName;
-    protected String role;
-    protected boolean active;
+public class CheckPasswordRequest {
+    private String password;
 }

@@ -24,13 +24,13 @@ function LoginModal({ isOpen, onClose, onLoginSuccess }) {
     try {
       const data = await login(username, password);
       localStorage.setItem("jwtToken", data.token);
+      localStorage.setItem("name", data.name);
+      localStorage.setItem("username", data.username);
       if(data.role === "ROLE_STUDENT"){
-        localStorage.setItem("studentName", data.name);
-        localStorage.setItem("username", data.username);
         window.location.href = "/student";
+      }else if(data.role === "ROLE_ADMIN"){
+        window.location.href = "/admin";
       }
-      //resetForm();
-      //onClose();
     } catch (err) {
       setError(err);
     }
