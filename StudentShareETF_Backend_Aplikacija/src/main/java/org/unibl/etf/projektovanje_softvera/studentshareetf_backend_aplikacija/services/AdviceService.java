@@ -197,8 +197,10 @@ public class AdviceService {
 
             String title = "Obavještenje o uklanjanju savjeta";
             String message = "Vaš savjet " +  advice.getContent() + " je uklonjen.";
-            notificationsService.createNotification(title, message);
+            notificationsService.createNotification(title, message,advice.getStudent());
         }
     }
+
+
 
 }

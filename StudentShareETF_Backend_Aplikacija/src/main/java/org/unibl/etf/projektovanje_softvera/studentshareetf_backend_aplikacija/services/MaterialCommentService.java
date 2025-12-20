@@ -9,6 +9,7 @@ import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.e
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.UserNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Material;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.MaterialComments;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Student;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories.MaterialCommentRepository;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.User;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories.MaterialRepository;
@@ -26,6 +27,7 @@ public class MaterialCommentService {
 
     private final MaterialCommentRepository materialCommentRepository;
     private final UserService userService;
+    private final StudentService studentService;
     private final MaterialService materialService;
     private final ModeratorAuditService moderatorAuditService;
     private final NotificationsService  notificationsService;
@@ -117,7 +119,7 @@ public class MaterialCommentService {
 
             String title = "Obavještenje o uklanjanju komentara";
             String message = "Vaš komentar " +  materialComments.getSadrzaj() + " je uklonjen.";
-            notificationsService.createNotification(title, message);
+            notificationsService.createNotification(title, message,studentService.getStudentByUser(materialComments.getKorisnik()));
         }
     }
 }

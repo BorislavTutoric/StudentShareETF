@@ -129,7 +129,7 @@ public class MaterialService {
 
             String title = "Zahtjev postavljanja materijala";
             String message = "Vaš zahtjev za postavljanje materijala " +  material.getName() + " je odobren!";
-            notificationsService.createNotification(title, message);
+            notificationsService.createNotification(title, message,material.getStudent());
         }
         else
         {
@@ -142,7 +142,7 @@ public class MaterialService {
 
             String title = "Zahtjev postavljanja materijala";
             String message = "Vaš zahtjev za postavljanje materijala " +  material.getName() + " je odbijen.";
-            notificationsService.createNotification(title, message);
+            notificationsService.createNotification(title, message,material.getStudent());
         }
     }
 }

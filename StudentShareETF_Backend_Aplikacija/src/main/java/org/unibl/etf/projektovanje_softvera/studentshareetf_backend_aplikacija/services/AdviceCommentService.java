@@ -170,7 +170,7 @@ public class AdviceCommentService {
 
             String title = "Obavještenje o uklanjanju komentara na savjet";
             String message = "Vaš komentar na savjet " +  adviceComment.getContent() + " je uklonjen.";
-            notificationsService.createNotification(title, message);
+            notificationsService.createNotification(title, message,adviceComment.getStudent());
         }
     }
 }

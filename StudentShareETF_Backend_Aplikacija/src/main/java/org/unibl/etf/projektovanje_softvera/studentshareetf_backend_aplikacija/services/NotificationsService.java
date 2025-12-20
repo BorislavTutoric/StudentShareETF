@@ -57,12 +57,14 @@ public class NotificationsService {
         }
     }
 
-    public void createNotification(String title, String message)
+    public void createNotification(String title, String message,Student student)
     {
         LocalDateTime now = LocalDateTime.now();
         Notification notification = new Notification();
         notification.setTitle(title);
         notification.setMessage(message);
+        notification.setDateTime(now);
+        notification.setStudent(student);
         notificationsRepository.save(notification);
     }
 }
