@@ -9,8 +9,8 @@ import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.m
 @NoArgsConstructor
 @AllArgsConstructor
 public class MaterialResponse {
-    private Integer materialId;
-    private String name;
-    private String category;
-    private String subjectName;
+    protected Integer materialId;
+    protected String name;
+    protected String category;
+    protected String subjectName;
 }
