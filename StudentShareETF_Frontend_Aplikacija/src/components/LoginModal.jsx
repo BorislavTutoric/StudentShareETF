@@ -22,19 +22,33 @@ function LoginModal({ isOpen, onClose, onLoginSuccess }) {
     e.preventDefault();
     setError("");
     try {
-      const data = await login(username, password);
-      localStorage.setItem("jwtToken", data.token);
-      if(data.role === "ROLE_STUDENT"){
-        localStorage.setItem("studentName", data.name);
+        const data = await login(username, password); 
+        // data sada sadrži: { token, role, username, name }
+
+        localStorage.setItem("jwtToken", data.token);
         localStorage.setItem("username", data.username);
-        window.location.href = "/student";
-      }
-      //resetForm();
-      //onClose();
+        localStorage.setItem("studentName", data.name);
+        localStorage.setItem("userRole", data.role); // Spasavamo ulogu radi provjere u dashboardu
+
+        // LOGIKA PREUSMJERAVANJA
+        if (data.role === "ROLE_STUDENT") {
+            window.location.href = "/student";
+        } 
+        else if (data.role === "ROLE_MODERATOR_ZA_MATERIJALE") {
+            window.location.href = "/moderator/materijali";
+        } 
+        else if (data.role === "ROLE_MODERATOR_ZA_DOGADJAJE") {
+            window.location.href = "/moderator/dogadjaji";
+        }
+        else {
+            // Ovdje možeš dodati defaultnu rutu ako uloga nije prepoznata
+            console.warn("Nepoznata uloga:", data.role);
+        }
+
     } catch (err) {
-      setError(err);
+        setError(err);
     }
-  };
+};
 
   const resetForm = () => {
     setUsername("");
