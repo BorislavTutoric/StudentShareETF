@@ -37,7 +37,7 @@ function LoginModal({ isOpen, onClose, onLoginSuccess }) {
         else if (data.role === "ROLE_MODERATOR_ZA_MATERIJALE") {
             window.location.href = "/moderator/materijali";
         } 
-        else if (data.role === "ROLE_MODERATOR_ZA_DOGADJAJE") {
+        else if (data.role === "ROLE_MODERATOR_ZA_DOGAĐAJE") {
             window.location.href = "/moderator/dogadjaji";
         }
         else {
