@@ -54,3 +54,11 @@ export const mailVerification = async (token) => {
   }
 };
 
+export const loginCheck = async () => {
+  try {
+    const res = await api.get("api/auth-check"); 
+    return res.data; 
+  } catch (err) {
+    throw err;
+  }
+};

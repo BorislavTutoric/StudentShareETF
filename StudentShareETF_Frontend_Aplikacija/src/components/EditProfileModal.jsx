@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { updatePersonalInfo, emailChange, passwordChange } from "../services/profileService";
+import { updateStudentPersonalInfo, emailChange, passwordChange } from "../services/profileService";
 import { checkEmail } from "../services/authService";
 
 function EditProfileModal({ profile, onClose, onUpdated, showToast }) {
@@ -25,7 +25,7 @@ function EditProfileModal({ profile, onClose, onUpdated, showToast }) {
     }
 
     try {
-      const res = await updatePersonalInfo({ name, surname, studyProgram, major });
+      const res = await updateStudentPersonalInfo({ name, surname, studyProgram, major });
       onUpdated(res.data);
       showToast("Lični podaci su uspješno ažurirani!", "success");
     } catch (err) {
