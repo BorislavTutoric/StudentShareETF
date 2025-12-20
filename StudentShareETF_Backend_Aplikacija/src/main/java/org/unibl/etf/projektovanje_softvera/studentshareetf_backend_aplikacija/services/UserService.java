@@ -90,8 +90,16 @@ public class UserService implements UserDetailsService {
         userRepository.delete(user);
     }
 
-    public void deleteModeratorAccount(Integer id) {
-        userRepository.deleteById(id);
+    public void deactivateAccount(Integer id) throws UserNotFoundException {
+        User user = getUserById(id);
+        user.setActive(false);
+        userRepository.save(user);
+    }
+
+    public void activateAccount(Integer id) throws UserNotFoundException {
+        User user = getUserById(id);
+        user.setActive(true);
+        userRepository.save(user);
     }
 
     public void changeModeratorPassword(UpdateModeratorPasswordRequest request) throws UserNotFoundException {

@@ -44,4 +44,10 @@ public class CalendarController {
     {
         return examScheduleService.createExamsFromPdf(file);
     }
+
+    @PostMapping("/academic-calendars/delete")
+    public ResponseEntity<?> deleteAcademicCalendars(){
+        academicCalendarService.deleteCalendars();
+        return ResponseEntity.ok().build();
+    }
 }

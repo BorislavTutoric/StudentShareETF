@@ -44,18 +44,22 @@ public class AccountsManagementController {
         }
     }
 
-    @DeleteMapping("/accounts/moderator/{id}/delete")
-    public ResponseEntity<?> deleteModeratorAccount (@PathVariable Integer id){
-        userService.deleteModeratorAccount(id);
-        return ResponseEntity.ok("Nalog uspješno obrisan!");
+    @PostMapping("/accounts/{id}/deactivate")
+    public ResponseEntity<?> deactivateAccount (@PathVariable Integer id){
+        try {
+            userService.deactivateAccount(id);
+            return ResponseEntity.ok("Nalog uspješno deaktiviran!");
+        } catch (UserNotFoundException e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
-    @DeleteMapping("/accounts/student/{id}/delete")
-    public ResponseEntity<?> deleteStudentAccount (@PathVariable Integer id){
-        try{
-            studentService.deleteStudentAccount(id);
-            return ResponseEntity.ok("Nalog uspješno obrisan!");
-        } catch (UserNotFoundException e) {
+    @PostMapping("/accounts/{id}/activate")
+    public ResponseEntity<?> activateAccount (@PathVariable Integer id){
+        try {
+            userService.activateAccount(id);
+            return ResponseEntity.ok("Nalog uspješno aktiviran!");
+        } catch (UserNotFoundException e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

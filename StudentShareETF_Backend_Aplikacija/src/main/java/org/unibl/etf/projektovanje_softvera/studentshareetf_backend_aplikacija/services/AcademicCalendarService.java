@@ -1,5 +1,6 @@
 package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services;
 
+import jakarta.transaction.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -65,5 +66,10 @@ public class AcademicCalendarService {
         academicCalendarRepository.save(academicCalendar);
 
         return new AcademicCalendarResponse(academicCalendar.getNaziv(), academicCalendar.getId());
+    }
+
+
+    public void deleteCalendars() {
+        academicCalendarRepository.deleteAllInactive();
     }
 }
