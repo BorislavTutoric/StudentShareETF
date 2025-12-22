@@ -10,11 +10,10 @@ function AdminProfileDisplay() {
   const [showPassword, setShowPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [profileData, setProfileData] = useState(null)
+  const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [passwordError, setPasswordError] = useState("");
-  const [usernameError, setUsernameError] = useState("");
   const [toast, setToast] = useState(null);
+  const [errors, setErrors] = useState({});
 
   const [editData, setEditData] = useState(profileData);
   const [passwordData, setPasswordData] = useState({
@@ -26,9 +25,8 @@ function AdminProfileDisplay() {
   const handleClose = () => {
     setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
     setIsModalOpen(false);
-    setPasswordError("");
-    setUsernameError("");
-  }
+    setErrors({});
+  };
 
   const showToast = (message, type = 'success', duration = 5000) => {
     setToast({ message, type });
@@ -38,12 +36,12 @@ function AdminProfileDisplay() {
   const fetchProfile = async () => {
     setLoading(true);
     try {
-        const data = await getProfileDetails();
-        setProfileData(data);
+      const data = await getProfileDetails();
+      setProfileData(data);
     } catch (err) {
-        console.log(err)
+      console.log(err);
     } finally {
-        setLoading(false);
+      setLoading(false);
     }
   };
 
@@ -51,10 +49,10 @@ function AdminProfileDisplay() {
     try {
       const data = await checkPassword(passwordData.currentPassword);
       if (!data) {
-        setPasswordError("Netačna trenutna lozinka!");
-        setPasswordData({...passwordData, currentPassword: ''});
+        setErrors(prev => ({ ...prev, currentPassword: 'Netačna trenutna lozinka!' }));
+        setPasswordData({ ...passwordData, currentPassword: '' });
       } else {
-        setPasswordError("");
+        setErrors(prev => ({ ...prev, currentPassword: '' }));
       }
     } catch (err) {
       console.error(err);
@@ -62,58 +60,112 @@ function AdminProfileDisplay() {
   };
 
   const usernameCheck = async () => {
-    if(editData.username !== profileData.username){
+    if (editData.username !== profileData.username) {
       try {
         const data = await checkUsername(editData.username);
         if (!data.available) {
-          setUsernameError("Korisničko ime je zauzeto");
-          setEditData({...editData, username: ''});
+          setErrors(prev => ({ ...prev, username: 'Korisničko ime je zauzeto!' }));
+          setEditData({ ...editData, username: '' });
         } else {
-          setUsernameError("");
+          setErrors(prev => ({ ...prev, username: '' }));
         }
       } catch (err) {
         console.error(err);
       }
-    }else{
-      setUsernameError("");
+    } else {
+      setErrors(prev => ({ ...prev, username: '' }));
     }
   };
-  
 
   const handleEdit = () => {
     setIsModalOpen(true);
     setModalTab('info');
     setEditData(profileData);
+    setErrors({});
+  };
+
+  const validateInfoForm = () => {
+    const newErrors = {};
+
+    if (!editData.username || !editData.username.trim()) {
+      newErrors.username = 'Korisničko ime je obavezno';
+    }
+
+    if (!editData.name || !editData.name.trim()) {
+      newErrors.name = 'Ime je obavezno';
+    }
+
+    if (!editData.surname || !editData.surname.trim()) {
+      newErrors.surname = 'Prezime je obavezno';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const validatePasswordForm = () => {
+    const newErrors = {};
+
+    if (!passwordData.currentPassword) {
+      newErrors.currentPassword = 'Trenutna lozinka je obavezna';
+    }
+
+    if (!passwordData.newPassword) {
+      newErrors.newPassword = 'Nova lozinka je obavezna';
+    } else if (passwordData.newPassword.length < 8) {
+      newErrors.newPassword = 'Lozinka mora imati najmanje 8 karaktera';
+    }
+
+    if (!passwordData.confirmPassword) {
+      newErrors.confirmPassword = 'Potvrda lozinke je obavezna';
+    } else if (passwordData.confirmPassword.length < 8) {
+      newErrors.confirmPassword = 'Lozinka mora imati najmanje 8 karaktera';
+    }
+
+    if (passwordData.newPassword && passwordData.confirmPassword && passwordData.newPassword !== passwordData.confirmPassword) {
+      newErrors.confirmPassword = 'Lozinke se ne poklapaju';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSave = async () => {
-    if(profileData.username === editData.username && 
-      profileData.name === editData.name && profileData.surname === editData.surname){
-        setIsModalOpen(false);
-    }else{
-      try{
-        await updatePersonalInfo(editData.username, editData.name, editData.surname);
-        setProfileData(editData);
-        showToast("Podaci uspješno izmijenjeni", 'success');
-      }catch(err){
-        console.log(err);
-        showToast("Greška pri izmjeni podataka!", 'error');
-      }
+    if (!validateInfoForm()) {
+      return;
+    }
+
+    if (profileData.username === editData.username && 
+        profileData.name === editData.name && 
+        profileData.surname === editData.surname) {
       setIsModalOpen(false);
+      return;
+    }
+
+    try {
+      await updatePersonalInfo(editData.username, editData.name, editData.surname);
+      setProfileData(editData);
+      showToast("Podaci uspješno izmijenjeni", 'success');
+      setIsModalOpen(false);
+    } catch (err) {
+      console.log(err);
+      showToast("Greška pri izmjeni podataka!", 'error');
     }
   };
 
   const handlePasswordSave = async () => {
-    if (passwordData.newPassword === passwordData.confirmPassword) {
-      try{
-        const response = await passwordChange(passwordData.newPassword)
-        setIsModalOpen(false);
-        setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
-        showToast("Lozinka uspješno izmijenjena!", 'success');
-      } catch (err){
-        console.log(err);
-        showToast("Greška pri izmjeni lozinke", 'error');
-      }
+    if (!validatePasswordForm()) {
+      return;
+    }
+
+    try {
+      await passwordChange(passwordData.newPassword);
+      setIsModalOpen(false);
+      setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
+      showToast("Lozinka uspješno izmijenjena!", 'success');
+    } catch (err) {
+      console.log(err);
+      showToast("Greška pri izmjeni lozinke", 'error');
     }
   };
 
@@ -122,6 +174,13 @@ function AdminProfileDisplay() {
       ...prev,
       [field]: value
     }));
+
+    if (errors[field]) {
+      setErrors(prev => ({
+        ...prev,
+        [field]: ''
+      }));
+    }
   };
 
   const handlePasswordChange = (field, value) => {
@@ -129,6 +188,13 @@ function AdminProfileDisplay() {
       ...prev,
       [field]: value
     }));
+
+    if (errors[field]) {
+      setErrors(prev => ({
+        ...prev,
+        [field]: ''
+      }));
+    }
   };
 
   useEffect(() => {
@@ -138,7 +204,7 @@ function AdminProfileDisplay() {
   if (loading) return (
     <div style={styles.loadingContainer}>
       <div style={styles.spinner}></div>
-      <p style={styles.loadingText}>Učitavanje podataka...</p>
+      <p style={styles.loadingText}>Učitavanje profila...</p>
     </div>
   );
 
@@ -173,9 +239,7 @@ function AdminProfileDisplay() {
       `}</style>
 
       <div style={styles.mainCard}>
-        {/* Top Row - Avatar (left) and Profile Info (center) and Buttons (right) */}
         <div style={styles.topSection}>
-          {/* Left - Avatar Section */}
           <div style={styles.avatarSection}>
             <div style={styles.avatarLarge}>
               {profileData.name.charAt(0)}{profileData.surname.charAt(0)}
@@ -186,7 +250,6 @@ function AdminProfileDisplay() {
             </div>
           </div>
 
-          {/* Center - Profile Info */}
           <div style={styles.infoSection}>
             <div style={styles.nameContainer}>
               <h1 style={styles.fullName}>{profileData.name} {profileData.surname}</h1>
@@ -208,11 +271,7 @@ function AdminProfileDisplay() {
               </div>
             </div>
 
-            {/* Edit Button - Below Info */}
-            <button
-              style={styles.actionBtn}
-              onClick={handleEdit}
-            >
+            <button style={styles.actionBtn} onClick={handleEdit}>
               <Edit2 size={20} />
               <span>Uredi profil</span>
             </button>
@@ -220,21 +279,14 @@ function AdminProfileDisplay() {
         </div>
       </div>
 
-      {/* Modal */}
       {isModalOpen && (
         <div style={styles.modalOverlay} onClick={() => setIsModalOpen(false)}>
-          <div 
-            style={styles.modal}
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
             <div style={styles.modalHeader}>
               <h2 style={styles.modalTitle}>
                 {modalTab === 'info' ? 'Izmjeni podatke' : 'Promjeni lozinku'}
               </h2>
-              <button
-                style={styles.closeBtn}
-                onClick={handleClose}
-              >
+              <button style={styles.closeBtn} onClick={handleClose}>
                 <X size={24} />
               </button>
             </div>
@@ -271,11 +323,14 @@ function AdminProfileDisplay() {
                       type="text"
                       value={editData.username}
                       onChange={(e) => handleChange('username', e.target.value)}
-                      style={styles.input}
+                      style={{
+                        ...styles.input,
+                        ...(errors.username ? styles.inputError : {})
+                      }}
                       placeholder="Korisničko ime"
                       onBlur={usernameCheck}
                     />
-                    {usernameError && <p style={styles.errorMessage}>{usernameError}</p>}
+                    {errors.username && <span style={styles.errorText}>{errors.username}</span>}
                   </div>
 
                   <div style={styles.formField}>
@@ -284,9 +339,13 @@ function AdminProfileDisplay() {
                       type="text"
                       value={editData.name}
                       onChange={(e) => handleChange('name', e.target.value)}
-                      style={styles.input}
+                      style={{
+                        ...styles.input,
+                        ...(errors.name ? styles.inputError : {})
+                      }}
                       placeholder="Ime"
                     />
+                    {errors.name && <span style={styles.errorText}>{errors.name}</span>}
                   </div>
 
                   <div style={styles.formField}>
@@ -295,9 +354,13 @@ function AdminProfileDisplay() {
                       type="text"
                       value={editData.surname}
                       onChange={(e) => handleChange('surname', e.target.value)}
-                      style={styles.input}
+                      style={{
+                        ...styles.input,
+                        ...(errors.surname ? styles.inputError : {})
+                      }}
                       placeholder="Prezime"
                     />
+                    {errors.surname && <span style={styles.errorText}>{errors.surname}</span>}
                   </div>
                 </div>
               ) : (
@@ -309,18 +372,22 @@ function AdminProfileDisplay() {
                         type={showPassword ? 'text' : 'password'}
                         value={passwordData.currentPassword}
                         onChange={(e) => handlePasswordChange('currentPassword', e.target.value)}
-                        style={styles.input}
+                        style={{
+                          ...styles.input,
+                          ...(errors.currentPassword ? styles.inputError : {})
+                        }}
                         placeholder="Unesite trenutnu lozinku"
                         onBlur={passwordCheck}
                       />
                       <button
+                        type="button"
                         style={styles.eyeBtn}
                         onClick={() => setShowPassword(!showPassword)}
                       >
                         {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                       </button>
                     </div>
-                    {passwordError && <p style={styles.errorMessage}>{passwordError}</p>}
+                    {errors.currentPassword && <span style={styles.errorText}>{errors.currentPassword}</span>}
                   </div>
 
                   <div style={styles.formField}>
@@ -330,16 +397,21 @@ function AdminProfileDisplay() {
                         type={showNewPassword ? 'text' : 'password'}
                         value={passwordData.newPassword}
                         onChange={(e) => handlePasswordChange('newPassword', e.target.value)}
-                        style={styles.input}
+                        style={{
+                          ...styles.input,
+                          ...(errors.newPassword ? styles.inputError : {})
+                        }}
                         placeholder="Unesite novu lozinku"
                       />
                       <button
+                        type="button"
                         style={styles.eyeBtn}
                         onClick={() => setShowNewPassword(!showNewPassword)}
                       >
                         {showNewPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                       </button>
                     </div>
+                    {errors.newPassword && <span style={styles.errorText}>{errors.newPassword}</span>}
                   </div>
 
                   <div style={styles.formField}>
@@ -349,23 +421,22 @@ function AdminProfileDisplay() {
                         type={showConfirmPassword ? 'text' : 'password'}
                         value={passwordData.confirmPassword}
                         onChange={(e) => handlePasswordChange('confirmPassword', e.target.value)}
-                        style={styles.input}
+                        style={{
+                          ...styles.input,
+                          ...(errors.confirmPassword ? styles.inputError : {})
+                        }}
                         placeholder="Potvrdite novu lozinku"
                       />
                       <button
+                        type="button"
                         style={styles.eyeBtn}
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                       >
                         {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                       </button>
                     </div>
+                    {errors.confirmPassword && <span style={styles.errorText}>{errors.confirmPassword}</span>}
                   </div>
-
-                  {passwordData.newPassword && passwordData.confirmPassword && passwordData.newPassword !== passwordData.confirmPassword && (
-                    <div style={styles.errorMessage}>
-                      Lozinke se ne poklapaju!
-                    </div>
-                  )}
                 </div>
               )}
             </div>
@@ -380,7 +451,6 @@ function AdminProfileDisplay() {
               <button
                 style={{...styles.modalBtn, ...styles.saveBtn}}
                 onClick={modalTab === 'info' ? handleSave : handlePasswordSave}
-                disabled={modalTab === 'password' && passwordData.newPassword !== passwordData.confirmPassword}
               >
                 Sačuvaj
               </button>
@@ -525,14 +595,6 @@ const styles = {
     letterSpacing: '0.2px',
   },
 
-  buttonsSection: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '12px',
-    minWidth: '160px',
-    flexShrink: 0,
-  },
-
   actionBtn: {
     display: 'flex',
     flexDirection: 'row',
@@ -552,13 +614,6 @@ const styles = {
     width: '100%',
   },
 
-  passwordBtn: {
-    background: 'rgba(76, 175, 80, 0.15)',
-    borderColor: 'rgba(76, 175, 80, 0.3)',
-    color: '#4cb050',
-  },
-
-  // Modal Styles
   modalOverlay: {
     position: 'fixed',
     top: 0,
@@ -680,6 +735,18 @@ const styles = {
     fontFamily: 'inherit',
   },
 
+  inputError: {
+    borderColor: '#F44336',
+  },
+
+  errorText: {
+    color: '#F44336',
+    fontSize: '12px',
+    fontWeight: '500',
+    marginTop: '4px',
+    display: 'block',
+  },
+
   passwordInputWrapper: {
     position: 'relative',
     display: 'flex',
@@ -698,17 +765,6 @@ const styles = {
     justifyContent: 'center',
     padding: '8px',
     transition: 'all 0.3s ease',
-  },
-
-  errorMessage: {
-    padding: '12px 16px',
-    background: 'rgba(239, 68, 68, 0.15)',
-    border: '1px solid rgba(239, 68, 68, 0.3)',
-    borderRadius: '10px',
-    color: '#ef4444',
-    fontSize: '13px',
-    fontWeight: '600',
-    letterSpacing: '0.2px',
   },
 
   modalFooter: {
@@ -742,26 +798,28 @@ const styles = {
     color: '#4cb050',
   },
 
-  loadingContainer: { 
-    display: "flex", 
-    flexDirection: "column", 
-    alignItems: "center", 
-    justifyContent: "center", 
-    minHeight: "300px", 
-    color: "#ffffff" 
+  loadingContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: '300px',
+    color: '#ffffff'
   },
-  spinner: { 
-    width: "40px", 
-    height: "40px", 
-    border: "4px solid rgba(96, 224, 22, 0.3)", 
-    borderTop: "4px solid #dc7806ff", 
-    borderRadius: "50%", 
-    animation: "spin 1s linear infinite" 
+
+  spinner: {
+    width: '40px',
+    height: '40px',
+    border: '4px solid rgba(96, 224, 22, 0.3)',
+    borderTop: '4px solid #dc7806ff',
+    borderRadius: '50%',
+    animation: 'spin 1s linear infinite'
   },
-  loadingText: { 
-    marginTop: "15px", 
-    fontSize: "16px", 
-    fontWeight: "600",
+
+  loadingText: {
+    marginTop: '15px',
+    fontSize: '16px',
+    fontWeight: '600',
     color: '#ed9b0dff',
   },
 };

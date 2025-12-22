@@ -18,18 +18,18 @@ export const getStudentAccounts = async () => {
   }
 };
 
-export const deleteModeratorAccount = async (moderatorId) => {
+export const deactivateUserAccountApi = async (userId) => {
   try{
-    const res = await api.get(`api/admin/accounts/moderator/${moderatorId}/delete`);
+    const res = await api.post(`api/admin/accounts/${userId}/deactivate`);
     return res.data;
   }catch (err){
     throw err;
   }
 };
 
-export const deleteStudentAccount = async (studentId) => {
+export const activateUserAccountApi = async (userId) => {
   try{
-    const res = await api.get(`api/admin/accounts/student/${studentId}/delete`);
+    const res = await api.post(`api/admin/accounts/${userId}/activate`);
     return res.data;
   }catch (err){
     throw err;

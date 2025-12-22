@@ -6,13 +6,8 @@ import { getAllModeratorActionsApi } from '../../services/moderatorActionsServic
 function ModeratorActions() {
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [selectedAction, setSelectedAction] = useState(null);
-  const [toast, setToast] = useState(null);
   const [actions, setActions] = useState([]);
-
-  const showToast = (message, type = 'success', duration = 5000) => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), duration);
-  };
+  const [loading, setLoading] = useState(true);
 
   const formatDateTime = (dateTimeString) => {
     const date = new Date(dateTimeString);
@@ -33,17 +28,14 @@ function ModeratorActions() {
 
   const getAllModeratorActions = async () => {
     try {
+      setLoading(true)
       const response = await getAllModeratorActionsApi();
       setActions(response);
     } catch (err) {
       console.log(err);
+    } finally {
+      setLoading(false);
     }
-  };
-
-  const handleDeleteAction = async (e, action) => {
-    e.stopPropagation();
-    // Implement delete functionality here
-    showToast('Akcija je obrisana', 'success');
   };
 
   const closeModal = () => {
@@ -60,10 +52,16 @@ function ModeratorActions() {
     getAllModeratorActions();
   }, []);
 
+  if (loading) return (
+    <div style={styles.loadingContainer}>
+      <div style={styles.spinner}></div>
+      <p style={styles.loadingText}>Učitavanje akcija...</p>
+    </div>
+  );
+
   return (
     <>
       <div style={styles.container}>
-        {toast && <Toast message={toast.message} type={toast.type} />}
         
         <div style={styles.header}>
           <div style={styles.headerContent}>
@@ -110,23 +108,6 @@ function ModeratorActions() {
                     <h3 style={styles.actionTitle}>{action.description}</h3>
                     <p style={styles.actionDate}>{formatDateTime(action.dateTime)}</p>
                   </div>
-
-                  {isHovered && (
-                    <button
-                      style={styles.deleteButton}
-                      onClick={(e) => handleDeleteAction(e, action)}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = 'rgba(239, 68, 68, 0.25)';
-                        e.currentTarget.style.transform = 'scale(1.1)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = 'rgba(239, 68, 68, 0.15)';
-                        e.currentTarget.style.transform = 'scale(1)';
-                      }}
-                    >
-                      <Trash2 size={18} color="#ef4444" />
-                    </button>
-                  )}
                 </div>
               );
             })
@@ -473,6 +454,30 @@ const styles = {
     letterSpacing: '0.3px',
     wordBreak: 'break-word',
     overflowWrap: 'break-word',
+  },
+  loadingContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: '300px',
+    color: '#ffffff'
+  },
+
+  spinner: {
+    width: '40px',
+    height: '40px',
+    border: '4px solid rgba(96, 224, 22, 0.3)',
+    borderTop: '4px solid #dc7806ff',
+    borderRadius: '50%',
+    animation: 'spin 1s linear infinite'
+  },
+
+  loadingText: {
+    marginTop: '15px',
+    fontSize: '16px',
+    fontWeight: '600',
+    color: '#ed9b0dff',
   },
 };
 

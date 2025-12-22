@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Upload, FileText, Trash2, Calendar, AlertCircle } from 'lucide-react';
+import { Upload, FileText, Trash2, Calendar, AlertCircle, X } from 'lucide-react';
 import { deleteExams, getAcademicCalendarApi, openAcademicCalendar, setExamSchedule, uploadAcademicCalendar } from '../../services/calendarService,';
 import Toast from '../Toast';
 
@@ -10,6 +10,7 @@ function AdminAcademicCalendar() {
   const [deleteMonth, setDeleteMonth] = useState('');
   const [deleteYear, setDeleteYear] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState(false)
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
   const [uploadingExams, setUploadingExams] = useState(false);
@@ -34,6 +35,10 @@ function AdminAcademicCalendar() {
   const handleFileSelect = (e) => {
     const file = e.target.files[0];
     setSelectedFile(file);
+  };
+
+  const handleRemoveFile = () => {
+    setSelectedFile(null);
   };
 
   const handleUploadCalendar = async () => {
@@ -105,7 +110,7 @@ function AdminAcademicCalendar() {
   if (loading) return (
     <div style={styles.loadingContainer}>
       <div style={styles.spinner}></div>
-      <p style={styles.loadingText}>Učitavanje podataka...</p>
+      <p style={styles.loadingText}>Učitavanje...</p>
     </div>
   );
 
@@ -167,12 +172,21 @@ function AdminAcademicCalendar() {
               </label>
 
               {selectedFile && (
-                <button
-                  style={styles.uploadButton}
-                  onClick={handleUploadCalendar}
-                >
-                  Upload Kalendar
-                </button>
+                <div style={styles.fileActionContainer}>
+                  <button
+                    style={styles.removeButton}
+                    onClick={handleRemoveFile}
+                  >
+                    <X size={18} />
+                    Ukloni Fajl
+                  </button>
+                  <button
+                    style={styles.uploadButton}
+                    onClick={handleUploadCalendar}
+                  >
+                    Upload Kalendar
+                  </button>
+                </div>
               )}
             </div>
           </div>
@@ -199,20 +213,29 @@ function AdminAcademicCalendar() {
               </label>
 
               {selectedFile && (
-                <button
-                  style={styles.uploadButton}
-                  onClick={handleUploadExamSchedule}
-                  disabled={uploadingExams}
-                >
-                  {uploadingExams ? (
-                    <>
-                      <div style={styles.spinnerSmall}></div>
-                      <span>Pričekajte, ovo može da potraje...</span>
-                    </>
-                  ) : (
-                    'Upload Raspored'
-                  )}
-                </button>
+                <div style={styles.fileActionContainer}>
+                  <button
+                    style={styles.removeButton}
+                    onClick={handleRemoveFile}
+                  >
+                    <X size={18} />
+                    Ukloni Fajl
+                  </button>
+                  <button
+                    style={styles.uploadButton}
+                    onClick={handleUploadExamSchedule}
+                    disabled={uploadingExams}
+                  >
+                    {uploadingExams ? (
+                      <>
+                        <div style={styles.spinnerSmall}></div>
+                        <span>Pričekajte, ovo može da potraje...</span>
+                      </>
+                    ) : (
+                      'Upload Raspored'
+                    )}
+                  </button>
+                </div>
               )}
             </div>
           </div>
@@ -266,7 +289,7 @@ function AdminAcademicCalendar() {
 
               <button
                 style={styles.deleteButton}
-                onClick={handleDeleteExams}
+                onClick={() => {deleteMonth && deleteYear ? setDeleteConfirm(true) : showToast("Niste odabrali mjesec i godinu!", 'info');}}
               >
                 <Trash2 size={18} />
                 Obriši Ispite
@@ -275,6 +298,37 @@ function AdminAcademicCalendar() {
           </div>
         </div>
       )}
+
+      {/* Modal za potvrdu brisanja */}
+      {deleteConfirm && (
+        <div style={styles.modalOverlay} onClick={() => setDeleteConfirm(false)}>
+          <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <h3 style={styles.modalTitle}>Potvrda brisanja</h3>
+            <p style={styles.modalText}>
+              Da li ste sigurni da želite obrisati ispite za odabrani mjesec i godinu? 
+            </p>
+            <div style={styles.modalButtons}>
+              <button
+                style={styles.cancelBtn}
+                onClick={() => setDeleteConfirm(false)}
+              >
+                Otkaži
+              </button>
+              <button
+                style={styles.confirmDeleteBtn}
+                onClick={() => {
+                    handleDeleteExams();
+                    setDeleteConfirm(false);
+                  }
+                }
+              >
+                Potvrdi
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
@@ -414,6 +468,26 @@ const styles = {
   fileInput: {
     display: 'none',
   },
+  fileActionContainer: {
+    display: 'flex',
+    gap: '10px',
+    alignItems: 'center',
+  },
+  removeButton: {
+    padding: '12px 24px',
+    backgroundColor: 'rgba(239, 68, 68, 0.2)',
+    color: '#ef4444',
+    border: '2px solid rgba(239, 68, 68, 0.4)',
+    borderRadius: '12px',
+    fontSize: '15px',
+    fontWeight: '700',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: '8px',
+  },
   uploadButton: {
     padding: '12px 24px',
     backgroundColor: '#ff6b35',
@@ -529,6 +603,73 @@ const styles = {
     fontSize: "16px", 
     fontWeight: "600",
     color: '#ed9b0dff',
+  },
+  modalOverlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    background: 'rgba(0, 0, 0, 0.6)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1000,
+    backdropFilter: 'blur(5px)',
+  },
+
+  modal: {
+    background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
+    borderRadius: '16px',
+    padding: '32px',
+    maxWidth: '400px',
+    width: '90%',
+    boxShadow: '0 20px 60px rgba(0, 0, 0, 0.6)',
+    border: '2px solid rgba(255, 107, 53, 0.2)',
+  },
+
+  modalTitle: {
+    color: '#ffffff',
+    fontSize: '20px',
+    fontWeight: '700',
+    margin: '0 0 16px 0',
+    letterSpacing: '0.3px',
+  },
+
+  modalText: {
+    color: 'rgba(255, 255, 255, 0.75)',
+    fontSize: '14px',
+    margin: '0 0 24px 0',
+    lineHeight: '1.6',
+  },
+
+  modalButtons: {
+    display: 'flex',
+    gap: '12px',
+    justifyContent: 'flex-end',
+  },
+
+  cancelBtn: {
+    background: 'rgba(255, 255, 255, 0.1)',
+    border: '2px solid rgba(255, 255, 255, 0.2)',
+    borderRadius: '10px',
+    padding: '10px 20px',
+    color: '#ffffff',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+  },
+
+  confirmDeleteBtn: {
+    background: 'linear-gradient(135deg, #ff6b35 0%, #f7a600 100%)',
+    border: 'none',
+    borderRadius: '10px',
+    padding: '10px 20px',
+    color: '#ffffff',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    boxShadow: '0 6px 20px rgba(255, 107, 53, 0.3)',
   },
 };
 

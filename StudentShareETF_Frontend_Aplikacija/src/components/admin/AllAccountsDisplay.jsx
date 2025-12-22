@@ -1,17 +1,19 @@
 import { act, useEffect, useState } from 'react';
 import { Trash2, Plus, Search } from 'lucide-react';
-import { deleteModeratorAccount, deleteStudentAccount, getModeratorAccounts, getStudentAccounts } from '../../services/accountsService';
+import { activateUserAccountApi, deactivateUserAccountApi, getModeratorAccounts, getStudentAccounts } from '../../services/accountsService';
 import CreateAccountModal from './CreateAccountModal';
 import Toast from '../Toast';
 
 function AccountsManagement() {
   const [activeTab, setActiveTab] = useState('moderator');
-  const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [deactivateConfirm, setDeactivateConfirm] = useState(null);
+  const [activateConfirm, setActivateConfirm] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [moderatorFilter, setModeratorFilter] = useState('all');
   const [studentFilter, setStudentFilter] = useState('all');
   const [isCreateAccountModalOpen, setIsCreateAccountModalOpen] = useState(false);
   const [toast, setToast] = useState(null);
+  const [expandedStudent, setExpandedStudent] = useState(null);
 
   const [moderators, setModerators] = useState([]);
 
@@ -44,18 +46,72 @@ function AccountsManagement() {
     setIsCreateAccountModalOpen(false);
   }
 
+  const deactivateUserAccount = async (userId, accountType) => {
+    try{
+      const response = await deactivateUserAccountApi(userId);
+      if(accountType === "student"){
+        setStudents(prevStudents =>
+          prevStudents.map(student =>
+            student.id === userId
+              ? { ...student, active: false } 
+              : student
+          )
+        );
+      }else{
+        setModerators(prevModerators =>
+          prevModerators.map(moderator =>
+            moderator.id === userId
+              ? { ...moderator, active: false } 
+              : moderator
+          )
+        );
+      }
+      showToast(response, 'success');
+    } catch (err){
+      console.log(err);
+      showToast("Greška pri deaktivaciji naloga!", 'error');
+    }
+  }
+
+  const activateUserAccount = async (userId, accountType) => {
+    try{
+      const response = await activateUserAccountApi(userId);
+      if(accountType === "student"){
+        setStudents(prevStudents =>
+          prevStudents.map(student =>
+            student.id === userId
+              ? { ...student, active: true } 
+              : student
+          )
+        );
+      }else{
+        setModerators(prevModerators =>
+          prevModerators.map(moderator =>
+            moderator.id === userId
+              ? { ...moderator, active: true } 
+              : moderator
+          )
+        );
+      }
+      showToast(response, 'success');
+    } catch (err){
+      console.log(err);
+      showToast("Greška pri aktivaciji naloga!", 'error');
+    }
+  }
+
   const getFilteredList = () => {
     let list = activeTab === 'moderator' ? moderators : students;
 
-    // Primeni pretragu
     const searchLower = searchTerm.toLowerCase();
     list = list.filter(item =>
+      item.id.toString().includes(searchLower) ||
+      (item.name + " " + item.surname).toLowerCase().includes(searchLower) ||
       item.name.toLowerCase().includes(searchLower) ||
       item.surname.toLowerCase().includes(searchLower) ||
-      item.username.toLowerCase().includes(searchLower)
+      item.username.toLowerCase().includes(searchLower) 
     );
 
-    // Primeni filter
     if (activeTab === 'moderator') {
       if (moderatorFilter === 'materijali') {
         list = list.filter(m => m.role === 'MODERATOR_ZA_MATERIJALE');
@@ -74,24 +130,8 @@ function AccountsManagement() {
   };
 
   const filteredList = getFilteredList();
-
-  const handleDelete = async (id, type) => {
-    try{
-        let response;
-        if (type === 'moderator') {
-            response = await deleteModeratorAccount(id);
-            setModerators(moderators.filter(m => m.id !== id));
-        } else {
-            response = await deleteStudentAccount(id);
-            setStudents(students.filter(s => s.id !== id));
-        }
-        setDeleteConfirm(null);
-        showToast(response, 'success');
-    }catch(err){
-        console.log(err);
-        showToast("Greška pri brisanju naloga", 'error');
-    }
-  };
+  const activeModeratorList = filteredList.filter(m => m.active !== false);
+  const inactiveModeratorList = filteredList.filter(m => m.active === false);
 
   useEffect(() => {
     getAllAccounts();
@@ -142,7 +182,7 @@ function AccountsManagement() {
           <Search size={20} color="rgba(255, 255, 255, 0.5)" />
           <input
             type="text"
-            placeholder="Pretraži po imenu, prezimenu ili korisničkom imenu..."
+            placeholder="Pretraži po jedinstvenom identifikatoru, imenu, prezimenu ili korisničkom imenu..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             style={styles.searchInput}
@@ -226,94 +266,248 @@ function AccountsManagement() {
       </div>
 
       {/* Lista naloga */}
-      <div style={styles.listContainer}>
-        {filteredList.length > 0 ? (
-          filteredList.map((item) => (
-            <div key={item.id} style={styles.accountCard}>
-              <div style={styles.accountInfo}>
-                <div style={styles.accountHeader}>
-                  <span style={styles.accountName}>{item.name} {item.surname}</span>
-                </div>
-                <div style={styles.accountDetails}>
-                  <div style={styles.detail}>
-                    <span style={styles.label}>Jedinstveni identifikator:</span>
-                    <span style={styles.value}>{item.id}</span>
-                  </div>
-                  <div style={styles.detail}>
-                    <span style={styles.label}>Korisničko ime:</span>
-                    <span style={styles.value}>{item.username}</span>
-                  </div>
-
-                  {activeTab === 'moderator' ? (
-                    <div style={styles.detail}>
-                      <span style={styles.label}>Vrsta:</span>
-                      <span style={{ ...styles.value, ...styles.typeTag }}>
-                        {item.role}
-                      </span>
+      {activeTab === 'moderator' ? (
+        <div style={styles.twoColumnContainer}>
+          {/* Aktivni moderatori */}
+          <div style={styles.sectionContainer}>
+            <h3 style={styles.sectionTitle}>Aktivni moderatori</h3>
+            <div style={styles.singleColumnList}>
+              {activeModeratorList.length > 0 ? (
+                activeModeratorList.map((item) => (
+                  <div key={item.id} style={styles.accountCard}>
+                    <div style={styles.accountInfo}>
+                      <div style={styles.accountHeader}>
+                        <span style={styles.accountName}>{item.name} {item.surname}</span>
+                      </div>
+                      <div style={styles.accountDetails}>
+                        <div style={styles.detail}>
+                          <span style={styles.label}>Jedinstveni identifikator:</span>
+                          <span style={styles.value}>{item.id}</span>
+                        </div>
+                        <div style={styles.detail}>
+                          <span style={styles.label}>Korisničko ime:</span>
+                          <span style={styles.value}>{item.username}</span>
+                        </div>
+                        <div style={styles.detail}>
+                                <span style={styles.label}>Status:</span>
+                                <span style={{
+                                  ...styles.value,
+                                  ...styles.statusBadge,
+                                  ...(item.active ? styles.statusActive : styles.statusInactive)
+                                }}>
+                                  {item.active ? '✓ Aktivan' : '✕ Deaktiviran'}
+                                </span>
+                        </div>
+                        <div style={styles.detail}>
+                          <span style={styles.label}>Vrsta:</span>
+                          <span style={{ ...styles.value, ...styles.typeTag }}>
+                            {item.role}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                  ) : (
-                    <>
-                      <div style={styles.detail}>
-                        <span style={styles.label}>Email:</span>
-                        <span style={styles.value}>{item.email}</span>
-                      </div>
-                      <div style={styles.detail}>
-                        <span style={styles.label}>Status:</span>
-                        <span style={{
-                          ...styles.value,
-                          ...styles.statusBadge,
-                          ...(item.active ? styles.statusActive : styles.statusInactive)
-                        }}>
-                          {item.active ? '✓ Aktivan' : '✕ Neaktivan'}
-                        </span>
-                      </div>
-                      <div style={styles.detail}>
-                        <span style={styles.label}>Studijski program:</span>
-                        <span style={styles.value}>{item.studyProgram}</span>
-                      </div>
-                      <div style={styles.detail}>
-                        <span style={styles.label}>Smjer:</span>
-                        <span style={styles.value}>{item.major}</span>
-                      </div>
-                    </>
-                  )}
+                    <button
+                      style={styles.deleteBtn}
+                      onClick={() => setDeactivateConfirm({ id: item.id, type: 'moderator' })}
+                    >
+                      Deaktiviraj
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <div style={styles.noResults}>
+                  <p>Nema pronađenih aktivnih moderatora</p>
                 </div>
-              </div>
-              <button
-                style={styles.deleteBtn}
-                onClick={() => setDeleteConfirm({ id: item.id, type: activeTab })}
-              >
-                <Trash2 size={18} />
-              </button>
+              )}
             </div>
-          ))
-        ) : (
-          <div style={styles.noResults}>
-            <p>Nema pronađenih naloga</p>
           </div>
-        )}
-      </div>
 
-      {/* Modal za potvrdu brisanja */}
-      {deleteConfirm && (
-        <div style={styles.modalOverlay} onClick={() => setDeleteConfirm(null)}>
+          {/* Neaktivni moderatori */}
+          <div style={styles.sectionContainer}>
+            <h3 style={styles.sectionTitle}>Deaktivirani moderatori</h3>
+            <div style={styles.singleColumnList}>
+              {inactiveModeratorList.length > 0 ? (
+                inactiveModeratorList.map((item) => (
+                  <div key={item.id} style={styles.accountCard}>
+                    <div style={styles.accountInfo}>
+                      <div style={styles.accountHeader}>
+                        <span style={styles.accountName}>{item.name} {item.surname}</span>
+                      </div>
+                      <div style={styles.accountDetails}>
+                        <div style={styles.detail}>
+                          <span style={styles.label}>Jedinstveni identifikator:</span>
+                          <span style={styles.value}>{item.id}</span>
+                        </div>
+                        <div style={styles.detail}>
+                          <span style={styles.label}>Korisničko ime:</span>
+                          <span style={styles.value}>{item.username}</span>
+                        </div>
+                        <div style={styles.detail}>
+                                <span style={styles.label}>Status:</span>
+                                <span style={{
+                                  ...styles.value,
+                                  ...styles.statusBadge,
+                                  ...(item.active ? styles.statusActive : styles.statusInactive)
+                                }}>
+                                  {item.active ? '✓ Aktivan' : '✕ Deaktiviran'}
+                                </span>
+                        </div>
+                        <div style={styles.detail}>
+                          <span style={styles.label}>Vrsta:</span>
+                          <span style={{ ...styles.value, ...styles.typeTag }}>
+                            {item.role}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      style={styles.activateBtn}
+                      onClick={() => setActivateConfirm({ id: item.id, type: 'moderator' })}
+                    >
+                      Aktiviraj
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <div style={styles.noResults}>
+                  <p>Nema pronađenih deaktiviranih moderatora</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div style={{...styles.twoColumnContainer, gridTemplateColumns: '1fr'}}>
+          <div style={styles.sectionContainer}>
+            <h3 style={styles.sectionTitle}>Studentski nalozi</h3>
+            <div style={styles.singleColumnList}>
+              {filteredList.length > 0 ? (
+                filteredList.map((item) => (
+                  <div key={item.id} style={styles.studentCard}>
+                    <div style={styles.studentCardContent}>
+                      <div style={styles.accountInfo}>
+                        <div style={styles.accountHeader}>
+                          <span style={styles.accountName}>{item.name} {item.surname}</span>
+                        </div>
+                        <div style={styles.accountDetails}>
+                          <div style={styles.detail}>
+                            <span style={styles.label}>Jedinstveni identifikator:</span>
+                            <span style={styles.value}>{item.id}</span>
+                          </div>
+                          <div style={styles.detail}>
+                            <span style={styles.label}>Korisničko ime:</span>
+                            <span style={styles.value}>{item.username}</span>
+                          </div>
+                          
+                          {expandedStudent === item.id && (
+                            <>
+                              <div style={styles.detail}>
+                                <span style={styles.label}>Email:</span>
+                                <span style={styles.value}>{item.email}</span>
+                              </div>
+                              <div style={styles.detail}>
+                                <span style={styles.label}>Status:</span>
+                                <span style={{
+                                  ...styles.value,
+                                  ...styles.statusBadge,
+                                  ...(item.active ? styles.statusActive : styles.statusInactive)
+                                }}>
+                                  {item.active ? '✓ Aktivan' : '✕ Neaktivan'}
+                                </span>
+                              </div>
+                              <div style={styles.detail}>
+                                <span style={styles.label}>Studijski program:</span>
+                                <span style={styles.value}>{item.studyProgram}</span>
+                              </div>
+                              <div style={styles.detail}>
+                                <span style={styles.label}>Smjer:</span>
+                                <span style={styles.value}>{item.major}</span>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                      <div style={styles.studentActions}>
+                        <button
+                          style={styles.expandBtn}
+                          onClick={() => setExpandedStudent(expandedStudent === item.id ? null : item.id)}
+                        >
+                          {expandedStudent === item.id ? '▼' : '▶'}
+                        </button>
+                        <button
+                          style={item.active ? styles.deleteBtn : styles.activateBtn}
+                          onClick={() => item.active ? setDeactivateConfirm({ id: item.id, type: 'student' }) : setActivateConfirm({ id: item.id, type: 'student' })}
+                        >
+                          {item.active ? 'Deaktiviraj' : 'Aktiviraj'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div style={styles.noResults}>
+                  <p>Nema pronađenih naloga</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal za potvrdu deaktivacije */}
+      {deactivateConfirm && (
+        <div style={styles.modalOverlay} onClick={() => setDeactivateConfirm(null)}>
           <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
-            <h3 style={styles.modalTitle}>Potvrdi brisanje</h3>
+            <h3 style={styles.modalTitle}>Potvrda deaktivacije</h3>
             <p style={styles.modalText}>
-              Da li si siguran da želiš obrisati ovaj nalog? Ova akcija se ne može poništiti.
+              Da li ste sigurni da želite deaktivirati ovaj nalog? 
             </p>
             <div style={styles.modalButtons}>
               <button
                 style={styles.cancelBtn}
-                onClick={() => setDeleteConfirm(null)}
+                onClick={() => setDeactivateConfirm(null)}
               >
                 Otkaži
               </button>
               <button
                 style={styles.confirmDeleteBtn}
-                onClick={() => handleDelete(deleteConfirm.id, deleteConfirm.type)}
+                onClick={() => {
+                    deactivateUserAccount(deactivateConfirm.id, deactivateConfirm.type)
+                    setDeactivateConfirm(null);
+                  }
+                }
               >
-                Obriši
+                Potvrdi
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal za potvrdu aktivacije */}
+      {activateConfirm && (
+        <div style={styles.modalOverlay} onClick={() => setActivateConfirm(null)}>
+          <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <h3 style={styles.modalTitle}>Potvrda aktivacije</h3>
+            <p style={styles.modalText}>
+              Da li ste sigurni da želite aktivirati ovaj nalog? 
+            </p>
+            <div style={styles.modalButtons}>
+              <button
+                style={styles.cancelBtn}
+                onClick={() => setActivateConfirm(null)}
+              >
+                Otkaži
+              </button>
+              <button
+                style={styles.confirmDeleteBtn}
+                onClick={() => {
+                    activateUserAccount(activateConfirm.id, activateConfirm.type)
+                    setActivateConfirm(null);
+                  }
+                }
+              >
+                Potvrdi
               </button>
             </div>
           </div>
@@ -462,10 +656,30 @@ const styles = {
     boxShadow: '0 4px 12px rgba(255, 107, 53, 0.3)',
   },
 
-  listContainer: {
+  sectionContainer: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '16px',
+  },
+
+  sectionTitle: {
+    color: '#ffffff',
+    fontSize: '18px',
+    fontWeight: '700',
+    margin: 0,
+    letterSpacing: '0.3px',
+  },
+
+  twoColumnContainer: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
-    gap: '20px',
+    gridTemplateColumns: '1fr 1fr',
+    gap: '24px',
+  },
+
+  singleColumnList: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '16px',
   },
 
   accountCard: {
@@ -563,6 +777,62 @@ const styles = {
     justifyContent: 'center',
     transition: 'all 0.3s ease',
     flexShrink: 0,
+  },
+
+  activateBtn: {
+    background: 'rgba(76, 175, 80, 0.2)',
+    border: '2px solid rgba(76, 175, 80, 0.4)',
+    borderRadius: '10px',
+    padding: '10px 12px',
+    color: '#4CAF50',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'all 0.3s ease',
+    flexShrink: 0,
+  },
+
+  studentCard: {
+    background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(247, 166, 0, 0.05) 100%)',
+    border: '2px solid rgba(255, 107, 53, 0.15)',
+    borderRadius: '14px',
+    padding: '20px',
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: '16px',
+    transition: 'all 0.3s ease',
+    backdropFilter: 'blur(10px)',
+  },
+
+  studentCardContent: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+    gap: '16px',
+    width: '100%',
+  },
+
+  studentActions: {
+    display: 'flex',
+    gap: '8px',
+    flexShrink: 0,
+  },
+
+  expandBtn: {
+    background: 'rgba(255, 107, 53, 0.2)',
+    border: '2px solid rgba(255, 107, 53, 0.4)',
+    borderRadius: '10px',
+    padding: '10px 12px',
+    color: '#ff6b35',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'all 0.3s ease',
+    fontSize: '14px',
+    fontWeight: '700',
   },
 
   noResults: {
