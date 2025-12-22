@@ -8,10 +8,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.AcademicCalendarResponse;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.DeleteExamsRequest;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.UserNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.ExamSchedule;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.AcademicCalendarService;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.ExamScheduleService;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.ExamService;
 
 import java.io.IOException;
 
@@ -22,6 +24,7 @@ public class CalendarController {
 
     private final AcademicCalendarService academicCalendarService;
     private final ExamScheduleService examScheduleService;
+    private final ExamService examService;
 
     @PostMapping(value = "/academic-calendar/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadAcademicCalendar(@RequestParam("file") MultipartFile file){
@@ -46,5 +49,11 @@ public class CalendarController {
     public ResponseEntity<?> deleteAcademicCalendars(){
         academicCalendarService.deleteCalendars();
         return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/exams/delete")
+    public ResponseEntity<?> deleteExams(@RequestBody DeleteExamsRequest request){
+        boolean result = examService.deleteExams(request);
+        return ResponseEntity.ok().body(result);
     }
 }

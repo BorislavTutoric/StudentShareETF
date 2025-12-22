@@ -1,7 +1,9 @@
 package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.DeleteExamsRequest;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.ExamResponse;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Exam;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Major;
@@ -9,6 +11,8 @@ import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.m
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.User;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories.ExamRepository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -52,5 +56,12 @@ public class ExamService {
                         exam.getRoom()
                 ))
                 .collect(Collectors.toList());
+    }
+
+    public boolean deleteExams(DeleteExamsRequest request) {
+        LocalDateTime start = LocalDate.of(request.getYear(), request.getMounth(), 1).atStartOfDay();
+        LocalDateTime end = LocalDate.of(request.getYear(), request.getMounth(), 1).atStartOfDay();
+        int result = examRepository.deleteByMonthAndYear(start, end);
+        return result > 0;
     }
 }
