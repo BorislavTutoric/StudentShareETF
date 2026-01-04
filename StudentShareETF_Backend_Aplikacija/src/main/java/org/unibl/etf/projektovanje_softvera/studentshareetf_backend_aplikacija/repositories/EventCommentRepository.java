@@ -8,4 +8,6 @@ import java.util.List;
 public interface EventCommentRepository extends JpaRepository<EventComment, Integer> {
 
     List<EventComment> findByEvent_Id(Integer eventId);
+
+    List<EventComment> findByReportedTrue();
 }

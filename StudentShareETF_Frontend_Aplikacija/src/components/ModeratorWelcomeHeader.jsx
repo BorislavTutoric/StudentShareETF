@@ -1,15 +1,27 @@
 import { useState, useEffect } from 'react';
-import { ShieldCheck } from 'lucide-react'; // Možeš koristiti Lucide za bolji kvalitet ili emoji
+import { ShieldCheck } from 'lucide-react';
 
 function ModeratorWelcomeHeader() {
   const [isHovered, setIsHovered] = useState(false);
   const [moderatorName, setModeratorName] = useState('');
 
   useEffect(() => {
-    // Pretpostavka da ime čuvaš pod ovim ključem, prilagodi ako je drugačije
     const name = localStorage.getItem("moderatorName") || localStorage.getItem("studentName");
     setModeratorName(name || 'Moderatore');
   }, []);
+
+  const getRoleDisplayName = () => {
+    const role = localStorage.getItem('userRole'); 
+    
+    switch(role) {
+      case 'ROLE_MODERATOR_ZA_MATERIJALE':
+        return 'MODERATOR ZA MATERIJALE';
+      case 'ROLE_MODERATOR_ZA_DOGAĐAJE':
+        return 'MODERATOR ZA DOGAĐAJE';
+      default:
+        return 'MODERATOR';
+    }
+  };
 
   return (
     <div style={styles.container}>
@@ -40,7 +52,7 @@ function ModeratorWelcomeHeader() {
             </span>
           </div>
           <div style={styles.badgeRow}>
-             <p style={styles.subtitle}>StudentShareETF 🎓</p>
+             <p style={styles.subtitle}>StudentShareETF 🎓 • {getRoleDisplayName()}</p>
           </div>
         </div>
         
@@ -56,8 +68,7 @@ function ModeratorWelcomeHeader() {
               animation: isHovered ? 'pulse-shield 2s ease-in-out infinite' : 'none'
             }}
           >
-            {/* Zamijenjena ikona studenta ikonom štita/admina */}
-            <span style={{ fontSize: "40px", color: "#0a1457" }}>⚙️</span>
+            <span style={{ fontSize: "40px", color: "#0a1457" }}>🛡️</span>
           </div>
           <div style={{
             ...styles.avatarGlow,
@@ -84,7 +95,7 @@ const styles = {
     alignItems: "center",
     transition: 'all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)',
     boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)',
-    border: '1px solid rgba(96, 224, 22, 0.3)', // Pojačan border za moderatora
+    border: '1px solid rgba(99, 102, 241, 0.3)',
     position: 'relative',
     overflow: 'hidden',
   },
@@ -114,12 +125,9 @@ const styles = {
   namePart: {
     fontSize: "28px",
     fontWeight: 900,
-    background: 'linear-gradient(135deg, #60e016 0%, #4ec70f 50%, #3db808 100%)',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    backgroundClip: 'text',
+    color: '#6366f1', // Normalna plava boja
     letterSpacing: "0.5px",
-    textShadow: '0 0 30px rgba(96, 224, 22, 0.3)',
+    textShadow: '0 2px 10px rgba(99, 102, 241, 0.5)',
     margin: 0,
   },
 
@@ -130,7 +138,7 @@ const styles = {
   },
 
   subtitle: {
-    color: '#60e016', // Zelena boja za tekst titule kod moderatora
+    color: '#6366f1',
     fontSize: "13px",
     fontWeight: 700,
     margin: 0,
@@ -157,14 +165,14 @@ const styles = {
     position: 'absolute',
     width: "100px",
     height: "100px",
-    background: 'radial-gradient(circle, rgba(96, 224, 22, 0.3) 0%, transparent 70%)',
+    background: 'radial-gradient(circle, rgba(99, 102, 241, 0.3) 0%, transparent 70%)',
     borderRadius: "50%",
     filter: 'blur(15px)',
     transition: 'all 0.4s ease',
   },
 
   avatarGlowActive: {
-    background: 'radial-gradient(circle, rgba(96, 224, 22, 0.6) 0%, transparent 70%)',
+    background: 'radial-gradient(circle, rgba(99, 102, 241, 0.6) 0%, transparent 70%)',
     filter: 'blur(20px)',
   },
 
@@ -173,18 +181,18 @@ const styles = {
     zIndex: 1,
     width: "85px",
     height: "85px",
-    background: 'linear-gradient(135deg, #60e016 0%, #4ec70f 50%, #3db808 100%)',
-    borderRadius: "20px", // Četvrtastiji oblik sa zaobljenim uglovima za admina
+    background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a78bfa 100%)',
+    borderRadius: "20px",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    boxShadow: '0 15px 40px rgba(96, 224, 22, 0.4)',
+    boxShadow: '0 15px 40px rgba(99, 102, 241, 0.4)',
     border: '3px solid rgba(255, 255, 255, 0.2)',
     transition: 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
   },
 
   avatarContainerHover: {
-    filter: 'drop-shadow(0 0 20px rgba(96, 224, 22, 0.5))',
+    filter: 'drop-shadow(0 0 20px rgba(99, 102, 241, 0.5))',
   },
 };
 

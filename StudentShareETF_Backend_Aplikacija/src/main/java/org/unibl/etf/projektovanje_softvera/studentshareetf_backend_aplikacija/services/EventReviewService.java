@@ -71,33 +71,50 @@ public class EventReviewService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException(username));
 
+        List<EventReview> reviews = reviewRepository.findById_EventId(eventId);
+
+        if ("MODERATOR_ZA_MATERIJALE".equals(user.getRole()) || "MODERATOR_ZA_DOGAĐAJE".equals(user.getRole())) {
+            return reviews.stream().map(review -> {
+                Student reviewStudent = studentRepository.findById(review.getId().getStudentId())
+                        .orElseThrow();
+
+                User reviewUser = userRepository.findById(reviewStudent.getUserId()).orElseThrow();
+
+                return new ReviewResponse(
+                        review.getId().getEventId(),
+                        review.getId().getStudentId(),
+                        review.getRating(),
+                        review.getCreatedAt().toString(),
+                        reviewUser.getName(),
+                        reviewUser.getSurname(),
+                        false
+                );
+            }).collect(Collectors.toList());
+        }
+
         Student currentStudent = studentRepository.findByUser(user)
                 .orElseThrow(() -> new RuntimeException("Student ne postoji"));
 
-        List<EventReview> reviews = reviewRepository.findById_EventId(eventId);
+        return reviews.stream().map(review -> {
+            boolean isMy = review.getId().getStudentId().equals(currentStudent.getUserId());
 
-        return reviews.stream()
-                .map(review -> {
-                    Student reviewStudent = studentRepository.findById(review.getId().getStudentId())
-                            .orElseThrow(() -> new RuntimeException("Student ne postoji"));
+            Student reviewStudent = studentRepository.findById(review.getId().getStudentId())
+                    .orElseThrow();
 
-                    User reviewUser = userRepository.findById(reviewStudent.getUserId())
-                            .orElseThrow();
+            User reviewUser = userRepository.findById(reviewStudent.getUserId()).orElseThrow();
 
-                    boolean isMy = reviewStudent.getUserId().equals(currentStudent.getUserId());
-
-                    return new ReviewResponse(
-                            review.getId().getEventId(),
-                            review.getId().getStudentId(),
-                            review.getRating(),
-                            review.getCreatedAt().toString(),
-                            reviewUser.getName(),
-                            reviewUser.getSurname(),
-                            isMy
-                    );
-                })
-                .collect(Collectors.toList());
+            return new ReviewResponse(
+                    review.getId().getEventId(),
+                    review.getId().getStudentId(),
+                    review.getRating(),
+                    review.getCreatedAt().toString(),
+                    reviewUser.getName(),
+                    reviewUser.getSurname(),
+                    isMy
+            );
+        }).collect(Collectors.toList());
     }
+
 
 
 

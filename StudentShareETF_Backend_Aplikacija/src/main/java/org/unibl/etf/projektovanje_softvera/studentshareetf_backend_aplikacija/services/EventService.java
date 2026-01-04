@@ -151,4 +151,18 @@ public class EventService {
             notificationsService.createNotification(title, message,event.getStudent());
         }
     }
+
+    @Transactional
+    public void deleteEventByModerator(Integer eventId, String username) throws EntityNotFoundException {
+
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new EntityNotFoundException("Događaj ne postoji"));
+
+        eventRepository.delete(event);
+
+        User moderator = userService.getUserByUsername(username);
+        String description = "Moderator " + moderator.getUsername() + " je obrisao događaj sa ID = " + eventId;
+
+        moderatorAuditService.logAction(moderator, description);
+    }
 }

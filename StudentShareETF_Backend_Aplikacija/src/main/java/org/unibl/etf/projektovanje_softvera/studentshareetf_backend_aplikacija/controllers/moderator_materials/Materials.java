@@ -25,9 +25,6 @@ public class Materials {
     private final MaterialService materialService;
     private final UserService userService;
 
-    // --- SEKCIJA: UPRAVLJANJE STUDENTIMA ---
-
-    // GET /api/moderator/materials/students
     @GetMapping("/students")
     public ResponseEntity<List<User>> getAllStudents() {
         return ResponseEntity.ok(userService.getAllStudents());

@@ -6,6 +6,7 @@ import MaterialsDisplay from "../components/MaterialsDisplay";
 import EventsDisplay from "../components/EventsDisplay";
 import ModeratorStudentsManagement from "../components/ModeratorStudentsManagement";
 import ModeratorRequestsManagement from "../components/ModeratorRequestsManagement";
+import ModeratorProfileDisplay from "../components/ModeratorProfileDisplay";
 
 function ModeratorMaterials() {
   const [activeTab, setActiveTab] = useState("Početna");
@@ -30,6 +31,14 @@ function ModeratorMaterials() {
   };
 
   const renderSection = () => {
+  if (activeTab === "Profil") {
+      return (
+        <div style={styles.profileWrapper}>
+          <ModeratorProfileDisplay />
+        </div>
+      );
+    }
+
     // 1. POČETNA (MATERIJALI)
     if (activeTab === "Početna") {
       if (view === "list") {
@@ -168,6 +177,14 @@ const styles = {
     width: "100%",
     overflow: "hidden",
     position: "relative"
+  },
+   profileWrapper: {
+    height: '100%',
+    width: '100%',
+    overflow: 'hidden',
+    borderRadius: '20px',
+    background: 'rgba(10, 20, 87, 0.4)',
+    border: '1px solid rgba(255, 255, 255, 0.1)',
   },
   fixedContentWrapper: {
     display: "flex",

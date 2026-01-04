@@ -48,4 +48,16 @@ public class Events {
             return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
         }
     }
+
+    @DeleteMapping("/{eventId}")
+    public ResponseEntity<Void> deleteEvent(@PathVariable Integer eventId) {
+        try {
+            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            eventService.deleteEventByModerator(eventId, username);
+            return ResponseEntity.noContent().build();
+        }
+        catch (EntityNotFoundException ex) {
+            return ResponseEntity.notFound().build();
+        }
+    }
 }
