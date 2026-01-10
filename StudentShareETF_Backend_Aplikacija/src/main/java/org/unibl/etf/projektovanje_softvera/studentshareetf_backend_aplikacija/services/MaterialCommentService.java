@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.MaterialCommentRequest;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.MaterialCommentResponse;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.MaterialCommentResponseForModerator;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.EntityNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.UserNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Material;
@@ -78,18 +79,19 @@ public class MaterialCommentService {
     }
 
     @Transactional(readOnly = true)
-    public List<MaterialCommentResponse> getPendingMaterialCommentForModerator() {
+    public List<MaterialCommentResponseForModerator> getPendingMaterialCommentForModerator() {
 
         List<MaterialComments> pendingMaterials = materialCommentRepository.findByPrijavljenTrue();
 
         return pendingMaterials.stream().map(comment -> {
-            MaterialCommentResponse response = new MaterialCommentResponse();
+            MaterialCommentResponseForModerator response = new MaterialCommentResponseForModerator();
             response.setCommentId(comment.getId());
-            response.setSadrzaj(comment.getSadrzaj());
-            response.setDatum(comment.getDatumVrijeme());
-            response.setName(comment.getKorisnik().getName());
-            response.setSurname(comment.getKorisnik().getSurname());
+            response.setContent(comment.getSadrzaj());
+            response.setDate(comment.getDatumVrijeme().toString());
             response.setMyComment(false);
+            response.setStudentId(comment.getKorisnik().getUserId());
+            String name = comment.getKorisnik().getName() + " " + comment.getKorisnik().getSurname() + " (" + comment.getKorisnik().getUsername() + ")";
+            response.setStudentName(name);
             return response;
         }).collect(Collectors.toList());
     }

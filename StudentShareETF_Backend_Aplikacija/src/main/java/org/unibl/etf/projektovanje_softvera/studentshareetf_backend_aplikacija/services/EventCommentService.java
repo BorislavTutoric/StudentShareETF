@@ -149,11 +149,12 @@ public class EventCommentService {
             EventCommentResponseForModerator response = new EventCommentResponseForModerator();
             response.setId(comment.getId());
             response.setContent(comment.getContent());
-            response.setDateTime(comment.getDateTime().toString());
+            response.setDate(comment.getDateTime().toString());
             response.setName(comment.getUser().getName());
             response.setSurname(comment.getUser().getSurname());
             response.setMyComment(false);
             response.setStudentId(comment.getUser().getUserId());
+            response.setStudentName(comment.getUser().getName() + " "  + comment.getUser().getSurname() + " (" +  comment.getUser().getUsername() + ")");
             return response;
         }).collect(Collectors.toList());
     }
@@ -177,7 +178,7 @@ public class EventCommentService {
         }
         else
         {
-            commentRepo.delete(eventComment);
+            commentRepo.deleteById(commentId);
 
             String description = "Moderator " + moderator.getName() + " je obrisao komentar korisnika " + eventComment.getUser().getUsername() + " čiji je sadržaj " + eventComment.getContent();
             moderatorAuditService.logAction(moderator,description);

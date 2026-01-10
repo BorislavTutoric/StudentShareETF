@@ -105,7 +105,7 @@ public class EventService {
             response.setMjesto(event.getMjesto());
             response.setStudentId(event.getStudent().getUserId());
             response.setDatumVrijeme(event.getDatumVrijeme());
-            response.setUsername(event.getStudent().getUser().getUsername());
+            response.setStudentName(event.getStudent().getUser().getName() + " " + event.getStudent().getUser().getSurname() + " (" + event.getStudent().getUser().getUsername() + ")");
             String url = event.getFileKey() != null ? storageService.generatePresignedUrl(event.getFileKey()) : null;
             response.setSlikaUrl(url);
             return response;

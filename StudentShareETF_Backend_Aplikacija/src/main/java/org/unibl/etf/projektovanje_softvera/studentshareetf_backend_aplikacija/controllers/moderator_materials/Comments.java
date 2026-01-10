@@ -5,10 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.MaterialApprovalRequest;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.MaterialCommentApprovalRequest;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.MaterialCommentResponse;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.MaterialResponse;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.*;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.EntityNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.MaterialCommentService;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.MaterialService;
@@ -28,7 +25,7 @@ public class Comments {
     @GetMapping
     public ResponseEntity<?> getMaterialRequests()
     {
-        List<MaterialCommentResponse> materials = materialCommentService.getPendingMaterialCommentForModerator();
+        List<MaterialCommentResponseForModerator> materials = materialCommentService.getPendingMaterialCommentForModerator();
 
         if (materials.isEmpty()) {
             return ResponseEntity.ok(Map.of("message", "Trenutno nema materijala na odobravanje"));

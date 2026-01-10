@@ -18,7 +18,7 @@ public class MaterialComments {
     @Column(name = "DatumVrijeme", nullable = false)
     private LocalDateTime datumVrijeme;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaterijalId", nullable = false)
     private Material materijal;
 

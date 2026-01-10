@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Shield, Lock, X, Eye, EyeOff } from 'lucide-react';
-import { checkUsername } from '../services/authService';
-import Toast from './Toast';
-import { passwordChange, updatePersonalInfo, checkPassword, getProfileDetails } from '../services/profileService';
+import { checkUsername } from '../../services/authService';
+import Toast from '../Toast';
+import { passwordChange, updatePersonalInfo, checkPassword, getProfileDetails } from '../../services/profileService';
 
 function ModeratorProfileDisplay() {
   const [isModalOpen, setIsModalOpen] = useState(false);

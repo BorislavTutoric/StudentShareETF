@@ -23,7 +23,7 @@ public class AdviceComments {
     @GetMapping
     public ResponseEntity<?> getMaterialRequests()
     {
-        List<AdviceResponse> advices = adviceCommentService.getPendingAdvicesForModerator();
+        List<AdviceForModeratorResponse> advices = adviceCommentService.getPendingAdvicesForModerator();
 
         if (advices.isEmpty()) {
             return ResponseEntity.ok(Map.of("message", "Trenutno nema postova na odobravanje"));

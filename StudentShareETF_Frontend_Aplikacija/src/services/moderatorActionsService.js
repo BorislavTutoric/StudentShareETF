@@ -12,14 +12,11 @@ export const moderatorActionService = {
     return response.data;
   },
 
-  // NOVE METODE ZA BRISANJE STUDENATA
-  deleteStudent: async (studentId) => {
-    try {
-      const response = await api.delete(`api/moderator/materials/students/${studentId}`);
-      return response.data;
-    } catch (err) {
-      throw err;
-    }
+  checkStudentSuspension: async (studentId) => {
+    const response = await api.get(
+      `/api/moderator/materials/students/${studentId}/suspension-status`
+    );
+    return response.data; // true / false
   },
 
   // --- MATERIJALI (Lijeva kolona) ---
@@ -76,4 +73,46 @@ export const moderatorActionService = {
     const response = await api.post("api/moderator/materials/post-comments/review", { adviceId, approved: isApproved });
     return response.data;
   },
+
+    getPendingEventsForModerator: async () => {
+    const response = await api.get("/api/moderator/events");
+    return response.data;
+  },
+
+  reviewEvent: async (dogadjajId, approved) => {
+    const response = await api.post("/api/moderator/events/review", {
+      dogadjajId,
+      approved
+    });
+    return response.data;
+  },
+
+  deleteEvent: async (eventId) => {
+    const response = await api.delete(`/api/moderator/events/${eventId}`);
+    return response.data;
+  },
+
+  getPendingEventCommentsForModerator: async () => {
+    const response = await api.get("/api/moderator/events/comments");
+    return response.data;
+  },
+
+  reviewEventComment: async (commentId, approved) => {
+    const response = await api.post("/api/moderator/events/comments/review", {
+      commentId,
+      approved
+    });
+    return response.data;
+  },
+
+ 
+  deleteEventComment: async (commentId) => {
+    const response = await api.delete(
+      `/api/moderator/events/comments/${commentId}`
+    );
+    return response.data;
+  }
+
 };
+
+export default moderatorActionService;

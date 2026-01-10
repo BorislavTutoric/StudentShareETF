@@ -12,4 +12,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class EventCommentResponseForModerator extends EventCommentResponse {
     private Integer studentId;
+    private String studentName;
+    private String date;
 }

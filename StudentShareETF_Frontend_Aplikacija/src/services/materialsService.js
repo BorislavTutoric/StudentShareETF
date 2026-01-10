@@ -128,5 +128,12 @@ export const reportCommentApi = async (commentId) => {
   }
 };
 
-
+export const deleteMaterial = async (materialId) => {
+  try {
+    const response = await api.delete(`/api/moderator/materials/${materialId}`);
+    return response.data; 
+  } catch (err) {
+    throw err;
+  }
+};
 

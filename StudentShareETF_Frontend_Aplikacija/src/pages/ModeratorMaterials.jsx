@@ -1,28 +1,36 @@
 import React, { useState } from "react";
-import ModeratorWelcomeHeader from "../components/ModeratorWelcomeHeader";
-import ModeratorMenuBar from "../components/ModeratorMenuBar";
-import ModeratorMaterialsHome from "../components/ModeratorMaterialsHome";
-import MaterialsDisplay from "../components/MaterialsDisplay";
-import EventsDisplay from "../components/EventsDisplay";
-import ModeratorStudentsManagement from "../components/ModeratorStudentsManagement";
-import ModeratorRequestsManagement from "../components/ModeratorRequestsManagement";
-import ModeratorProfileDisplay from "../components/ModeratorProfileDisplay";
+import ModeratorWelcomeHeader from "../components/moderators/ModeratorWelcomeHeader";
+import ModeratorMenuBar from "../components/moderators/ModeratorMenuBar";
+import ModeratorMaterialsHomeDisplay from "../components/moderators/materials/ModeratorMaterialsHomeDisplay";
+import ModeratorMaterialsSubjectsDisplay from "../components/moderators/materials/ModeratorMaterialsSubjectsDisplay";
+import EventsDisplayModeratorMaterials from "../components/EventsDisplayModeratorMaterials";
+import ModeratorStudentsManagement from "../components/moderators/ModeratorStudentsManagement";
+import ModeratorRequestsManagement from "../components/moderators/materials/ModeratorRequestsManagement";
+import ModeratorProfileDisplay from "../components/moderators/ModeratorProfileDisplay";
 
 function ModeratorMaterials() {
   const [activeTab, setActiveTab] = useState("Početna");
   const [selectedSubject, setSelectedSubject] = useState(null);
   const [materials, setMaterials] = useState([]);
   const [view, setView] = useState("list");
+  const [activeComponent, setActiveComponent] = useState("subjects");
+  const [year, setYear] = useState(1);
 
   const handleLogout = () => {
     localStorage.clear();
     window.location.href = "/";
   };
 
+  const handleCloseMaterials = () => {
+    setActiveComponent("subjects");
+    setSelectedSubject(null);
+    setMaterials([]);
+  };
+
   const handleOpenMaterials = (courseName, materialsData) => {
     setSelectedSubject(courseName);
     setMaterials(materialsData);
-    setView("details");
+    setActiveComponent("materials");
   };
 
   const handleMenuClick = (tabName) => {
@@ -31,7 +39,7 @@ function ModeratorMaterials() {
   };
 
   const renderSection = () => {
-  if (activeTab === "Profil") {
+    if (activeTab === "Profil") {
       return (
         <div style={styles.profileWrapper}>
           <ModeratorProfileDisplay />
@@ -41,78 +49,59 @@ function ModeratorMaterials() {
 
     // 1. POČETNA (MATERIJALI)
     if (activeTab === "Početna") {
-      if (view === "list") {
-        return <ModeratorMaterialsHome onOpenMaterials={handleOpenMaterials} />;
-      } else {
-        return (
-          <div style={styles.detailsWrapper}>
-            <MaterialsDisplay 
-              isOpen={true} 
-              materials={materials} 
-              subjectName={selectedSubject} 
+      return (
+        <>
+          {activeComponent === "subjects" && (
+            <ModeratorMaterialsSubjectsDisplay 
+              onOpenMaterials={handleOpenMaterials} 
+              startYear={year}
             />
-          </div>
-        );
-      }
+          )}
+          {activeComponent === "materials" && (
+            <ModeratorMaterialsHomeDisplay
+              materials={materials}
+              isOpen={true}
+              onClose={handleCloseMaterials}
+              subjectName={selectedSubject}
+            />
+          )}
+        </>
+      );
     }
 
-    // 2. DOGAĐAJI (SA FIXNIM SKROLOM)
     if (activeTab === "Događaji") {
       return (
-        <div style={styles.fixedContentWrapper}>
-          <div style={styles.stickyHeader}>
-            <h2 style={styles.sectionTitle}>Pregled događaja</h2>
-          </div>
-          
+        <div style={styles.fixedContentWrapper}>          
           <div style={styles.scrollableArea}>
-             <EventsDisplay />
+            <EventsDisplayModeratorMaterials />
           </div>
         </div>
       );
     }
 
     if (activeTab === "Studentski nalozi") {
-    return (
+      return (
         <div style={styles.fixedContentWrapper}>
-            <div style={styles.modernHeader}>
-                <div style={styles.titleIconBox}>
-                    <span style={{ fontSize: '24px' }}>👥</span> 
-                </div>
-                <div style={styles.headerTextBox}>
-                    <h2 style={styles.modernSectionTitle}>Upravljanje studentskim nalozima</h2>
-                    <p style={styles.sectionSubtitle}>Pregled, aktivacija i suspenzija korisničkih pristupa</p>
-                </div>
-            </div>
-            <div style={styles.scrollableArea}>
-                <ModeratorStudentsManagement />
-            </div>
+          <div style={styles.scrollableArea}>
+            <ModeratorStudentsManagement />
+          </div>
         </div>
-    );
+      );
+    }
 
-}
-if (activeTab === "Zahtjevi") {
-  return (
-    <div style={styles.fixedContentWrapper}>
-       <div style={styles.modernHeader}>
-          <div style={styles.titleIconBox}>
-             <span style={{ fontSize: '24px' }}>📩</span> 
+    if (activeTab === "Zahtjevi") {
+      return (
+        <div style={styles.fixedContentWrapper}>
+          <div style={styles.scrollableArea}>
+            <ModeratorRequestsManagement />
           </div>
-          <div style={styles.headerTextBox}>
-             <h2 style={styles.modernSectionTitle}>Zahtjevi i Prijave</h2>
-             <p style={styles.sectionSubtitle}>Pregled novih materijala i moderacija prijavljenog sadržaja</p>
-          </div>
-       </div>
-       <div style={styles.scrollableArea}>
-          <ModeratorRequestsManagement />
-       </div>
-    </div>
-  );
-}
-    // 3. OSTALE SEKCIJE
+        </div>
+      );
+    }
+
+    // 5. OSTALE SEKCIJE
     const titles = {
       "Profil": "Moj Profil",
-  
-      
     };
 
     return (
@@ -124,20 +113,19 @@ if (activeTab === "Zahtjevi") {
   };
 
   return (
-    <div style={styles.pageWrapper}>
-      <div style={styles.mainContainer}>
-        <div style={styles.sidebarSection}>
-          <ModeratorMenuBar 
-            onLogoutClick={handleLogout} 
-            onMenuClick={handleMenuClick} 
-          />
-        </div>
+    <div style={styles.mainLayout}>
+      <div style={styles.leftMenu}>
+        <ModeratorMenuBar 
+          onLogoutClick={handleLogout} 
+          onMenuClick={handleMenuClick} 
+        />
+      </div>
 
-        <div style={styles.contentSection}>
-          <ModeratorWelcomeHeader isModerator={true} roleName="Moderator za materijale" />
-          <div style={styles.renderArea}>
-            {renderSection()}
-          </div>
+      <div style={styles.rightContent}>
+        <ModeratorWelcomeHeader isModerator={true} roleName="Moderator za materijale" />
+        
+        <div style={styles.contentBox}>
+          {renderSection()}
         </div>
       </div>
     </div>
@@ -145,40 +133,33 @@ if (activeTab === "Zahtjevi") {
 }
 
 const styles = {
-  pageWrapper: {
-    background: 'linear-gradient(180deg, #0e1966ff 0%, #5d6196ff 100%)',
+  mainLayout: {
+    display: "flex",
     height: "100vh",
-    width: "100%",
-    display: "flex",
-    padding: "20px",
-    boxSizing: "border-box",
-    overflow: "hidden"
+    background: '#64aaf1ff', 
   },
-  mainContainer: {
-    display: "flex",
-    width: "100%",
-    height: "100%",
-    gap: "25px",
-  },
-  sidebarSection: {
+
+  leftMenu: {
     width: "270px",
-    flexShrink: 0,
+    padding: "16px",
   },
-  contentSection: {
+
+  rightContent: {
     flex: 1,
+    padding: "16px",
     display: "flex",
     flexDirection: "column",
-    gap: "20px",
-    height: "100%",
-    overflow: "hidden"
+    gap: "16px",
   },
-  renderArea: {
+  contentBox: {
     flex: 1,
-    width: "100%",
+    background: 'linear-gradient(180deg, #0a1457 0%, #1a1f6b 100%)',
+    borderRadius: "16px",
+    padding: "0px 0",
     overflow: "hidden",
-    position: "relative"
   },
-   profileWrapper: {
+
+  profileWrapper: {
     height: '100%',
     width: '100%',
     overflow: 'hidden',
@@ -186,6 +167,7 @@ const styles = {
     background: 'rgba(10, 20, 87, 0.4)',
     border: '1px solid rgba(255, 255, 255, 0.1)',
   },
+
   fixedContentWrapper: {
     display: "flex",
     flexDirection: "column",
@@ -195,25 +177,15 @@ const styles = {
     border: "1px solid rgba(255, 255, 255, 0.1)",
     overflow: "hidden"
   },
-  stickyHeader: {
-    padding: "20px 25px",
-    background: "rgba(0, 0, 0, 0.2)",
-    borderBottom: "1px solid rgba(255, 255, 255, 0.1)",
-    zIndex: 10
-  },
+
   scrollableArea: {
     flex: 1,
     overflowY: "auto",
     padding: "10px",
     scrollbarWidth: "thin",
-    scrollbarColor: "#60e016 rgba(255,255,255,0.1)"
+    scrollbarColor: "#6366f1 rgba(255,255,255,0.1)"
   },
-  sectionTitle: {
-    color: "#60e016",
-    fontSize: "22px",
-    fontWeight: "700",
-    margin: 0
-  },
+
   card: {
     background: 'linear-gradient(135deg, #0a1457 0%, #1a2a5e 100%)',
     borderRadius: "20px",
@@ -222,56 +194,19 @@ const styles = {
     boxShadow: "0 10px 40px rgba(0, 0, 0, 0.3)",
     border: '1px solid rgba(96, 224, 22, 0.2)',
   },
+
+  sectionTitle: {
+    color: "#60e016",
+    fontSize: "22px",
+    fontWeight: "700",
+    margin: 0
+  },
+
   text: { 
     color: "white", 
     fontSize: "16px", 
     opacity: 0.9, 
     marginTop: '20px' 
-  },
-  modernHeader: {
-    padding: "25px 30px",
-    background: "linear-gradient(90deg, rgba(0, 0, 0, 0.3) 0%, transparent 100%)",
-    borderBottom: "1px solid rgba(255, 255, 255, 0.08)",
-    display: "flex",
-    alignItems: "center",
-    gap: "20px",
-    zIndex: 10
-  },
-  titleIconBox: {
-    width: "50px",
-    height: "50px",
-    background: "rgba(96, 224, 22, 0.1)",
-    borderRadius: "12px",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    border: "1px solid rgba(96, 224, 22, 0.3)",
-    boxShadow: "0 0 15px rgba(96, 224, 22, 0.1)"
-  },
-  headerTextBox: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "4px"
-  },
-  modernSectionTitle: {
-    color: "#5bac2dff",
-    fontSize: "18px",
-    fontWeight: "800",
-    margin: 0,
-    textTransform: "uppercase",
-    letterSpacing: "1px",
-    textShadow: "0 2px 4px rgba(0,0,0,0.3)"
-  },
-  sectionSubtitle: {
-    color: "rgba(255, 255, 255, 0.5)",
-    fontSize: "13px",
-    margin: 0,
-    fontWeight: "400"
-  },
-  detailsWrapper: { 
-    height: '100%', 
-    overflowY: 'auto',
-    borderRadius: '20px'
   }
 };
 

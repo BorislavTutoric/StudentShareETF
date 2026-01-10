@@ -14,4 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class MaterialCommentResponseForModerator extends MaterialCommentResponse{
     private Integer studentId;
+    private String studentName;
+    private String content;
+    private String date;
 }

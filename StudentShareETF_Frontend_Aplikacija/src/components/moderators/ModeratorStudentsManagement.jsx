@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Search, UserCheck, UserX } from 'lucide-react';
-import { moderatorActionService } from "../services/moderatorActionsService";
-import Toast from './Toast';
+import { moderatorActionService } from "../../services/moderatorActionsService";
+import Toast from './../Toast';
 
 export default function ModeratorStudentsManagement() {
   const [students, setStudents] = useState([]);
@@ -486,80 +486,84 @@ const styles = {
     fontSize: '16px',
   },
 
-  modalOverlay: {
+modalOverlay: {
     position: 'fixed',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    background: 'rgba(0, 0, 0, 0.6)',
+    background: 'rgba(0, 0, 0, 0.8)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 1000,
-    backdropFilter: 'blur(5px)',
+    zIndex: 1100,
   },
 
   modal: {
-    background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
-    borderRadius: '16px',
-    padding: '32px',
-    maxWidth: '400px',
+    background: 'linear-gradient(135deg, #0a1457 0%, #1a2a5e 100%)',
+    border: '2px solid rgba(138, 43, 226, 0.5)',
+    borderRadius: '20px',
+    padding: '35px',
     width: '90%',
-    boxShadow: '0 20px 60px rgba(0, 0, 0, 0.6)',
-    border: '2px solid rgba(139, 92, 246, 0.3)',
+    maxWidth: '500px',
+    boxShadow: '0 10px 40px rgba(0, 0, 0, 0.5)',
   },
 
   modalTitle: {
-    color: '#ffffff',
-    fontSize: '20px',
+    color: '#8a2be2',
+    fontSize: '22px',
     fontWeight: '700',
-    margin: '0 0 16px 0',
-    letterSpacing: '0.3px',
+    margin: '0 0 20px 0',
+    textAlign: 'center',
   },
 
   modalText: {
-    color: 'rgba(255, 255, 255, 0.75)',
-    fontSize: '14px',
-    margin: '0 0 24px 0',
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontSize: '16px',
+    margin: '0 0 30px 0',
+    textAlign: 'center',
     lineHeight: '1.6',
   },
 
   modalButtons: {
     display: 'flex',
-    gap: '12px',
-    justifyContent: 'flex-end',
+    gap: '15px',
   },
 
   cancelBtn: {
-    background: 'rgba(255, 255, 255, 0.1)',
+    flex: 1,
+    padding: '14px',
+    background: 'rgba(255, 255, 255, 0.05)',
+    color: 'rgba(255, 255, 255, 0.7)',
     border: '2px solid rgba(255, 255, 255, 0.2)',
     borderRadius: '10px',
-    padding: '10px 20px',
-    color: '#ffffff',
-    fontWeight: '600',
+    fontSize: '16px',
+    fontWeight: '700',
     cursor: 'pointer',
     transition: 'all 0.3s ease',
   },
 
   confirmBtn: {
+    flex: 1,
+    padding: '14px',
     border: 'none',
     borderRadius: '10px',
-    padding: '10px 20px',
-    color: '#ffffff',
-    fontWeight: '600',
+    fontSize: '16px',
+    fontWeight: '700',
     cursor: 'pointer',
     transition: 'all 0.3s ease',
   },
 
   confirmSuspend: {
-    background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-    boxShadow: '0 6px 20px rgba(239, 68, 68, 0.4)',
+    background: 'rgba(239, 68, 68, 0.2)',
+    color: '#f87171',
+    border: '2px solid #f87171',
   },
 
   confirmActivate: {
-    background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
-    boxShadow: '0 6px 20px rgba(34, 197, 94, 0.4)',
+    background: 'rgba(34, 197, 94, 0.2)',
+    color: '#4ade80',
+    border: '2px solid #4ade80',
   },
 };
 

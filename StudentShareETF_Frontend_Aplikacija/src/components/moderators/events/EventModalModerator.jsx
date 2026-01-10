@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { X, Trash2 } from 'lucide-react';
-import { getEventComments, getEventReviews, deleteEventCommentById, deleteEvent } from '../services/eventService';
-import Toast from './Toast';
+import { getEventComments, getEventReviews, deleteEventCommentById, deleteEvent } from '../../../services/eventService';
+import Toast from '../../Toast';
 
 function EventModalModerator({ event, onClose, onEventDeleted }) {
   const [allComments, setAllComments] = useState([]);
@@ -298,7 +298,7 @@ function EventModalModerator({ event, onClose, onEventDeleted }) {
         </div>
       </div>
 
-      {/* Potvrda za brisanje događaja */}
+      {/* Potvrda za brisanje događaja - Novi stil */}
       {showDeleteEventConfirm && (
         <div style={styles.confirmOverlay} onClick={() => setShowDeleteEventConfirm(false)}>
           <div style={styles.confirmDialog} onClick={(e) => e.stopPropagation()}>
@@ -326,7 +326,7 @@ function EventModalModerator({ event, onClose, onEventDeleted }) {
         </div>
       )}
 
-      {/* Potvrda za brisanje komentara */}
+      {/* Potvrda za brisanje komentara - Novi stil */}
       {showDeleteCommentConfirm && (
         <div style={styles.confirmOverlay} onClick={() => setShowDeleteCommentConfirm(null)}>
           <div style={styles.confirmDialog} onClick={(e) => e.stopPropagation()}>
@@ -721,68 +721,69 @@ const styles = {
     color: '#6b7280',
   },
 
-  // Confirmation Dialog Styles
+  // Confirmation Dialog Styles - Isti kao u ModeratorEventRequestsManagement
   confirmOverlay: {
     position: 'fixed',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(0,0,0,0.85)',
+    background: 'rgba(0, 0, 0, 0.8)',
     display: 'flex',
-    justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 3000,
+    justifyContent: 'center',
+    zIndex: 1100,
   },
   confirmDialog: {
-    backgroundColor: 'white',
-    borderRadius: '12px',
-    padding: '30px',
-    maxWidth: '450px',
+    background: 'linear-gradient(135deg, #0a1457 0%, #1a2a5e 100%)',
+    border: '2px solid rgba(138, 43, 226, 0.5)',
+    borderRadius: '20px',
+    padding: '35px',
     width: '90%',
-    boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
+    maxWidth: '500px',
+    boxShadow: '0 10px 40px rgba(0, 0, 0, 0.5)',
   },
   confirmTitle: {
+    color: '#8a2be2',
     fontSize: '22px',
-    fontWeight: '800',
-    color: '#1f2937',
-    marginBottom: '15px',
+    fontWeight: '700',
+    margin: '0 0 20px 0',
     textAlign: 'center',
   },
   confirmText: {
-    fontSize: '15px',
-    lineHeight: '1.6',
-    color: '#4b5563',
-    marginBottom: '25px',
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontSize: '16px',
+    margin: '0 0 30px 0',
     textAlign: 'center',
+    lineHeight: '1.6',
   },
   confirmButtons: {
     display: 'flex',
-    gap: '12px',
+    gap: '15px',
   },
   confirmCancelBtn: {
     flex: 1,
-    padding: '12px',
-    backgroundColor: '#e5e7eb',
-    color: '#1f2937',
-    border: 'none',
-    borderRadius: '8px',
-    fontSize: '15px',
-    fontWeight: '600',
+    padding: '14px',
+    background: 'rgba(255, 255, 255, 0.05)',
+    color: 'rgba(255, 255, 255, 0.7)',
+    border: '2px solid rgba(255, 255, 255, 0.2)',
+    borderRadius: '10px',
+    fontSize: '16px',
+    fontWeight: '700',
     cursor: 'pointer',
-    transition: 'all 0.2s ease',
+    transition: 'all 0.3s ease',
   },
   confirmDeleteBtn: {
     flex: 1,
-    padding: '12px',
-    backgroundColor: '#ef4444',
-    color: 'white',
-    border: 'none',
-    borderRadius: '8px',
-    fontSize: '15px',
-    fontWeight: '600',
+    padding: '14px',
+    background: 'rgba(239, 68, 68, 0.2)',
+    color: '#f87171',
+    border: '2px solid #f87171',
+    borderRadius: '10px',
+    fontSize: '16px',
+    fontWeight: '700',
     cursor: 'pointer',
-    transition: 'all 0.2s ease',
+    transition: 'all 0.3s ease',
   },
 };
 

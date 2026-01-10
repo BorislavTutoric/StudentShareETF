@@ -5,10 +5,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.MaterialResponse;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Material;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Student;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Subject;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.User;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.MaterialResponseForModerator;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.*;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories.MaterialRepository;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories.SubjectRepository;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.UserNotFoundException;
@@ -95,14 +93,19 @@ public class MaterialService {
     }
 
     @Transactional(readOnly = true)
-    public List<MaterialResponse> getPendingMaterialsForModerator() {
+    public List<MaterialResponseForModerator> getPendingMaterialsForModerator() {
         List<Material> pendingMaterials = materialRepository.findByApprovedFalseAndModeratorIsNull();
 
         return pendingMaterials.stream().map(material -> {
-            MaterialResponse response = new MaterialResponse();
+            MaterialResponseForModerator response = new MaterialResponseForModerator();
             response.setMaterialId(material.getMaterialId());
             response.setName(material.getName());
             response.setCategory(material.getCategory());
+            response.setSubjectName(material.getSubject().getName());
+            response.setStudentId(material.getStudent().getUserId());
+            String name = material.getStudent().getUser().getName() + " " + material.getStudent().getUser().getSurname() + " (" + material.getStudent().getUser().getUsername() + ")";
+            response.setStudentName(name);
+            response.setUploadDate(material.getDate().toString());
             return response;
         }).collect(Collectors.toList());
     }
@@ -144,5 +147,19 @@ public class MaterialService {
             String message = "Vaš zahtjev za postavljanje materijala " +  material.getName() + " je odbijen.";
             notificationsService.createNotification(title, message,material.getStudent());
         }
+    }
+
+    @Transactional
+    public void deleteMaterialByModerator(Integer materialId, String username) throws EntityNotFoundException {
+
+        Material material = materialRepository.findById(materialId)
+                .orElseThrow(() -> new EntityNotFoundException("Materijal ne postoji"));
+
+        materialRepository.delete(material);
+
+        User moderator = userService.getUserByUsername(username);
+        String description = "Moderator " + moderator.getUsername() + " je obrisao materijal sa ID = " + materialId;
+
+        moderatorAuditService.logAction(moderator, description);
     }
 }

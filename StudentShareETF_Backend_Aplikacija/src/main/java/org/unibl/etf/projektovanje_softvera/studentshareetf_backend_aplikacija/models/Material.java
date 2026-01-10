@@ -1,10 +1,13 @@
 package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models;
 
 
+
 import jakarta.persistence.*;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "MATERIJAL")
@@ -48,6 +51,24 @@ public class Material {
     @Version
     @Column(name = "Version")
     private Long version = 0L;
+
+    @OneToMany(
+            mappedBy = "materijal",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private List<MaterialComments> comments = new ArrayList<>();
+
+    @OneToMany(
+            mappedBy = "materijal",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private List<MaterialReview> reviews = new ArrayList<>();
+
+    @OneToMany(
+            mappedBy = "material",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private List<SavedMaterial> savedMaterials = new ArrayList<>();
 
     public Material() {}
 
@@ -130,5 +151,20 @@ public class Material {
 
     public void setVersion(Long version) {
         this.version = version;
+    }
+
+    public void setDatumVrijeme(LocalDateTime datumVrijeme) {
+        this.date = datumVrijeme;
+    }
+    public LocalDateTime getDatumVrijeme() {
+        return date;
+    }
+
+    public List<MaterialComments> getComments() {
+        return comments;
+    }
+
+    public void setComments(List<MaterialComments> comments) {
+        this.comments = comments;
     }
 }

@@ -10,4 +10,6 @@ import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.m
 @AllArgsConstructor
 public class MaterialResponseForModerator extends MaterialResponse {
     private Integer studentId;
+    private String studentName;
+    private String uploadDate;
 }

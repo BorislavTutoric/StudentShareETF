@@ -7,10 +7,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.MaterialApprovalRequest;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.MaterialResponse;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.MaterialResponseForModerator;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.EntityNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.UserNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.User;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.MaterialService;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.StudentService;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.UserService;
 
 import java.util.List;
@@ -24,6 +26,7 @@ public class Materials {
 
     private final MaterialService materialService;
     private final UserService userService;
+    private final StudentService studentService;
 
     @GetMapping("/students")
     public ResponseEntity<List<User>> getAllStudents() {
@@ -52,11 +55,16 @@ public class Materials {
         }
     }
 
+    @GetMapping("/students/{id}/suspension-status")
+    public ResponseEntity<Boolean> isStudentSuspended(@PathVariable Integer id) {
+        return ResponseEntity.ok(studentService.getStudentSuspensionStatus(id));
+    }
+
     // --- SEKCIJA: ZAHTJEVI ZA MATERIJALE ---
 
     @GetMapping
     public ResponseEntity<?> getMaterialRequests() {
-        List<MaterialResponse> materials = materialService.getPendingMaterialsForModerator();
+        List<MaterialResponseForModerator> materials = materialService.getPendingMaterialsForModerator();
 
         if (materials.isEmpty()) {
             return ResponseEntity.ok(Map.of("message", "Trenutno nema materijala na odobravanje"));
@@ -83,6 +91,18 @@ public class Materials {
                     .body(Map.of("error", "Materijal je već obrađen od strane drugog moderatora"));
         } catch (EntityNotFoundException ex) {
             return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
+        }
+    }
+
+    @DeleteMapping("/{materialId}")
+    public ResponseEntity<Void> deleteMaterial(@PathVariable Integer materialId) {
+        try {
+            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            materialService.deleteMaterialByModerator(materialId, username);
+            return ResponseEntity.noContent().build();
+        }
+        catch (EntityNotFoundException ex) {
+            return ResponseEntity.notFound().build();
         }
     }
 }

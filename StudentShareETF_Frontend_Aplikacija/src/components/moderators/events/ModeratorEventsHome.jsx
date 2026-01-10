@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { getAllEvents } from "../services/eventService"
+import { getAllEvents } from "../../../services/eventService"
 import EventCardModerator from "./EventCardModerator";
 import EventModalModerator from "./EventModalModerator";
-import Toast from "./Toast";
+import Toast from "../../Toast";
 
 export default function ModeratorEventsHome() {
   const [events, setEvents] = useState([]);

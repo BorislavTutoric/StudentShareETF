@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.AdviceCommentRequest;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.AdviceCommentResponse;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.AdviceForModeratorResponse;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.AdviceResponse;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.EntityNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.UserNotFoundException;
@@ -131,16 +132,18 @@ public class AdviceCommentService {
     }
 
     @Transactional(readOnly = true)
-    public List<AdviceResponse> getPendingAdvicesForModerator() {
+    public List<AdviceForModeratorResponse> getPendingAdvicesForModerator() {
 
         List<AdviceComment> pendingAdvices = adviceCommentRepository.findByReportedTrue();
 
         return pendingAdvices.stream().map(advice -> {
-            AdviceResponse response = new AdviceResponse();
-            response.setId(advice.getId());
+            AdviceForModeratorResponse response = new AdviceForModeratorResponse();
+            response.setAdviceId(advice.getId());
+            response.setStudentId(advice.getStudent().getUserId());
             response.setContent(advice.getContent());
-            response.setDateTime(advice.getDateTime());
-            response.setUsername(advice.getStudent().getUser().getUsername());
+            response.setDate(advice.getDateTime().toString());
+            String name = advice.getStudent().getUser().getName() + " " + advice.getStudent().getUser().getSurname() + " (" + advice.getStudent().getUser().getUsername() + ")";
+            response.setStudentName(name);
             return response;
         }).collect(Collectors.toList());
     }

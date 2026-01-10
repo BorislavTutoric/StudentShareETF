@@ -14,8 +14,9 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AdviceForModeratorResponse {
-    private Integer id;
+    private Integer adviceId;
+    private Integer studentId;
     private String content;
-    private LocalDateTime dateTime;
-    private String username;
+    private String date;
+    private String studentName;
 }

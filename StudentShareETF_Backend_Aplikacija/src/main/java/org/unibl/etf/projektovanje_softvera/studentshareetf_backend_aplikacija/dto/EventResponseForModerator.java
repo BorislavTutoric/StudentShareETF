@@ -11,4 +11,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class EventResponseForModerator extends EventResponse{
     private Integer studentId;
+    private String studentName;
 }
