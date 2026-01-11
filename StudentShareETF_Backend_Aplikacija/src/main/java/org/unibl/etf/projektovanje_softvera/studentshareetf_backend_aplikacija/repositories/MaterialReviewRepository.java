@@ -30,4 +30,14 @@ public interface MaterialReviewRepository extends JpaRepository<MaterialReview, 
             "GROUP BY r.materijalId")
     List<AverageReview> findAvgRatingsBySubjectName(@Param("subjectName") String subjectName);
 
+    @Query("""
+        SELECT m
+        FROM MaterialReview m
+        JOIN m.user u
+        WHERE m.materijal.materialId = :materialId
+            AND u.active = true
+        """)
+    List<MaterialReview> findReviewsOfActiveUsersByMaterialId(
+            @Param("materialId") Integer materialId
+    );
 }

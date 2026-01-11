@@ -2,6 +2,8 @@ package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.
 
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.MaterialCommentResponse;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Material;
@@ -18,4 +20,15 @@ public interface MaterialCommentRepository extends JpaRepository<MaterialComment
     List<MaterialComments> findByMaterijal_MaterialId(Integer materialId);
 
     Optional<MaterialComments> findById(Integer commentId);
+
+    @Query("""
+        SELECT m
+        FROM MaterialComments m
+        JOIN m.korisnik k
+        WHERE m.materijal.materialId = :materialId
+            AND k.active = true
+        """)
+    List<MaterialComments> findCommentsOfActiveUsersByMaterial(
+            @Param("materialId") Integer materialId
+    );
 }

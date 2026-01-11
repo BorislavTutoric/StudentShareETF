@@ -2,19 +2,32 @@ import { useState, useEffect } from 'react';
 import { Bell, X, Trash2 } from 'lucide-react';
 import { deleteNotificationApi, setReadNotification } from '../services/notificationsService';
 import Toast from './Toast';
+import ConfirmationModal from './ConfirmationModal';
 
-function NotificationsPanel({ studentNotifications }) {
+function NotificationsPanel({ studentNotifications, setUnreadNotifications }) {
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [selectedNotification, setSelectedNotification] = useState(null);
   const [toast, setToast] = useState(null);
   const [notifications, setNotifications] = useState([]);
+
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+  const [onConfirm, setOnConfirm] = useState(null);
+  const [message, setMessage] = useState("");
+  
+  const handleCloseConfirmModal = () => {
+    setConfirmModalOpen(false);
+  }
 
   const showToast = (message, type = 'success', duration = 5000) => {
     setToast({ message, type });
     setTimeout(() => setToast(null), duration);
   };
 
-  const unreadCount = () => notifications.filter(n => !n.read).length;
+  const unreadCount = () => {
+    const count = notifications.filter(n => !n.read).length;
+    setUnreadNotifications(count);
+    return count;
+  };
 
   const handleNotificationClick = async (notification) => {
     setSelectedNotification(notification);
@@ -33,8 +46,7 @@ function NotificationsPanel({ studentNotifications }) {
     }
   };
 
-  const handleDeleteNotification = async (e, notification) => {
-    e.stopPropagation();
+  const handleDeleteNotification = async (notification) => {
     try{
         const response = await deleteNotificationApi(notification.notificationId);
         setNotifications(prevNotifications => prevNotifications.filter(notificationPrev => notificationPrev.notificationId !== notification.notificationId));
@@ -70,6 +82,12 @@ function NotificationsPanel({ studentNotifications }) {
   return (
     <>
       <div style={styles.container}>
+        <ConfirmationModal 
+          isOpen={confirmModalOpen}
+          onConfirm={onConfirm}
+          message={message}
+          onCancel={handleCloseConfirmModal}
+        />
         {toast && <Toast message={toast.message} type={toast.type} />}
         <div style={styles.header}>
           <div style={styles.headerContent}>
@@ -106,13 +124,19 @@ function NotificationsPanel({ studentNotifications }) {
                   ...(isRead ? styles.notificationDotRead : {})
                 }}></div>
                 <div style={styles.notificationContent}>
-                  <h3 style={styles.notificationTitle}>{notification.title}</h3>
+                  <h3 style={styles.notificationTitle}>{notification.title.includes("Podsjetnik za obavezu!") ? "Podsjetnik za obavezu!" : notification.title}</h3>
                   <p style={styles.notificationText}>{notification.message}</p>
                 </div>
                 {isHovered && (
                   <button
                     style={styles.deleteButton}
-                    onClick={(e) => handleDeleteNotification(e, notification)}
+                    onClick={(e) => {
+                                e.stopPropagation();
+                                setMessage("obrisati obavještenje?");
+                                setOnConfirm(() => () => handleDeleteNotification(notification));
+                                setConfirmModalOpen(true)
+                              }
+                    }
                     onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.3)'}
                     onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)'}
                   >
@@ -132,7 +156,7 @@ function NotificationsPanel({ studentNotifications }) {
             <div style={styles.modalHeader}>
               <div style={styles.modalHeaderContent}>
                 <Bell size={24} color="#60e016" />
-                <h2 style={styles.modalTitle}>{selectedNotification.title}</h2>
+                <h2 style={styles.modalTitle}>{selectedNotification.title.includes("Podsjetnik za obavezu!") ? "Podsjetnik za obavezu!" : selectedNotification.title}</h2>
               </div>
               <button style={styles.closeButton} onClick={closeModal}>
                 <X size={24} color="#ffffff" />
@@ -141,7 +165,7 @@ function NotificationsPanel({ studentNotifications }) {
             <div style={styles.modalBody}>
               <p style={styles.modalMessage}>{selectedNotification.message}</p>
               <div style={styles.divider}></div>
-              <p style={styles.modalDescription}>{selectedNotification.description}</p>
+              <p style={styles.modalDescription}>Vrijeme: {selectedNotification.activeFrom}</p>
             </div>
           </div>
         </div>

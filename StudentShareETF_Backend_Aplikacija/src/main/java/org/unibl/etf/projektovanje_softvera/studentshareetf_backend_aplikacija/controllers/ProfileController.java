@@ -26,7 +26,6 @@ import java.util.Map;
 public class ProfileController {
 
     private final ProfileService profileService;
-    private final UserRepository userRepository;
 
     @GetMapping("/profile")
     public ResponseEntity<?> getProfileInformations(){

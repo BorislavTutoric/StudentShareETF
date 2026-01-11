@@ -45,6 +45,7 @@ public class EventReviewService {
 
             EventReview review = new EventReview();
             review.setId(key);
+            review.setUser(user);
             review.setRating(request.getRating());
             review.setCreatedAt(LocalDateTime.now());
 
@@ -74,7 +75,7 @@ public class EventReviewService {
         Student currentStudent = studentRepository.findByUser(user)
                 .orElseThrow(() -> new RuntimeException("Student ne postoji"));
 
-        List<EventReview> reviews = reviewRepository.findById_EventId(eventId);
+        List<EventReview> reviews = reviewRepository.findReviewsOfActiveUsersByEventId(eventId);
 
         return reviews.stream()
                 .map(review -> {

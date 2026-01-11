@@ -13,4 +13,5 @@ public class MaterialResponse {
     private String name;
     private String category;
     private String subjectName;
+    private String description;
 }
