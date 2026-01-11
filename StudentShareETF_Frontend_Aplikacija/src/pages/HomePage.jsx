@@ -26,6 +26,10 @@ function Home() {
           window.location.href = "/student";
         }else if(response.role === "ADMIN"){
           window.location.href = "/admin";
+        }else if(response.role = "MODERATOR_ZA_DOGAĐAJE"){
+          window.location.href = "/moderator/dogadjaji"
+        }else if(response.role = "MODERATOR_ZA_MATERIJALE"){
+          window.location.href = "/moderator/materijali"
         }
       } catch {
         localStorage.removeItem("jwtToken");

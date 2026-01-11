@@ -212,10 +212,10 @@ function ModeratorMaterialsHomeDisplay({ materials, isOpen, onClose, subjectName
   };
 
   const categories = {
-    predavanja: localMaterials.filter(m => m.category === 'predavanja'),
-    vjezbe: localMaterials.filter(m => m.category === 'vjezbe'),
-    rokovi: localMaterials.filter(m => m.category === 'rokovi'),
-    ostalo: localMaterials.filter(m => m.category === 'ostalo')
+    predavanja: localMaterials.filter(m => m.category === 'Predavanja'),
+    vjezbe: localMaterials.filter(m => m.category === 'Vježbe'),
+    rokovi: localMaterials.filter(m => m.category === 'Rokovi'),
+    ostalo: localMaterials.filter(m => m.category === 'Ostalo')
   };
 
   return (
