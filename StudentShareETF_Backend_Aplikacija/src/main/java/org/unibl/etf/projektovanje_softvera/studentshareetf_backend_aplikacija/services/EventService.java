@@ -135,7 +135,7 @@ public class EventService {
 
             String title = "Zahtjev postavljanja dogadjaja";
             String message = "Vaš zahtjev za postavljanje dogadjaja " +  event.getNaziv() + " je odobren!";
-            notificationsService.createNotification(title, message,event.getStudent());
+            notificationsService.createNotification(title, message,event.getStudent(),LocalDateTime.now(),LocalDateTime.now());
         }
         else
         {
@@ -148,7 +148,7 @@ public class EventService {
 
             String title = "Zahtjev postavljanja dogadjaja";
             String message = "Vaš zahtjev za postavljanje dogadjaja " +  event.getNaziv() + " je odbijen.";
-            notificationsService.createNotification(title, message,event.getStudent());
+            notificationsService.createNotification(title, message,event.getStudent(),LocalDateTime.now(),LocalDateTime.now());
         }
     }
 

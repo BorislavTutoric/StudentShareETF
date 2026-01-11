@@ -121,7 +121,7 @@ public class MaterialCommentService {
 
             String title = "Obavještenje o uklanjanju komentara";
             String message = "Vaš komentar " +  materialComments.getSadrzaj() + " je uklonjen.";
-            notificationsService.createNotification(title, message,studentService.getStudentByUser(materialComments.getKorisnik()));
+            notificationsService.createNotification(title, message,studentService.getStudentByUser(materialComments.getKorisnik()),LocalDateTime.now(),LocalDateTime.now());
         }
     }
 }

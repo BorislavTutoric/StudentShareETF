@@ -14,6 +14,8 @@ import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.m
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Student;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.User; // Dodano
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories.AdviceCommentRepository;
+
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -173,7 +175,7 @@ public class AdviceCommentService {
 
             String title = "Obavještenje o uklanjanju komentara na savjet";
             String message = "Vaš komentar na savjet " +  adviceComment.getContent() + " je uklonjen.";
-            notificationsService.createNotification(title, message,adviceComment.getStudent());
+            notificationsService.createNotification(title, message,adviceComment.getStudent(), LocalDateTime.now(),LocalDateTime.now());
         }
     }
 }

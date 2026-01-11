@@ -72,7 +72,7 @@ public class EventReviewService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException(username));
 
-        List<EventReview> reviews = reviewRepository.findById_EventId(eventId);
+        List<EventReview> reviews = reviewRepository.findReviewsOfActiveUsersByEventId(eventId);
 
         if ("MODERATOR_ZA_MATERIJALE".equals(user.getRole()) || "MODERATOR_ZA_DOGAĐAJE".equals(user.getRole())) {
             return reviews.stream().map(review -> {
@@ -101,7 +101,7 @@ public class EventReviewService {
 
             Student reviewStudent = studentRepository.findById(review.getId().getStudentId())
                     .orElseThrow();
-        List<EventReview> reviews = reviewRepository.findReviewsOfActiveUsersByEventId(eventId);
+
 
             User reviewUser = userRepository.findById(reviewStudent.getUserId()).orElseThrow();
 

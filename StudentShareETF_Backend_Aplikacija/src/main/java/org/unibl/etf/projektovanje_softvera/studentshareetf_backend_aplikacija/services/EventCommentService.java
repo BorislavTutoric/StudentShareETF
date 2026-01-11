@@ -86,9 +86,6 @@ public class EventCommentService {
             ).collect(Collectors.toList());
         }
 
-        Student currentStudent = studentRepo.findByUser(user)
-                .orElseThrow(() -> new RuntimeException("Student ne postoji"));
-
         return comments.stream().map(c -> {
             boolean isMy = c.getUser().getUserId().equals(currentStudent.getUserId());
 
@@ -189,7 +186,7 @@ public class EventCommentService {
 
             String title = "Obavještenje o uklanjanju komentara";
             String message = "Vaš komentar " +  eventComment.getContent() + " je uklonjen.";
-            notificationsService.createNotification(title, message,studentService.getStudentByUser(eventComment.getUser()));
+            notificationsService.createNotification(title, message,studentService.getStudentByUser(eventComment.getUser()),LocalDateTime.now(),LocalDateTime.now());
         }
     }
 }

@@ -200,7 +200,7 @@ public class AdviceService {
 
             String title = "Obavještenje o uklanjanju savjeta";
             String message = "Vaš savjet " +  advice.getContent() + " je uklonjen.";
-            notificationsService.createNotification(title, message,advice.getStudent());
+            notificationsService.createNotification(title, message,advice.getStudent(),LocalDateTime.now(),LocalDateTime.now());
         }
     }
 
