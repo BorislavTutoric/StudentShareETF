@@ -108,7 +108,7 @@ public class MaterialCommentService {
             materialComments.setPrijavljen(false);
             materialCommentRepository.save(materialComments);
 
-            String description = "Moderator " + moderator.getName() + " je odbio zahtjev za uklanjanje komentara " + materialComments.getKorisnik().getUsername() + ".";
+            String description = "Moderator :" + moderator.getUsername() + " je odbio zahtjev za uklanjanje komentara korisnika :" + materialComments.getKorisnik().getUsername() + " sadržaja \"" + materialComments.getSadrzaj() + "\".";
             moderatorAuditService.logAction(moderator,description);
 
         }
@@ -116,11 +116,11 @@ public class MaterialCommentService {
         {
             materialCommentRepository.delete(materialComments);
 
-            String description = "Moderator " + moderator.getName() + " je obrisao komentar korisnika " + materialComments.getKorisnik().getUsername() + " čiji je sadržaj " + materialComments.getSadrzaj();
+            String description = "Moderator " + moderator.getUsername() + " je obrisao komentar korisnika :" + materialComments.getKorisnik().getUsername() + " čiji je sadržaj \"" + materialComments.getSadrzaj() + "\".";
             moderatorAuditService.logAction(moderator,description);
 
             String title = "Obavještenje o uklanjanju komentara";
-            String message = "Vaš komentar " +  materialComments.getSadrzaj() + " je uklonjen.";
+            String message = "Vaš komentar \"" +  materialComments.getSadrzaj() + "\" je uklonjen.";
             notificationsService.createNotification(title, message,studentService.getStudentByUser(materialComments.getKorisnik()),LocalDateTime.now(),LocalDateTime.now());
         }
     }

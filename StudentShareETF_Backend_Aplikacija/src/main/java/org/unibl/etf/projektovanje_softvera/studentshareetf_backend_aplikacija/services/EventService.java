@@ -130,24 +130,22 @@ public class EventService {
             event.setModerator(moderator);
             eventRepository.save(event);
 
-            String description = "Moderator " + moderator.getName() + " je odobrio dogadjaj " + event.getNaziv() + ".";
+            String description = "Moderator :" + moderator.getUsername() + " je odobrio dogadjaj \"" + event.getNaziv() + "\".";
             moderatorAuditService.logAction(moderator,description);
 
             String title = "Zahtjev postavljanja dogadjaja";
-            String message = "Vaš zahtjev za postavljanje dogadjaja " +  event.getNaziv() + " je odobren!";
+            String message = "Vaš zahtjev za postavljanje dogadjaja \"" +  event.getNaziv() + "\" je odobren!";
             notificationsService.createNotification(title, message,event.getStudent(),LocalDateTime.now(),LocalDateTime.now());
         }
         else
         {
-            event.setAktivan(false);
-            event.setModerator(moderator);
-            eventRepository.save(event);
+            eventRepository.delete(event);
 
-            String description = "Moderator " + moderator.getName() + " je odbio postavljanje dogadjaja " + event.getNaziv() + ".";
+            String description = "Moderator :" + moderator.getUsername() + " je odbio postavljanje dogadjaja \"" + event.getNaziv() + "\".";
             moderatorAuditService.logAction(moderator,description);
 
             String title = "Zahtjev postavljanja dogadjaja";
-            String message = "Vaš zahtjev za postavljanje dogadjaja " +  event.getNaziv() + " je odbijen.";
+            String message = "Vaš zahtjev za postavljanje dogadjaja \"" +  event.getNaziv() + "\" je odbijen.";
             notificationsService.createNotification(title, message,event.getStudent(),LocalDateTime.now(),LocalDateTime.now());
         }
     }
@@ -161,7 +159,7 @@ public class EventService {
         eventRepository.delete(event);
 
         User moderator = userService.getUserByUsername(username);
-        String description = "Moderator " + moderator.getUsername() + " je obrisao događaj sa ID = " + eventId;
+        String description = "Moderator :" + moderator.getUsername() + " je obrisao događaj \"" + event.getNaziv() + "\".";
 
         moderatorAuditService.logAction(moderator, description);
     }

@@ -15,6 +15,11 @@ export const addEventComment = async (eventId, content) => {
   return res.data;
 };
 
+export const getComments = async (eventId) => {
+  const res = await api.get(`/api/events/${eventId}/comments/moderator`);
+  return res.data;
+};
+
 export const getEventReviews = async (eventId) => {
   const res = await api.get(`/api/events/${eventId}/reviews`);
   return res.data;

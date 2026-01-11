@@ -9,10 +9,7 @@ import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.d
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.AdviceResponse;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.EntityNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.UserNotFoundException;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Advice;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.AdviceComment;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Student;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.User; // Dodano
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.*;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories.AdviceCommentRepository;
 
 import java.time.LocalDateTime;
@@ -136,9 +133,9 @@ public class AdviceCommentService {
     @Transactional(readOnly = true)
     public List<AdviceForModeratorResponse> getPendingAdvicesForModerator() {
 
-        List<AdviceComment> pendingAdvices = adviceCommentRepository.findByReportedTrue();
+        List<AdviceComment> pendingAdviceComments = adviceCommentRepository.findByReportedTrue();
 
-        return pendingAdvices.stream().map(advice -> {
+        return pendingAdviceComments.stream().map(advice -> {
             AdviceForModeratorResponse response = new AdviceForModeratorResponse();
             response.setAdviceId(advice.getId());
             response.setStudentId(advice.getStudent().getUserId());
@@ -146,10 +143,11 @@ public class AdviceCommentService {
             response.setDate(advice.getDateTime().toString());
             String name = advice.getStudent().getUser().getName() + " " + advice.getStudent().getUser().getSurname() + " (" + advice.getStudent().getUser().getUsername() + ")";
             response.setStudentName(name);
+            Subject subject = advice.getAdvice().getSubject();
+            response.setSubject(subject.getName());
             return response;
         }).collect(Collectors.toList());
     }
-
 
     @Transactional
     public void reviewAdvice(Integer adviceId, boolean approved, String username) throws EntityNotFoundException {
@@ -163,18 +161,18 @@ public class AdviceCommentService {
             adviceComment.setReported(false);
             adviceCommentRepository.save(adviceComment);
 
-            String description = "Moderator " + moderator.getName() + " je odbio zahtjev za uklanjanje komentara na post " + adviceComment.getContent() + ".";
+            String description = "Moderator :" + moderator.getUsername() + " je odbio zahtjev za uklanjanje komentara na post \"" + adviceComment.getContent() + "\".";
             moderatorAuditService.logAction(moderator,description);
         }
         else
         {
             adviceCommentRepository.delete(adviceComment);
 
-            String description = "Moderator " + moderator.getName() + " je obrisao komentar na post korisnika " + adviceComment.getStudent().getUser().getUsername() + " čiji je sadržaj " + adviceComment.getContent();
+            String description = "Moderator :" + moderator.getUsername() + " je obrisao komentar na post korisnika :" + adviceComment.getStudent().getUser().getUsername() + " čiji je sadržaj \"" + adviceComment.getContent() + "\".";
             moderatorAuditService.logAction(moderator,description);
 
             String title = "Obavještenje o uklanjanju komentara na savjet";
-            String message = "Vaš komentar na savjet " +  adviceComment.getContent() + " je uklonjen.";
+            String message = "Vaš komentar na savjet \"" +  adviceComment.getContent() + "\" je uklonjen.";
             notificationsService.createNotification(title, message,adviceComment.getStudent(), LocalDateTime.now(),LocalDateTime.now());
         }
     }

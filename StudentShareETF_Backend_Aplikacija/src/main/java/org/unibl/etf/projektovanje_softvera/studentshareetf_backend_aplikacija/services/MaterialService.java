@@ -13,7 +13,6 @@ import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.e
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.EntityNotFoundException;
 
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -127,24 +126,22 @@ public class MaterialService {
             material.setModerator(moderator);
             materialRepository.save(material);
 
-            String description = "Moderator " + moderator.getName() + " je odobrio materijal " + material.getName() + ".";
+            String description = "Moderator :" + moderator.getName() + " je odobrio materijal \"" + material.getName() + "\".";
             moderatorAuditService.logAction(moderator,description);
 
             String title = "Zahtjev postavljanja materijala";
-            String message = "Vaš zahtjev za postavljanje materijala " +  material.getName() + " je odobren!";
+            String message = "Vaš zahtjev za postavljanje materijala \"" +  material.getName() + "\" je odobren!";
             notificationsService.createNotification(title, message,material.getStudent(),LocalDateTime.now(),LocalDateTime.now());
         }
         else
         {
-            material.setApproved(false);
-            material.setModerator(moderator);
-            materialRepository.save(material);
+            materialRepository.delete(material);
 
-            String description = "Moderator " + moderator.getName() + " je dobio materijal " + material.getName() + ".";
+            String description = "Moderator :" + moderator.getName() + " je dobio materijal \"" + material.getName() + "\".";
             moderatorAuditService.logAction(moderator,description);
 
             String title = "Zahtjev postavljanja materijala";
-            String message = "Vaš zahtjev za postavljanje materijala " +  material.getName() + " je odbijen.";
+            String message = "Vaš zahtjev za postavljanje materijala \"" +  material.getName() + "\" je odbijen.";
             notificationsService.createNotification(title, message,material.getStudent(),LocalDateTime.now(),LocalDateTime.now());
         }
     }
@@ -158,7 +155,7 @@ public class MaterialService {
         materialRepository.delete(material);
 
         User moderator = userService.getUserByUsername(username);
-        String description = "Moderator " + moderator.getUsername() + " je obrisao materijal sa ID = " + materialId;
+        String description = "Moderator :" + moderator.getUsername() + " je obrisao materijal \"" + material.getName() + "\".";
 
         moderatorAuditService.logAction(moderator, description);
     }

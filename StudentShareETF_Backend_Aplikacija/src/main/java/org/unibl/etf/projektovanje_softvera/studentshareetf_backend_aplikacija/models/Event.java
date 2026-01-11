@@ -2,6 +2,8 @@ package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "DOGADJAJ")
@@ -37,6 +39,18 @@ public class Event {
 
     @Column(name = "Aktivan", nullable = false)
     private boolean aktivan = false;
+
+    @OneToMany(
+            mappedBy = "event",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private List<EventComment> comments = new ArrayList<>();
+
+    @OneToMany(
+            mappedBy = "event",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true)
+    private List<EventReview> reviews = new ArrayList<>();
 
     public Event() {}
 

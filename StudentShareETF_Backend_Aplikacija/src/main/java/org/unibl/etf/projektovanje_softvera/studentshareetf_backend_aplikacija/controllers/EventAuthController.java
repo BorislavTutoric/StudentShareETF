@@ -99,6 +99,16 @@ public class EventAuthController {
         }
     }
 
+    @GetMapping("/{eventId}/comments/moderator")
+    public ResponseEntity<?> getComments(@PathVariable Integer eventId) {
+        try {
+            List<EventCommentResponse> comments = commentService.getComments(eventId);
+            return ResponseEntity.ok(comments);
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(404).body(Map.of("error", ex.getMessage()));
+        }
+    }
+
     @PostMapping("/{eventId}/comments")
     public ResponseEntity<?> createCommentForEvent(@PathVariable Integer eventId, @RequestBody EventCommentRequest request) {
         try {
