@@ -40,7 +40,7 @@ function AdviceHome({ onOpenAdvice, startYear = 1, subjectsView = "all" }) {
     const fetchSubjects = async (year) => {
         try {
             if(subjects === "all") {
-                const data = await getSubjectsWithId(year); 
+                const data = await getSubjectsWithId(year); 
                 setCourses(data);
             } else {
                 const data = await getFilteredSubjects(year);
@@ -125,7 +125,7 @@ function AdviceHome({ onOpenAdvice, startYear = 1, subjectsView = "all" }) {
     if (displayAdvice) {
         return (
             <AdviceDisplay 
-                subjectId={adviceSubject.id}
+                subjectId={adviceSubject.id}
                 subjectName={adviceSubject.name} 
                 year={adviceSubject.year} 
                 onBack={handleBackToSubjects}

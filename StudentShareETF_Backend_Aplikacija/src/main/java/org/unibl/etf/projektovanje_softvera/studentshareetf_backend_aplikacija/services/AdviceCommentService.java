@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.AdviceCommentRequest;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.AdviceCommentResponse;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.AdviceForModeratorResponse;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.AdviceResponse;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.EntityNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.UserNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Advice;
@@ -24,6 +26,8 @@ public class AdviceCommentService {
     private final AdviceCommentRepository adviceCommentRepository;
     private final StudentService studentService;
     private final UserService userService;
+    private final ModeratorAuditService moderatorAuditService;
+    private final NotificationsService notificationsService;
 
     private Student getStudentByUsername(String username) throws UserNotFoundException, EntityNotFoundException {
         User user = userService.getUserByUsername(username);
@@ -127,5 +131,49 @@ public class AdviceCommentService {
         adviceCommentRepository.deleteByAdvice(advice);
     }
 
+    @Transactional(readOnly = true)
+    public List<AdviceForModeratorResponse> getPendingAdvicesForModerator() {
 
+        List<AdviceComment> pendingAdvices = adviceCommentRepository.findByReportedTrue();
+
+        return pendingAdvices.stream().map(advice -> {
+            AdviceForModeratorResponse response = new AdviceForModeratorResponse();
+            response.setAdviceId(advice.getId());
+            response.setStudentId(advice.getStudent().getUserId());
+            response.setContent(advice.getContent());
+            response.setDate(advice.getDateTime().toString());
+            String name = advice.getStudent().getUser().getName() + " " + advice.getStudent().getUser().getSurname() + " (" + advice.getStudent().getUser().getUsername() + ")";
+            response.setStudentName(name);
+            return response;
+        }).collect(Collectors.toList());
+    }
+
+
+    @Transactional
+    public void reviewAdvice(Integer adviceId, boolean approved, String username) throws EntityNotFoundException {
+
+        User moderator = userService.getUserByUsername(username);
+
+        AdviceComment adviceComment = adviceCommentRepository.findById(adviceId)
+                .orElseThrow(() -> new EntityNotFoundException("Post ne postoji"));
+
+        if(approved) {
+            adviceComment.setReported(false);
+            adviceCommentRepository.save(adviceComment);
+
+            String description = "Moderator " + moderator.getName() + " je odbio zahtjev za uklanjanje komentara na post " + adviceComment.getContent() + ".";
+            moderatorAuditService.logAction(moderator,description);
+        }
+        else
+        {
+            adviceCommentRepository.delete(adviceComment);
+
+            String description = "Moderator " + moderator.getName() + " je obrisao komentar na post korisnika " + adviceComment.getStudent().getUser().getUsername() + " čiji je sadržaj " + adviceComment.getContent();
+            moderatorAuditService.logAction(moderator,description);
+
+            String title = "Obavještenje o uklanjanju komentara na savjet";
+            String message = "Vaš komentar na savjet " +  adviceComment.getContent() + " je uklonjen.";
+            notificationsService.createNotification(title, message,adviceComment.getStudent());
+        }
+    }
 }

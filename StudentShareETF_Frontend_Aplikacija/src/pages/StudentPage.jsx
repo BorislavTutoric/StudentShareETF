@@ -224,8 +224,6 @@ const styles = {
     display: "flex",
     height: "100vh",
     backgroundColor: "#64aaf1ff",
-    //background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%)",
-    //backgroundColor: "white",
   },
 
   leftMenu: {
@@ -243,9 +241,6 @@ const styles = {
 
   contentBox: {
     flex: 1,
-    //backgroundColor: "linear-gradient(135deg, #1E3A8A 0%, #6793f2ff 100%)",
-    //background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%)",
-    //backgroundColor: "#071686ff",
     background: 'linear-gradient(180deg, #0a1457 0%, #1a1f6b 100%)',
     borderRadius: "16px",
     padding: "0px 0",

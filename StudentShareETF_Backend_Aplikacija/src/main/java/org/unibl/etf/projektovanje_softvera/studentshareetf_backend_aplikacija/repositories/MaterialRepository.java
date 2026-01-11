@@ -28,4 +28,6 @@ public interface MaterialRepository extends JpaRepository<Material, Integer> {
     """)
     List<Material> findSavedMaterialsByStudentAndSubject(@Param("student") Student student, @Param("subject") Subject subject
     );
+
+    List<Material> findByApprovedFalseAndModeratorIsNull();
 }

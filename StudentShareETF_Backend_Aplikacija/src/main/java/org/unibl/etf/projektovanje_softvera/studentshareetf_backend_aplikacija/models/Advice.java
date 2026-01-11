@@ -29,6 +29,10 @@ public class Advice {
     @JoinColumn(name = "StudentId", nullable = false)
     private Student student;
 
+    @Version
+    @Column(name = "Version", nullable = false)
+    private Long version = 0L;
+
     public Advice() {}
 
     public Advice(String content, Subject subject, Student student) {
@@ -84,5 +88,13 @@ public class Advice {
 
     public void setSubject(Subject subject) {
         this.subject = subject;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
+    public Long getVersion() {
+        return version;
     }
 }

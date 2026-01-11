@@ -12,6 +12,7 @@ public interface EventCommentRepository extends JpaRepository<EventComment, Inte
 
     List<EventComment> findByEvent_Id(Integer eventId);
 
+    List<EventComment> findByReportedTrue();
     @Query("""
         SELECT e
         FROM EventComment e

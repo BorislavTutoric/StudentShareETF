@@ -143,6 +143,8 @@ public class EventAuthController {
             return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
         }
     }
+
+
 }
 
 

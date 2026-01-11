@@ -2,6 +2,7 @@ package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.
 
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -20,6 +21,8 @@ public interface MaterialCommentRepository extends JpaRepository<MaterialComment
     List<MaterialComments> findByMaterijal_MaterialId(Integer materialId);
 
     Optional<MaterialComments> findById(Integer commentId);
+
+    List<MaterialComments> findByPrijavljenTrue();
 
     @Query("""
         SELECT m

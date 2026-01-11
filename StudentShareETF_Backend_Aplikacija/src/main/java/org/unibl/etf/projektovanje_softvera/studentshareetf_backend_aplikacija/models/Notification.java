@@ -34,6 +34,9 @@ public class Notification {
     @JoinColumn(name = "StudentId", nullable = false)
     private Student student;
 
+    @Column(name = "AktivnoOd", nullable = false)
+    private LocalDateTime aktivnoOd = LocalDateTime.now();
+
     public Notification() {}
 
     public Integer getId() {
@@ -89,5 +92,13 @@ public class Notification {
 
     public void setStudent(Student student) {
         this.student = student;
+    }
+
+    public void setAktivnoOd() {
+        this.aktivnoOd = LocalDateTime.now();
+    }
+
+    public LocalDateTime getAktivnoOd() {
+        return aktivnoOd;
     }
 }

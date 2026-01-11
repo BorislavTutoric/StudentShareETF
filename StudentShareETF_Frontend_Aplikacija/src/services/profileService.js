@@ -19,3 +19,12 @@ export const passwordChange = (newPassword) => {
   return api.put("/api/password-change", { newPassword });
 };
 
+export const checkPassword = async (password) => {
+  try {
+    const response = await api.post("api/profile/check-password", { password });
+    return response.data; 
+  } catch (err) {
+    throw err;
+  }
+};
+
