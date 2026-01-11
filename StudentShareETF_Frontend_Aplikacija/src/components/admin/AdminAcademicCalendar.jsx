@@ -81,7 +81,11 @@ function AdminAcademicCalendar() {
     if (deleteMonth && deleteYear) {
       try{
         const response = await deleteExams(deleteMonth, deleteYear);
-        showToast(response, 'success');
+        if(response){
+          showToast("Uspješno ste obrisali ispite za odabrani mjesec!", 'success');
+        } else {
+          showToast("Nema ispita za odabrani mjesec!", 'info');
+        }
         setDeleteMonth('');
         setDeleteYear('');
       }catch{
@@ -254,15 +258,15 @@ function AdminAcademicCalendar() {
                     onChange={(e) => setDeleteMonth(e.target.value)}
                   >
                     <option value="">Odaberi mjesec</option>
-                    <option value="01">Januar</option>
-                    <option value="02">Februar</option>
-                    <option value="03">Mart</option>
-                    <option value="04">April</option>
-                    <option value="05">Maj</option>
-                    <option value="06">Jun</option>
-                    <option value="07">Jul</option>
-                    <option value="08">Avgust</option>
-                    <option value="09">Septembar</option>
+                    <option value="1">Januar</option>
+                    <option value="2">Februar</option>
+                    <option value="3">Mart</option>
+                    <option value="4">April</option>
+                    <option value="5">Maj</option>
+                    <option value="6">Jun</option>
+                    <option value="7">Jul</option>
+                    <option value="8">Avgust</option>
+                    <option value="9">Septembar</option>
                     <option value="10">Oktobar</option>
                     <option value="11">Novembar</option>
                     <option value="12">Decembar</option>

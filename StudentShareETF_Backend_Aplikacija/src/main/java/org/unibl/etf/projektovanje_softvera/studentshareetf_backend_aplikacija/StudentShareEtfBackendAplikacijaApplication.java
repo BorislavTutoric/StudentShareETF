@@ -11,7 +11,7 @@ public class StudentShareEtfBackendAplikacijaApplication {
         SpringApplication.run(StudentShareEtfBackendAplikacijaApplication.class, args);
 
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        System.out.println(passwordEncoder.encode("jovan123"));
+        System.out.println(passwordEncoder.encode("perica"));
     }
 
 }

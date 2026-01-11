@@ -59,8 +59,13 @@ public class ExamService {
     }
 
     public boolean deleteExams(DeleteExamsRequest request) {
-        LocalDateTime start = LocalDate.of(request.getYear(), request.getMounth(), 1).atStartOfDay();
-        LocalDateTime end = LocalDate.of(request.getYear(), request.getMounth(), 1).atStartOfDay();
+
+        int year = Integer.parseInt(request.getYear());
+        int month = Integer.parseInt(request.getMonth());
+
+        LocalDateTime start = LocalDate.of(year, month, 1).atStartOfDay();
+        LocalDateTime end = start.plusMonths(1);
+
         int result = examRepository.deleteByMonthAndYear(start, end);
         return result > 0;
     }

@@ -50,3 +50,15 @@ export const createModeratorAccount = async (firstName, lastName, username, pass
     throw err;
   }
 };
+
+export const changeModeratorPasswordApi = async (username, newPassword) => {
+  try{
+    const res = await api.post("api/admin/accounts/moderator/password-change", {
+      username, 
+      newPassword
+    });
+    return res.data;
+  }catch (err){
+    throw err;
+  }
+};

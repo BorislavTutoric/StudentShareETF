@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class DeleteExamsRequest {
-    private Integer mounth;
-    private Integer year;
+    private String month;
+    private String year;
 }

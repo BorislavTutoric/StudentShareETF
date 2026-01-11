@@ -1,6 +1,6 @@
 import { act, useEffect, useState } from 'react';
 import { Trash2, Plus, Search } from 'lucide-react';
-import { activateUserAccountApi, deactivateUserAccountApi, getModeratorAccounts, getStudentAccounts } from '../../services/accountsService';
+import { activateUserAccountApi, changeModeratorPasswordApi, deactivateUserAccountApi, getModeratorAccounts, getStudentAccounts } from '../../services/accountsService';
 import CreateAccountModal from './CreateAccountModal';
 import Toast from '../Toast';
 
@@ -14,6 +14,8 @@ function AccountsManagement() {
   const [isCreateAccountModalOpen, setIsCreateAccountModalOpen] = useState(false);
   const [toast, setToast] = useState(null);
   const [expandedStudent, setExpandedStudent] = useState(null);
+  const [changePasswordModal, setChangePasswordModal] = useState(null);
+  const [newPassword, setNewPassword] = useState('');
 
   const [moderators, setModerators] = useState([]);
 
@@ -97,6 +99,29 @@ function AccountsManagement() {
     } catch (err){
       console.log(err);
       showToast("Greška pri aktivaciji naloga!", 'error');
+    }
+  }
+
+  const handleChangePassword = (userId, userName, username) => {
+    setChangePasswordModal({ id: userId, name: userName, username: username });
+    setNewPassword('');
+  }
+
+  const handleConfirmChangePassword = async () => {
+    if (!newPassword.trim()) {
+      showToast("Molimo unesite novu lozinku!", 'error');
+      return;
+    }
+    try{
+      const response = await changeModeratorPasswordApi(changePasswordModal.username, newPassword);
+      showToast(`Uspješno ste izmjenili lozinku moderatora: ${changePasswordModal.name}!`, 'success');
+      setChangePasswordModal(null);
+      setNewPassword('');
+    } catch (err){
+      console.log(err);
+      showToast("Greška pri izmjeni lozinke!", 'error')
+      setChangePasswordModal(null);
+      setNewPassword('');
     }
   }
 
@@ -306,12 +331,20 @@ function AccountsManagement() {
                         </div>
                       </div>
                     </div>
-                    <button
-                      style={styles.deleteBtn}
-                      onClick={() => setDeactivateConfirm({ id: item.id, type: 'moderator' })}
-                    >
-                      Deaktiviraj
-                    </button>
+                    <div style={styles.buttonGroup}>
+                      <button
+                        style={styles.passwordBtn}
+                        onClick={() => handleChangePassword(item.id, item.name + ' ' + item.surname, item.username)}
+                      >
+                        🔐 Izmjeni lozinku
+                      </button>
+                      <button
+                        style={styles.deleteBtn}
+                        onClick={() => setDeactivateConfirm({ id: item.id, type: 'moderator' })}
+                      >
+                        Deaktiviraj
+                      </button>
+                    </div>
                   </div>
                 ))
               ) : (
@@ -360,12 +393,20 @@ function AccountsManagement() {
                         </div>
                       </div>
                     </div>
-                    <button
-                      style={styles.activateBtn}
-                      onClick={() => setActivateConfirm({ id: item.id, type: 'moderator' })}
-                    >
-                      Aktiviraj
-                    </button>
+                    <div style={styles.buttonGroup}>
+                      <button
+                        style={styles.passwordBtn}
+                        onClick={() => handleChangePassword(item.id, item.name + ' ' + item.surname, item.username)}
+                      >
+                        🔐 Izmjeni lozinku
+                      </button>
+                      <button
+                        style={styles.activateBtn}
+                        onClick={() => setActivateConfirm({ id: item.id, type: 'moderator' })}
+                      >
+                        Aktiviraj
+                      </button>
+                    </div>
                   </div>
                 ))
               ) : (
@@ -508,6 +549,39 @@ function AccountsManagement() {
                 }
               >
                 Potvrdi
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal za promenu lozinke */}
+      {changePasswordModal && (
+        <div style={styles.modalOverlay} onClick={() => setChangePasswordModal(null)}>
+          <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
+            <h3 style={styles.modalTitle}>Izmjena lozinke</h3>
+            <p style={styles.modalText}>
+              Izmjena lozinke za korisnika: <strong>{changePasswordModal.name}</strong>
+            </p>
+            <input
+              type="password"
+              placeholder="Unesite novu lozinku..."
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              style={styles.passwordInput}
+            />
+            <div style={styles.modalButtons}>
+              <button
+                style={styles.cancelBtn}
+                onClick={() => setChangePasswordModal(null)}
+              >
+                Otkaži
+              </button>
+              <button
+                style={styles.confirmDeleteBtn}
+                onClick={handleConfirmChangePassword}
+              >
+                Izmjeni lozinku
               </button>
             </div>
           </div>
@@ -765,6 +839,29 @@ const styles = {
     color: '#F44336',
   },
 
+  buttonGroup: {
+    display: 'flex',
+    gap: '8px',
+    flexDirection: 'column',
+    flexShrink: 0,
+  },
+
+  passwordBtn: {
+    background: 'rgba(100, 150, 255, 0.2)',
+    border: '2px solid rgba(100, 150, 255, 0.4)',
+    borderRadius: '10px',
+    padding: '10px 12px',
+    color: '#6496ff',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'all 0.3s ease',
+    fontSize: '12px',
+    fontWeight: '600',
+    whiteSpace: 'nowrap',
+  },
+
   deleteBtn: {
     background: 'rgba(255, 107, 53, 0.2)',
     border: '2px solid rgba(255, 107, 53, 0.4)',
@@ -777,6 +874,9 @@ const styles = {
     justifyContent: 'center',
     transition: 'all 0.3s ease',
     flexShrink: 0,
+    fontSize: '12px',
+    fontWeight: '600',
+    whiteSpace: 'nowrap',
   },
 
   activateBtn: {
@@ -791,6 +891,9 @@ const styles = {
     justifyContent: 'center',
     transition: 'all 0.3s ease',
     flexShrink: 0,
+    fontSize: '12px',
+    fontWeight: '600',
+    whiteSpace: 'nowrap',
   },
 
   studentCard: {
@@ -880,6 +983,22 @@ const styles = {
     fontSize: '14px',
     margin: '0 0 24px 0',
     lineHeight: '1.6',
+  },
+
+  passwordInput: {
+    width: '100%',
+    padding: '12px 16px',
+    margin: '0 0 24px 0',
+    background: 'rgba(255, 255, 255, 0.1)',
+    border: '2px solid rgba(255, 107, 53, 0.2)',
+    borderRadius: '10px',
+    color: '#ffffff',
+    fontSize: '14px',
+    fontWeight: '500',
+    boxSizing: 'border-box',
+    outline: 'none',
+    transition: 'all 0.3s ease',
+    fontFamily: 'inherit',
   },
 
   modalButtons: {
