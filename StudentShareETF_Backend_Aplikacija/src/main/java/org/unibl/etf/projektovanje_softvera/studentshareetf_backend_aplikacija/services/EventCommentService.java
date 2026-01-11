@@ -66,7 +66,7 @@ public class EventCommentService {
                 .orElseThrow(() -> new UserNotFoundException("Student ne postoji"));
 
 
-        List<EventComment> comments = commentRepo.findByEvent_Id(eventId);
+        List<EventComment> comments = commentRepo.findCommentsOfActiveUsersByEvent_Id(eventId);
 
         return comments.stream().map(c -> {
 

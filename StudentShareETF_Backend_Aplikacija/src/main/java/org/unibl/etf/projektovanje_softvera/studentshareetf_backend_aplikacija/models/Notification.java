@@ -27,6 +27,9 @@ public class Notification {
     @Column(name = "DatumVrijeme", nullable = false)
     private LocalDateTime dateTime;
 
+    @Column(name = "AktivnoOd", nullable = false)
+    private LocalDateTime activeFrom;
+
     @ManyToOne()
     @JoinColumn(name = "StudentId", nullable = false)
     private Student student;
@@ -70,6 +73,14 @@ public class Notification {
 
     public void setDateTime(LocalDateTime dateTime) {
         this.dateTime = dateTime;
+    }
+
+    public LocalDateTime getActiveFrom() {
+        return activeFrom;
+    }
+
+    public void setActiveFrom(LocalDateTime activeFrom) {
+        this.activeFrom = activeFrom;
     }
 
     public Student getStudent() {

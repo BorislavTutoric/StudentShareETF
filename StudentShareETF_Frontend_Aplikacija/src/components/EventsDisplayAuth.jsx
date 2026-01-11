@@ -60,9 +60,15 @@ export default function EventsDisplayAuth() {
   if (events.length === 0) {
     return (
       <div style={styles.container}>
-        <button style={styles.addButton} onClick={() => setShowCreateModal(true)}>
-          + Dodaj događaj
-        </button>
+        <div style={styles.headerSection}>
+          <div style={styles.headerContent}>
+            <h1 style={styles.headerTitle}>📅 Događaji</h1>
+            <p style={styles.headerSubtitle}>Upravljaj i prati sve nadolazeće događaje</p>
+          </div>
+          <button style={styles.addButton} onClick={() => setShowCreateModal(true)}>
+            + Dodaj događaj
+          </button>
+        </div>
 
         <div style={styles.emptyContainer}>
           <p style={styles.emptyText}>Trenutno nema dostupnih događaja</p>
@@ -81,7 +87,12 @@ export default function EventsDisplayAuth() {
   return (
     <div style={styles.container}>
       {toast && <Toast message={toast.message} type={toast.type} />}
-      <div style={styles.buttonContainer}>
+      
+      <div style={styles.headerSection}>
+        <div style={styles.headerContent}>
+          <h1 style={styles.headerTitle}>📅 Događaji</h1>
+          <p style={styles.headerSubtitle}>Prati sve nadolazeće događaje</p>
+        </div>
         <button style={styles.addButton} onClick={() => setShowCreateModal(true)}>
           + Dodaj događaj
         </button>
@@ -118,22 +129,46 @@ export default function EventsDisplayAuth() {
 const styles = {
   container: {
     width: "100%",
-    padding: "10px 40px 30px 40px",
+    padding: "20px 40px 30px 40px",
     boxSizing: "border-box",
     minHeight: "auto",
     position: "relative",
   },
 
-  buttonContainer: {
-    position: "absolute",
-    top: "10px",
-    right: "40px",
-    zIndex: 10,
+  headerSection: {
+    display: "flex",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: "40px",
+    padding: "20px 30px",
+    background: "linear-gradient(135deg, rgba(96, 224, 22, 0.08) 0%, rgba(96, 224, 22, 0.04) 100%)",
+    borderRadius: "16px",
+    border: "2px solid rgba(96, 224, 22, 0.2)",
+    backdropFilter: "blur(10px)",
   },
 
-  header: {
-    textAlign: "center",
-    marginBottom: "20px",
+  headerContent: {
+    display: "flex",
+    flexDirection: "column",
+    gap: "0px",
+    flex: 1,
+  },
+
+  headerTitle: {
+    fontSize: "32px",
+    fontWeight: "800",
+    color: "#60e016",
+    margin: 0,
+    letterSpacing: "0.5px",
+    textShadow: "0 2px 4px rgba(96, 224, 22, 0.3)",
+  },
+
+  headerSubtitle: {
+    fontSize: "14px",
+    color: "rgba(255, 255, 255, 0.6)",
+    margin: 0,
+    fontWeight: "500",
+    letterSpacing: "0.3px",
   },
 
   addButton: {
@@ -146,72 +181,72 @@ const styles = {
     borderRadius: "8px",
     cursor: "pointer",
     transition: "all 0.2s ease",
-    boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
+    boxShadow: "0 4px 8px rgba(96, 224, 22, 0.3)",
+    whiteSpace: "nowrap",
+    flexShrink: 0,
   },
 
   eventsGrid: {
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
-    gap: '25px',
-    marginTop: '60px',
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
+    gap: "25px",
   },
 
   loadingContainer: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: '400px',
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: "400px",
   },
 
   spinner: {
-    width: '50px',
-    height: '50px',
-    border: '5px solid rgba(255, 255, 255, 0.3)',
-    borderTop: '5px solid #60e016',
-    borderRadius: '50%',
-    animation: 'spin 1s linear infinite',
+    width: "50px",
+    height: "50px",
+    border: "5px solid rgba(255, 255, 255, 0.3)",
+    borderTop: "5px solid #60e016",
+    borderRadius: "50%",
+    animation: "spin 1s linear infinite",
   },
 
   loadingText: {
-    marginTop: '20px',
-    fontSize: '18px',
-    color: 'white',
-    fontWeight: '600',
+    marginTop: "20px",
+    fontSize: "18px",
+    color: "white",
+    fontWeight: "600",
   },
 
   errorContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: '400px',
-    padding: '20px',
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: "400px",
+    padding: "20px",
   },
 
   errorText: {
-    fontSize: '18px',
-    color: '#ef4444',
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    padding: '20px 30px',
-    borderRadius: '12px',
-    fontWeight: '600',
+    fontSize: "18px",
+    color: "#ef4444",
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
+    padding: "20px 30px",
+    borderRadius: "12px",
+    fontWeight: "600",
   },
 
   emptyContainer: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    minHeight: '400px',
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: "400px",
   },
 
   emptyText: {
-    fontSize: '20px',
-    color: 'white',
-    fontWeight: '600',
+    fontSize: "20px",
+    color: "white",
+    fontWeight: "600",
   },
 };
 
-// Dodaj CSS animaciju za spinner
 const styleSheet = document.createElement("style");
 styleSheet.innerText = `
   @keyframes spin {
