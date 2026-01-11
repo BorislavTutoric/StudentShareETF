@@ -33,11 +33,11 @@ public class Materials {
         return ResponseEntity.ok(userService.getAllStudents());
     }
 
-    // PUT /api/moderator/materials/students/{id}/status
+
     @PutMapping("/students/{id}/status")
     public ResponseEntity<?> toggleStudentStatus(@PathVariable Integer id, @RequestBody Map<String, Object> body) {
         try {
-            // Frontend šalje 0 ili 1, mi pretvaramo u Boolean za tvoj servis
+
             Object val = body.get("aktivan");
             Boolean noviStatus = false;
             if (val instanceof Integer) {
