@@ -6,7 +6,7 @@ function ModeratorWelcomeHeader() {
   const [moderatorName, setModeratorName] = useState('');
 
   useEffect(() => {
-    const name = localStorage.getItem("moderatorName") || localStorage.getItem("studentName");
+    const name = localStorage.getItem("name");
     setModeratorName(name || 'Moderatore');
   }, []);
 
