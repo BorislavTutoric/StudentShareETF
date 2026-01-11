@@ -74,6 +74,8 @@ function StudentPage() {
   const handleLogoutClick = () => {
     window.location.href = "/";
     localStorage.removeItem("jwtToken");
+    localStorage.removeItem("username");
+    localStorage.removeItem("name");
   };
 
   const handleCloseMaterials = () => {setActiveComponent("subjects")}

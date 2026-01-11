@@ -22,6 +22,15 @@ function LoginModal({ isOpen, onClose, onLoginSuccess }) {
     e.preventDefault();
     setError("");
     try {
+      const data = await login(username, password);
+      localStorage.setItem("jwtToken", data.token);
+      localStorage.setItem("name", data.name);
+      localStorage.setItem("username", data.username);
+      if(data.role === "ROLE_STUDENT"){
+        window.location.href = "/student";
+      }else if(data.role === "ROLE_ADMIN"){
+        window.location.href = "/admin";
+      }
         const data = await login(username, password); 
         // data sada sadrži: { token, role, username, name }
 

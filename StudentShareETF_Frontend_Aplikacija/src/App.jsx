@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Home from "./pages/HomePage";
 import Verify from "./pages/Verify";
 import StudentPage from "./pages/StudentPage";
+import AdminPage from "./pages/AdminPage";
 import ModeratorEvents from "./pages/ModeratorEvents"
 
 // 1. Uvezi nove komponente (koje ćeš kreirati ispod)
@@ -16,6 +17,7 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/verify" element={<Verify />} />
         <Route path="/student" element={<StudentPage />} />
+        <Route path="/admin" element={<AdminPage />} />
         
         {/* 2. DODAJ OVE RUTE DA BI REDIRECT IMAO GDJE OTIĆI */}
         <Route path="/moderator/materijali" element={<ModeratorMaterials />} />

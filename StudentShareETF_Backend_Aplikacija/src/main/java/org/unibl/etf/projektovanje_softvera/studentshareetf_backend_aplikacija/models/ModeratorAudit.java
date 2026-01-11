@@ -12,7 +12,7 @@ public class ModeratorAudit {
     @Column(name = "AuditId", nullable = false)
     private Integer id;
 
-    @ManyToOne()
+    @ManyToOne
     @JoinColumn(name = "ModeratorId", nullable = false)
     private User moderator;
 
@@ -32,6 +32,10 @@ public class ModeratorAudit {
 
     public Integer getId() {
         return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public User getModerator() {

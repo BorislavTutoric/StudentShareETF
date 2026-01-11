@@ -8,8 +8,10 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserResponse {
+    protected Integer id;
     protected String name;
     protected String surname;
     protected String username;
     protected String role;
+    protected boolean active;
 }
