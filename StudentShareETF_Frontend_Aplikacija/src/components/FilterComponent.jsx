@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Filter, X } from 'lucide-react';
 
-function FilterComponent({ isOpen, onClose, setMySubjects, setAllSubjects }) {
-  const [selectedView, setSelectedView] = useState('all');
+function FilterComponent({ isOpen, onClose, setMySubjects, setAllSubjects, subjectsView}) {
+  const [selectedView, setSelectedView] = useState(subjectsView);
 
   const handleViewChange = (view) => {
     setSelectedView(view);
@@ -13,6 +13,10 @@ function FilterComponent({ isOpen, onClose, setMySubjects, setAllSubjects }) {
         setMySubjects();
     }
   };
+
+  useEffect(() => {
+      setSelectedView(subjectsView);
+  }, [subjectsView]);
 
   if (!isOpen) return null;
 
@@ -69,8 +73,8 @@ function FilterComponent({ isOpen, onClose, setMySubjects, setAllSubjects }) {
 const styles = {
   filterBubble: {
     position: 'absolute',
-    top: '305px',
-    right: '40px',
+    top: '270px',
+    right: '100px',
     backgroundColor: '#a8d5ba',
     borderRadius: '20px',
     padding: '16px 20px',

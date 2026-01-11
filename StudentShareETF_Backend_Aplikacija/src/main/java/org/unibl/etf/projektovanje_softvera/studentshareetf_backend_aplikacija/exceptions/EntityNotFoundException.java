@@ -1,11 +1,11 @@
 package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions;
 
-public class EntityNotFound extends RuntimeException {
+public class EntityNotFoundException extends Exception {
 
-    public EntityNotFound() {
+    public EntityNotFoundException() {
         super("Entity not found");
     }
-    public EntityNotFound(String message) {
+    public EntityNotFoundException(String message) {
         super(message);
     }
 }

@@ -37,10 +37,6 @@ function EventModal({ event, onClose }) {
             <h2 style={styles.modalTitle}>{event.naziv}</h2>
 
             <div style={styles.modalInfoGrid}>
-              <div style={styles.modalInfoItem}>
-                <span style={styles.modalLabel}>Naziv:</span>
-                <span style={styles.modalValue}>{event.naziv}</span>
-              </div>
 
               <div style={styles.modalInfoItem}>
                 <span style={styles.modalLabel}>Datum:</span>
@@ -60,7 +56,7 @@ function EventModal({ event, onClose }) {
 
               <div style={styles.modalInfoItem}>
                 <span style={styles.modalLabel}>Autor:</span>
-                <span style={styles.modalValue}>{event.autor}</span>
+                <span style={styles.modalValue}>{event.username}</span>
               </div>
             </div>
 

@@ -1,5 +1,7 @@
 package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services;
 
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,8 +18,11 @@ import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequ
 
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.time.Duration;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class StorageService {
@@ -47,8 +52,12 @@ public class StorageService {
                 .build();
     }
 
-    public String uploadFile(MultipartFile file) throws IOException {
-        String key = System.currentTimeMillis() + "_" + sanitizeFilename(file.getOriginalFilename());
+    public String uploadFile(MultipartFile file, String folder) throws IOException {
+        String originalName = Optional.ofNullable(file.getOriginalFilename())
+                .map(this::sanitizeFilename)
+                .orElse("unknown");
+
+        String key = folder + "/" + UUID.randomUUID() + "_" + originalName;
 
         PutObjectRequest putReq = PutObjectRequest.builder()
                 .bucket(bucket)
@@ -56,9 +65,13 @@ public class StorageService {
                 .contentType(file.getContentType())
                 .build();
 
-        s3.putObject(putReq, RequestBody.fromBytes(file.getBytes()));
+        try (InputStream is = file.getInputStream()) {
+            s3.putObject(putReq, RequestBody.fromInputStream(is, file.getSize()));
+        }
+
         return key;
     }
+
 
     public String generatePresignedUrl(String key) {
         GetObjectRequest getObjectRequest = GetObjectRequest.builder()
@@ -73,6 +86,20 @@ public class StorageService {
 
         PresignedGetObjectRequest presigned = presigner.presignGetObject(presignRequest);
         return presigned.url().toString();
+    }
+
+    public String readPdfFromBucket(String key) throws IOException {
+        GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                .bucket(bucket)
+                .key(key)
+                .build();
+
+        try (InputStream is = s3.getObject(getObjectRequest);
+             PDDocument document = PDDocument.load(is)) {
+
+            PDFTextStripper stripper = new PDFTextStripper();
+            return stripper.getText(document);
+        }
     }
 
     private String sanitizeFilename(String name) {

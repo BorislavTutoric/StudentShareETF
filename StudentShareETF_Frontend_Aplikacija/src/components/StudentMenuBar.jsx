@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { LogOut, Home, Bell, Bookmark, Calendar, Lightbulb, Users } from 'lucide-react';
 
-function StudentMenuBar({ onLogoutClick, onMenuClick, onHomeCLick}) {
+function StudentMenuBar({ onLogoutClick, onMenuClick, onHomeCLick, onCalendarClick, onNotificationsClick}) {
   const [hoveredItem, setHoveredItem] = useState(null);
+  const [activeItem, setActiveItem] = useState('Početna');
 
   const menuItems = [
     { name: 'Profil', icon: '👤' },
@@ -26,7 +27,7 @@ function StudentMenuBar({ onLogoutClick, onMenuClick, onHomeCLick}) {
         <div style={styles.menuAvatar}>
           👤
         </div>
-        <div style={styles.menuTitle}>Moj Profil</div>
+        <div style={styles.menuTitle}>{localStorage.getItem("username")}</div>
       </div>
 
       <nav style={styles.menuNav}>
@@ -37,15 +38,23 @@ function StudentMenuBar({ onLogoutClick, onMenuClick, onHomeCLick}) {
             onMouseLeave={() => setHoveredItem(null)}
             style={{
               ...styles.menuButton,
-              ...(hoveredItem === item.name ? styles.menuButtonHover : {})
+	      ...(activeItem === item.name ? styles.menuButtonActive : {}),
+              ...(hoveredItem === item.name && activeItem !== item.name ? styles.menuButtonHover : {})
             }}
             onClick={() => {
+              setActiveItem(item.name);
               if(item.name === "Početna")
               {
-                onMenuClick(item.name)
+                onMenuClick(item.name);
                 onHomeCLick();
+              }else if(item.name === "Obavještenja"){
+                onNotificationsClick();
+                onMenuClick(item.name);
+              }else if(item.name === "Akademski kalendar"){
+                onMenuClick(item.name);
+                onCalendarClick();
               }else{
-                onMenuClick(item.name)
+                onMenuClick(item.name);
               }}
             } 
           >
@@ -56,7 +65,7 @@ function StudentMenuBar({ onLogoutClick, onMenuClick, onHomeCLick}) {
               <span
                 style={{
                   ...styles.menuItem,
-                  ...(hoveredItem === item.name ? styles.menuItemActive : {}),
+                  ...(activeItem === item.name ? styles.menuItemActive : {}),
                 }}
               >
                 {item.name}
@@ -91,7 +100,7 @@ function StudentMenuBar({ onLogoutClick, onMenuClick, onHomeCLick}) {
 
 const styles = {
   menuBar: {
-    width: '300px',
+    width: '270px',
     background: 'linear-gradient(180deg, #0a1457 0%, #1a1f6b 100%)',
     padding: '24px',
     display: 'flex',
@@ -153,6 +162,12 @@ const styles = {
     outline: 'none',
     transition: 'all 0.3s ease',
     backdropFilter: 'blur(10px)',
+  },
+
+  menuButtonActive: {
+    background: 'rgba(96, 224, 22, 0.15)',
+    borderLeft: '4px solid #60e016',
+    paddingLeft: '12px',
   },
 
   menuButtonHover: {
