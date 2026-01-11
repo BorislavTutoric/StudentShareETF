@@ -35,7 +35,7 @@ public class MaterialCommentService {
 
     public List<MaterialCommentResponse> getCommentsByMaterialId(Integer materialId, String username) {
 
-        List<MaterialComments> comments = materialCommentRepository.findByMaterijal_MaterialId(materialId);
+        List<MaterialComments> comments = materialCommentRepository.findCommentsOfActiveUsersByMaterial(materialId);
         List<MaterialCommentResponse> commentResponses = new ArrayList<>();
         for (MaterialComments comment : comments) {
             User user = comment.getKorisnik();

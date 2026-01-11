@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { AdvicePostComponent } from './AdvicePostComponent';
 import adviceService from '../services/adviceService'; 
 import { MessageSquare, ChevronLeft, Send, PenTool } from 'lucide-react'; 
+import Toast from './Toast';
 
 const PRIMARY_ACCENT = '#60e016';
 const BACKGROUND_GRADIENT = "linear-gradient(180deg, #1a237e 0%, #283593 50%, #3949ab 100%)";
@@ -15,6 +16,12 @@ const AdviceDisplay = ({ subjectId, subjectName, year, onBack }) => {
     const [newPostContent, setNewPostContent] = useState('');
     const [isPostSubmitting, setIsPostSubmitting] = useState(false);
     const [hoverBack, setHoverBack] = useState(false);
+    const [toast, setToast] = useState(null);
+
+    const showToast = (message, type = 'success', duration = 5000) => {
+        setToast({ message, type });
+        setTimeout(() => setToast(null), duration);
+    };
 
     const fetchAdvices = useCallback(async () => {
         setIsLoading(true);
@@ -74,7 +81,7 @@ const AdviceDisplay = ({ subjectId, subjectName, year, onBack }) => {
             setNewPostContent('');
             await fetchAdvices(); 
         } catch (e) {
-            alert('Greška pri objavljivanju savjeta: ' + e);
+            showToast("Greška pri objavljivanju savjeta!");
             console.error(e);
         } finally {
             setIsPostSubmitting(false);
@@ -93,31 +100,29 @@ const AdviceDisplay = ({ subjectId, subjectName, year, onBack }) => {
     };
     
     const handleDeleteAdvice = async (adviceId) => {
-        if (!window.confirm("Jeste li sigurni da želite obrisati ovaj savjet? Ovo je trajno.")) return;
         try {
             await adviceService.deleteAdvice(adviceId); 
-            alert('Savjet uspješno obrisan.');
             setAdvices(prev => prev.filter(a => a.id !== adviceId));
             setAllComments(prev => {
                 const newComments = { ...prev };
                 delete newComments[adviceId];
                 return newComments;
             });
+            showToast("Uspješno ste obrisali savjet!", 'success');
         } catch (e) {
-            alert('Greška pri brisanju savjeta: ' + e);
+            showToast("Greška pri brisanju savjeta!", 'success');
         }
     };
 
     const handleReportAdvice = async (adviceId) => {
-        if (!window.confirm("Jeste li sigurni da želite prijaviti ovaj savjet?")) return;
         try {
             await adviceService.reportAdvice(adviceId);
-            alert('Savjet uspješno prijavljen.');
+            showToast("Savjet je uspješno prijavljen!", 'success');
             setAdvices(prev => prev.map(advice => 
                 advice.id === adviceId ? { ...advice, reported: true } : advice
             ));
         } catch (e) {
-            alert('Greška pri prijavljivanju savjeta: ' + e);
+            showToast("Greška pri prijavi savjeta!", 'success');
         }
     };
 
@@ -134,10 +139,9 @@ const AdviceDisplay = ({ subjectId, subjectName, year, onBack }) => {
     };
 
     const handleReportComment = async (commentId, adviceId) => {
-        if (!window.confirm("Jeste li sigurni da želite prijaviti ovaj komentar?")) return;
         try {
             await adviceService.reportComment(commentId);
-            alert('Komentar uspješno prijavljen.');
+            showToast("Komentar je uspješno prijavljen!", 'success');
             setAllComments(prev => ({
                 ...prev,
                 [adviceId]: (prev[adviceId] || []).map(comment =>
@@ -145,7 +149,7 @@ const AdviceDisplay = ({ subjectId, subjectName, year, onBack }) => {
                 )
             }));
         } catch (e) {
-            alert('Greška pri prijavljivanju komentara: ' + e);
+            showToast("Greška pri prijavi komentara!", 'success');
         }
     };
 
@@ -192,6 +196,8 @@ const AdviceDisplay = ({ subjectId, subjectName, year, onBack }) => {
 
     return (
         <div style={styles.container}>
+            {toast && <Toast message={toast.message} type={toast.type} />}
+            
             <div style={styles.contentWrapper}>
                 <button 
                     onClick={onBack} 
@@ -269,7 +275,8 @@ const styles = {
     container: {
         width: '100%',
         minHeight: '100vh',
-        background: BACKGROUND_GRADIENT,
+        //background: BACKGROUND_GRADIENT,
+        background: 'linear-gradient(135deg, #0a1457 0%, #1a2a5e 50%, #2a1f5e 100%)',
         padding: '25px 20px',
         fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
     },

@@ -67,7 +67,11 @@ public class EventCommentService {
         User user = userRepo.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException(username));
 
-        List<EventComment> comments = commentRepo.findByEvent_Id(eventId);
+        Student currentStudent = studentRepo.findByUser(user)
+                .orElseThrow(() -> new UserNotFoundException("Student ne postoji"));
+
+
+        List<EventComment> comments = commentRepo.findCommentsOfActiveUsersByEvent_Id(eventId);
 
         if ("MODERATOR_ZA_MATERIJALE".equals(user.getRole()) || "MODERATOR_ZA_DOGAĐAJE".equals(user.getRole())) {
             return comments.stream().map(c ->

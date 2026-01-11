@@ -48,4 +48,15 @@ public class NotificationsController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @GetMapping("/check-unread")
+    public ResponseEntity<?> checkUnreadNotifications(){
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        try{
+            Integer numOfUnreadNotifications = notificationsService.checkUnreadNotifications(username);
+            return ResponseEntity.ok(numOfUnreadNotifications);
+        } catch (UserNotFoundException ex){
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        }
+    }
 }

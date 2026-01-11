@@ -29,7 +29,7 @@ public class MaterialReviewService {
 
     public List<MaterialReviewResponse> getReviewsByMaterialId(Integer materialId, String username) {
 
-        List<MaterialReview> reviews = materialReviewRepository.findByMaterijal_MaterialId(materialId);
+        List<MaterialReview> reviews = materialReviewRepository.findReviewsOfActiveUsersByMaterialId(materialId);
         List<MaterialReviewResponse> reviewResponses = new ArrayList<>();
         for (MaterialReview review : reviews) {
             User user = review.getUser();

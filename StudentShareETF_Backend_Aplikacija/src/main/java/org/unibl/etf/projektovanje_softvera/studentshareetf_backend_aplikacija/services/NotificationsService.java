@@ -29,10 +29,10 @@ public class NotificationsService {
     public List<NotificationsResponse> getNotificationsByUsername(String username) throws UserNotFoundException, EntityNotFoundException {
         User user = userService.getUserByUsername(username);
         Student student = studentService.getStudentByUser(user);
-        List<Notification> notifications = notificationsRepository.findByStudent(student);
+        List<Notification> notifications = notificationsRepository.findActiveNotifications(student, LocalDateTime.now());
         List<NotificationsResponse> notificationsResponses = new ArrayList<>();
         for (Notification notification1 : notifications) {
-                notificationsResponses.add(new NotificationsResponse(notification1.getId(), notification1.getTitle(), notification1.getMessage(), notification1.getRead(), notification1.getDateTime()));
+                notificationsResponses.add(new NotificationsResponse(notification1.getId(), notification1.getTitle(), notification1.getMessage(), notification1.getRead(), notification1.getDateTime(), notification1.getActiveFrom()));
         }
         return  notificationsResponses;
     }
@@ -66,5 +66,32 @@ public class NotificationsService {
         notification.setDateTime(now);
         notification.setStudent(student);
         notificationsRepository.save(notification);
+    }
+    public Integer checkUnreadNotifications(String username) throws UserNotFoundException{
+        User user = userService.getUserByUsername(username);
+        Student student = studentService.getStudentByUser(user);
+        List<Notification> notifications = notificationsRepository.findActiveUnreadNotifications(student, LocalDateTime.now());
+        return notifications.size();
+    }
+
+    public void createNotification(String title, String message, Student student, LocalDateTime dateTime, LocalDateTime activeFrom){
+        Notification notification = new Notification();
+        notification.setTitle(title);
+        notification.setMessage(message);
+        notification.setRead(false);
+        notification.setDateTime(dateTime);
+        notification.setActiveFrom(activeFrom);
+        notification.setStudent(student);
+
+        notificationsRepository.save(notification);
+    }
+
+    public void deleteTaskNotification(Integer taskId, Student student){
+        List<Notification> taskNotifications = notificationsRepository.findTaskNotifications("Podsjetnik za obavezu!", student);
+        for (Notification notification : taskNotifications) {
+            if(notification.getTitle().contains("(id: " + taskId + ")")){
+                notificationsRepository.delete(notification);
+            }
+        }
     }
 }

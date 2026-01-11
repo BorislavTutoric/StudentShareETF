@@ -9,7 +9,7 @@ import EventsDisplayAuth from "../components/EventsDisplayAuth";
 import SavedMaterials from "../components/SavedMaterials";
 import SavedMaterialsDisplay from "../components/SavedMaterialsDisplay";
 import Notifications from "../components/Notifications";
-import { getNotificationsApi } from "../services/notificationsService";
+import { getNotificationsApi, getNumOfUnreadNotificationsApi } from "../services/notificationsService";
 import AcademicCalendar from "../components/AcademicCalendar";
 import { getAcademicCalendarApi } from "../services/calendarService,";
 import Toast from "../components/Toast";
@@ -33,6 +33,7 @@ function StudentPage() {
   const [myMonthTasks, setMyMonthTasks] = useState(null);
   const [toast, setToast] = useState(null);
   const [averageRatings, setAverageRatings] = useState([]);
+  const [numOfUnreadNotifications, setNumOfUnreadNotifications] = useState(0)
 
   const handleSubjectsClick = () => { 
     setActiveComponent("subjects");
@@ -109,6 +110,15 @@ function StudentPage() {
     }
   }
 
+  const getNumOfUnreadNotifications = async () => {
+    try{
+      const response = await getNumOfUnreadNotificationsApi();
+      setNumOfUnreadNotifications(response);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
   const renderContent = () => {
     switch (activeSection) {
       case "Profil":
@@ -134,7 +144,7 @@ function StudentPage() {
         );
 
       case "Obavještenja":
-        return <Notifications studentNotifications={notifications}/>;
+        return <Notifications studentNotifications={notifications} setUnreadNotifications={setNumOfUnreadNotifications}/>;
 
       case "Sačuvano":
         return (
@@ -172,7 +182,18 @@ function StudentPage() {
       default:
         return <h2>Dobrodošli!</h2>;
     }
-};
+  }
+
+  useEffect(() => {
+    getNumOfUnreadNotifications();
+
+    const interval = setInterval(() => {
+      getNumOfUnreadNotifications();
+    }, 15000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div style={styles.mainLayout}>
       {toast && <Toast message={toast.message} type={toast.type} />}
@@ -183,6 +204,7 @@ function StudentPage() {
           onHomeCLick={handleSubjectsClick}
           onNotificationsClick={handleNotificationsClick}
           onCalendarClick={handleCalendarClick}
+          unreadNotifications={numOfUnreadNotifications}
         />
       </div>
 

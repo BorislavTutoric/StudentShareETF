@@ -45,6 +45,7 @@ public class EventReviewService {
 
             EventReview review = new EventReview();
             review.setId(key);
+            review.setUser(user);
             review.setRating(request.getRating());
             review.setCreatedAt(LocalDateTime.now());
 
@@ -100,6 +101,7 @@ public class EventReviewService {
 
             Student reviewStudent = studentRepository.findById(review.getId().getStudentId())
                     .orElseThrow();
+        List<EventReview> reviews = reviewRepository.findReviewsOfActiveUsersByEventId(eventId);
 
             User reviewUser = userRepository.findById(reviewStudent.getUserId()).orElseThrow();
 

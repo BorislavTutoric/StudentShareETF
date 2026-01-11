@@ -5,22 +5,31 @@ import { getFilteredSubjects } from "../services/materialsService";
 import AdviceDisplay from './AdviceDisplay'; 
 import { Filter, Search } from 'lucide-react';
 import SearchInput from './SearchInput'; 
-import FilterComponent from './FilterComponent'; 
+import FilterComponent from './FilterComponent';
+import ConfirmationModal from './ConfirmationModal'; 
 
 
 function AdviceHome({ onOpenAdvice, startYear = 1, subjectsView = "all" }) {
-    const [courses, setCourses] = useState([]);
-    const [selectedYear, setSelectedYear] = useState(1);
-    const [hoverId, setHoverId] = useState(null);
-    const [filterHover, setFilterHover] = useState(false);
-    const [searchHover, setSearchHover] = useState(false);
-    const [searchTerm, setSearchTerm] = useState("");
-    const [isFilterOpen, setFilterOpen] = useState(false);
-    const [subjects, setSubjects] = useState("all");
-    const [isSearchButtonClicked, setIsClicked] = useState(false);
+    const [courses, setCourses] = useState([]);
+    const [selectedYear, setSelectedYear] = useState(1);
+    const [hoverId, setHoverId] = useState(null);
+    const [filterHover, setFilterHover] = useState(false);
+    const [searchHover, setSearchHover] = useState(false);
+    const [searchTerm, setSearchTerm] = useState("");
+    const [isFilterOpen, setFilterOpen] = useState(false);
+    const [subjects, setSubjects] = useState("all");
+    const [isSearchButtonClicked, setIsClicked] = useState(false);
 
-    const [displayAdvice, setDisplayAdvice] = useState(false);
-    const [adviceSubject, setAdviceSubject] = useState({ id: null, name: '', year: 0 });
+    const [displayAdvice, setDisplayAdvice] = useState(false);
+    const [adviceSubject, setAdviceSubject] = useState({ id: null, name: '', year: 0 });
+
+    const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+    const [onConfirm, setOnConfirm] = useState(null);
+    const [message, setMessage] = useState("");
+    
+    const handleCloseConfirmModal = () => {
+        setConfirmModalOpen(false);
+    }
 
     const filterMySubjects = () => setSubjects("my");
     const setAllSubjects = () => setSubjects("all");
@@ -59,7 +68,7 @@ function AdviceHome({ onOpenAdvice, startYear = 1, subjectsView = "all" }) {
     
     const filterSubjectsFirstSemester = (course) => {
         if(course.semester === 1) {
-            if(isSearchButtonClicked){
+            if(isSearchButtonClicked){
                 return course.name.toLowerCase().includes(searchTerm.toLowerCase());
             }
             return true;

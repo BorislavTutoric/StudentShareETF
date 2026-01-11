@@ -24,4 +24,14 @@ public interface MaterialCommentRepository extends JpaRepository<MaterialComment
 
     List<MaterialComments> findByPrijavljenTrue();
 
+    @Query("""
+        SELECT m
+        FROM MaterialComments m
+        JOIN m.korisnik k
+        WHERE m.materijal.materialId = :materialId
+            AND k.active = true
+        """)
+    List<MaterialComments> findCommentsOfActiveUsersByMaterial(
+            @Param("materialId") Integer materialId
+    );
 }

@@ -27,8 +27,9 @@ function ProfileDisplay() {
     fetchProfile();
   }, []);
 
-  const showToast = (message, type = 'success', duration = 10000) => {
+  const showToast = (message, type = 'success', duration = 3000) => {
     setToast({ message, type });
+    setTimeout(() => setToast(null), duration);
   };
 
   if (loading) return (
@@ -53,46 +54,42 @@ function ProfileDisplay() {
   return (
     <>
       <div style={styles.container}>
-        <div style={styles.header}>
-          <div style={styles.avatarContainer}>
-            <div style={styles.avatar}>
-              {profile.name.charAt(0)}{profile.surname.charAt(0)}
+        <div style={styles.mainCard}>
+          <div style={styles.topSection}>
+            <div style={styles.avatarSection}>
+              <div style={styles.avatar}>
+                {profile.name.charAt(0)}{profile.surname.charAt(0)}
+              </div>
             </div>
-          </div>
-          <div style={styles.nameSection}>
-            <h2 style={styles.name}>{profile.name} {profile.surname}</h2>
-            <p style={styles.role}>{profile.role}</p>
-            <p style={styles.username}>@{profile.username}</p>
+
+            <div style={styles.infoSection}>
+              <div style={styles.nameContainer}>
+                <h2 style={styles.name}>{profile.name} {profile.surname}</h2>
+                <p style={styles.role}>{profile.role}</p>
+                <p style={styles.username}>@{profile.username}</p>
+              </div>
+
+              <div style={styles.infoGrid}>
+                <div style={styles.infoCard}>
+                  <div style={styles.infoLabel}>Email adresa</div>
+                  <div style={styles.infoValue}>{profile.email}</div>
+                </div>
+                <div style={styles.infoCard}>
+                  <div style={styles.infoLabel}>Studijski program</div>
+                  <div style={styles.infoValue}>{profile.studyProgram}</div>
+                </div>
+                <div style={styles.infoCard}>
+                  <div style={styles.infoLabel}>Smjer</div>
+                  <div style={styles.infoValue}>{profile.major}</div>
+                </div>
+              </div>
+
+              <button style={styles.editButton} onClick={() => setIsModalOpen(true)}>
+                <span style={styles.editIcon}>✏️</span> Uredi profil
+              </button>
+            </div>
           </div>
         </div>
-
-        <div style={styles.divider}></div>
-
-        <div style={styles.contentSection}>
-          <div style={styles.infoGrid}>
-            <div style={styles.infoCard}>
-              <div style={styles.infoLabel}>Email adresa</div>
-              <div style={styles.infoValue}>{profile.email}</div>
-            </div>
-            <div style={styles.infoCard}>
-              <div style={styles.infoLabel}>Studijski program</div>
-              <div style={styles.infoValue}>{profile.studyProgram}</div>
-            </div>
-            <div style={styles.infoCard}>
-              <div style={styles.infoLabel}>Smjer</div>
-              <div style={styles.infoValue}>{profile.major}</div>
-            </div>
-          </div>
-        </div>
-
-        <div style={styles.divider}></div>
-
-        <button
-          style={styles.editButton}
-          onClick={() => setIsModalOpen(true)}
-        >
-          <span style={styles.editIcon}>✏️</span> Uredi profil
-        </button>
       </div>
 
       {/* Modal */}
@@ -113,7 +110,6 @@ function ProfileDisplay() {
         <Toast
           message={toast.message}
           type={toast.type}
-          onClose={() => setToast(null)}
         />
       )}
     </>
@@ -123,40 +119,70 @@ function ProfileDisplay() {
 const styles = {
   container: {
     width: "100%",
-    maxWidth: "780px",
-    margin: "20px auto",
-    borderRadius: "20px",
-    background: 'linear-gradient(135deg, #2a3f7e 0%, #1a2d5f 100%)',
-    boxShadow: "0 20px 60px rgba(0, 0, 0, 0.5)",
-    border: '2px solid rgba(96, 224, 22, 0.3)',
-    overflow: "hidden",
-    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
-    color: "#ffffff",
-  },
-  header: {
-    padding: "30px 24px",
-    background: 'rgba(96, 224, 22, 0.15)',
+    height: "100%",
+    padding: "0px",
     display: "flex",
     alignItems: "center",
-    gap: "20px",
+    justifyContent: "center",
+    boxSizing: "border-box",
+    background: 'linear-gradient(135deg, #0a1457 0%, #1a2a5e 50%, #2a1f5e 100%)',
+    margin: 0,
+    fontFamily: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif",
     color: "#ffffff",
-    border: '1px solid rgba(96, 224, 22, 0.3)',
+    overflow: "hidden",
   },
-  avatarContainer: { flexShrink: 0 },
+  mainCard: {
+    background: 'linear-gradient(135deg, #0a1457 0%, #1a2a5e 50%, #2a1f5e 100%)',
+    borderRadius: '0px',
+    padding: '20px',
+    boxShadow: 'none',
+    border: 'none',
+    width: '100%',
+    height: '100vh',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxSizing: 'border-box',
+    overflow: 'hidden',
+  },
+  topSection: {
+    display: 'flex',
+    gap: '30px',
+    width: '100%',
+    alignItems: 'center',
+  },
+  avatarSection: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '20px',
+    minWidth: '180px',
+    flexShrink: 0,
+  },
   avatar: {
-    width: "80px",
-    height: "80px",
+    width: "140px",
+    height: "140px",
     borderRadius: "50%",
     backgroundColor: '#60e016',
     color: '#0a1457',
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    fontSize: "28px",
+    fontSize: "56px",
     fontWeight: "700",
     border: "2px solid rgba(96, 224, 22, 0.4)",
   },
-  nameSection: { flex: 1 },
+  infoSection: { 
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '28px',
+  },
+  nameContainer: { 
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+  },
   name: { 
     fontSize: "28px", 
     fontWeight: "700", 
@@ -173,20 +199,17 @@ const styles = {
     color: 'rgba(255, 255, 255, 0.8)',
   },
   username: { 
-    fontSize: "14px", 
+    fontSize: "16px",
+    fontWeight: "600",
     margin: "5px 0 0 0", 
     opacity: "0.75",
     color: 'rgba(255, 255, 255, 0.6)',
   },
-  divider: { 
-    height: "1px", 
-    background: 'rgba(96, 224, 22, 0.2)',
+  infoGrid: { 
+    display: "grid", 
+    gridTemplateColumns: "repeat(3, 1fr)", 
+    gap: "15px" 
   },
-  contentSection: { 
-    padding: "25px 40px", 
-    background: 'rgba(96, 224, 22, 0.05)', 
-  },
-  infoGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "15px" },
   infoCard: {
     padding: "18px",
     background: 'linear-gradient(135deg, rgba(96, 224, 22, 0.12) 0%, rgba(96, 224, 22, 0.08) 100%)', 
@@ -211,8 +234,7 @@ const styles = {
   },
   
   editButton: {
-    width: "calc(100% - 48px)",
-    margin: "0 24px 24px 24px",
+    width: "100%",
     padding: "14px 20px",
     border: "none",
     borderRadius: "10px",
@@ -235,7 +257,8 @@ const styles = {
     alignItems: "center", 
     justifyContent: "center", 
     minHeight: "300px", 
-    color: "#ffffff" 
+    color: "#ffffff",
+    background: 'linear-gradient(135deg, #2a3f7e 0%, #1a2d5f 100%)',
   },
   spinner: { 
     width: "40px", 

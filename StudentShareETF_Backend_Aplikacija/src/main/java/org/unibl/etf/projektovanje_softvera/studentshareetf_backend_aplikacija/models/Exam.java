@@ -35,13 +35,15 @@ public class Exam {
 
         Exam exam = (Exam) o;
 
+        if (dateTime != null ? !dateTime.equals(exam.dateTime) : exam.dateTime != null) return false;
         if (title != null ? !title.equals(exam.title) : exam.title != null) return false;
         return major != null ? major.equals(exam.major) : exam.major == null;
     }
 
     @Override
     public int hashCode() {
-        int result = title != null ? title.hashCode() : 0;
+        int result = dateTime != null ? dateTime.hashCode() : 0;
+        result = 31 * result + (title != null ? title.hashCode() : 0);
         result = 31 * result + (major != null ? major.hashCode() : 0);
         return result;
     }

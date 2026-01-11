@@ -37,7 +37,7 @@ public class MaterialService {
         List<MaterialResponse> materials =  materialRepository.findBySubjectAndApproved(subject.get(), true)
                 .stream()
                 .filter(Material::isApproved)
-                .map(m -> new MaterialResponse(m.getMaterialId(), m.getName(), m.getCategory(), m.getSubject().getName()))
+                .map(m -> new MaterialResponse(m.getMaterialId(), m.getName(), m.getCategory(), m.getSubject().getName(), m.getDescription()))
                 .toList();
         return materials;
     }
@@ -88,7 +88,7 @@ public class MaterialService {
 
         return materialRepository.findSavedMaterialsByStudentAndSubject(student, subject)
                 .stream()
-                .map(material -> new MaterialResponse(material.getMaterialId(), material.getName(), material.getCategory(), subjectName))
+                .map(material -> new MaterialResponse(material.getMaterialId(), material.getName(), material.getCategory(), subjectName, material.getDescription()))
                 .toList();
     }
 
