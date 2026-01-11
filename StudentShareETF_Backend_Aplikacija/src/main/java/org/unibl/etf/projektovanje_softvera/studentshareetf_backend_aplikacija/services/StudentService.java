@@ -44,6 +44,18 @@ public class StudentService {
         }
     }
 
+    public boolean getStudentSuspensionStatus(Integer id) throws UserNotFoundException
+    {
+        Optional<User> user = userRepository.findByUserId(id);
+        if(user.isPresent()){
+            return !user.get().isActive();
+        }
+        else
+        {
+            throw new UserNotFoundException("Ne postoji dati student");
+        }
+    }
+
     public void emailCheck(String email) throws EmailNotFoundException {
         Optional<Student>  student = studentRepository.findByEmail(email);
         if(student.isPresent()) {

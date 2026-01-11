@@ -82,3 +82,14 @@ export const deleteEventReview = async (eventId) => {
     throw err;
   }
 };
+
+export const deleteEventCommentById = async (commentId) => {
+  const response = await api.delete(`/api/moderator/events/comments/${commentId}`);
+  return response.data;
+};
+
+export const deleteEvent = async (eventId) => {
+  const response = await api.delete(`/api/moderator/events/${eventId}`);
+  return response.data;
+};
+

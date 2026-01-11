@@ -32,11 +32,11 @@ export default function EventCreateModal({ onClose, onCreated, showToast }) {
     try {
       setSubmitting(true);
       await createEvent(eventDataToSend);
-      showToast('Događaj uspješno kreiran!', 'success');
+      showToast('Zahtjev za postavljanje događaja uspješno poslat!', 'success');
       onCreated();
       onClose();
     } catch (error) {
-      showToast('Greška pri dodavanju dogadjaja', 'error');
+      showToast('Greška pri slanju zahtjeva za postavljanje događaja!', 'error');
     } finally {
       setSubmitting(false);
     }

@@ -14,6 +14,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +26,22 @@ public class UserService implements UserDetailsService {
     //public UserService(UserRepository userRepository) {
         //this.userRepository = userRepository;
     //}
+
+    // Dobavljanje svih korisnika koji su studenti
+    public List<User> getAllStudents() {
+        return userRepository.findAll()
+                .stream()
+                .filter(u -> "STUDENT".equalsIgnoreCase(u.getRole()))
+                .collect(Collectors.toList());
+    }
+
+    // Promjena statusa korisnika
+    public void updateUserStatus(Integer userId, Boolean aktivan) throws UserNotFoundException {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException());
+        user.setActive(aktivan);
+        userRepository.save(user);
+    }
 
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return  userRepository.findByUsername(username)

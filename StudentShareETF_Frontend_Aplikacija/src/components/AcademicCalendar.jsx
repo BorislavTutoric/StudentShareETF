@@ -4,6 +4,7 @@ import { openAcademicCalendar } from '../services/calendarService,';
 import { addTaskApi, deleteTask, getMyMonthTasksApi } from '../services/taskService';
 import Toast from './Toast';
 import FlipPicker from './FlipPicker';
+import ConfirmationModal from './ConfirmationModal';
 
 function AkademskiKalendar({ calendarFile, facultyTasks = [], myTasks = [], handleMonthTasks}) {
   const currentDate = new Date();
@@ -32,6 +33,10 @@ function AkademskiKalendar({ calendarFile, facultyTasks = [], myTasks = [], hand
   const [selectedTask, setSelectedTask] = useState(null);
   const [showTaskDetails, setShowTaskDetails] = useState(false);
 
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+  const [onConfirm, setOnConfirm] = useState(null);
+  const [message, setMessage] = useState("");
+
   const monthNames = ['Januar', 'Februar', 'Mart', 'April', 'Maj', 'Jun', 'Jul', 'August', 'Septembar', 'Oktobar', 'Novembar', 'Decembar'];
   const months = monthNames.map((name, index) => ({ name, year: displayYear }));
   const daysOfWeek = ['Ponedeljak', 'Utorak', 'Srijeda', 'Četvrtak', 'Petak', 'Subota', 'Nedjelja'];
@@ -40,6 +45,10 @@ function AkademskiKalendar({ calendarFile, facultyTasks = [], myTasks = [], hand
     setToast({ message, type });
     setTimeout(() => setToast(null), duration);
   };
+
+  const handleCloseConfirmModal = () => {
+      setConfirmModalOpen(false);
+  }
 
   const scrollToModal = () => {
     setTimeout(() => {
@@ -318,6 +327,12 @@ function AkademskiKalendar({ calendarFile, facultyTasks = [], myTasks = [], hand
   return (
     <div style={styles.container}>
       {toast && <Toast message={toast.message} type={toast.type} />}
+      <ConfirmationModal 
+        isOpen={confirmModalOpen}
+        onConfirm={onConfirm}
+        message={message}
+        onCancel={handleCloseConfirmModal}
+      />
 
       <div style={styles.header}>
         <div style={styles.headerLeft}>
@@ -583,7 +598,9 @@ function AkademskiKalendar({ calendarFile, facultyTasks = [], myTasks = [], hand
                         style={styles.deleteTaskBtn}
                         onClick={(e) => {
                           e.stopPropagation();
-                          removeTask(index, task.id)
+                          setMessage(`obrisati obavezu: ${task.title}?`)
+                          setOnConfirm(() => () => removeTask(index, task.id));
+                          setConfirmModalOpen(true);
                         }}
                       >
                         <Trash2 size={16} />

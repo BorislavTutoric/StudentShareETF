@@ -25,6 +25,7 @@ public class TaskService {
     private final TaskRepository taskRepository;
     private final UserService userService;
     private final StudentService studentService;
+    private final NotificationsService notificationsService;
 
     public List<TaskResponse> getTasksForDate(String month, String year, String username) {
 
@@ -82,6 +83,46 @@ public class TaskService {
 
         taskRepository.save(task);
 
+        LocalDateTime now = LocalDateTime.now();
+
+        LocalDateTime sevenDaysBefore = dateTime.minusDays(7);
+        if (sevenDaysBefore.isAfter(now) || sevenDaysBefore.isEqual(now)) {
+            notificationsService.createNotification(
+                    "Podsjetnik za obavezu! (id: " + task.getId() + ")" ,
+                    "Vaša obaveza: " + title + " je za 7 dana",
+                    student,
+                    now,
+                    sevenDaysBefore
+            );
+        }
+
+        LocalDateTime threeDaysBefore = dateTime.minusDays(3);
+        if (threeDaysBefore.isAfter(now) || threeDaysBefore.isEqual(now)) {
+            String message = "Vaša obaveza: " + title + " je za 3 dana.";
+            if (!way.equals("personal")) {
+                message += "\nPrijavite ispit ako već niste!";
+            }
+            notificationsService.createNotification(
+                    "Podsjetnik za obavezu! (id: " + task.getId() + ")" ,
+                    message,
+                    student,
+                    now,
+                    threeDaysBefore
+            );
+        }
+
+        LocalDateTime oneDayBefore = dateTime.minusDays(1);
+        if (oneDayBefore.isAfter(now) || oneDayBefore.isEqual(now)) {
+            notificationsService.createNotification(
+                    "Podsjetnik za obavezu! (id: " + task.getId() + ")" ,
+                    "Vaša obaveza: " + title + " je za 1 dan",
+                    student,
+                    now,
+                    oneDayBefore
+            );
+        }
+
+
         return task.getId();
     }
 
@@ -98,6 +139,8 @@ public class TaskService {
         }
 
         taskRepository.delete(task);
+
+        notificationsService.deleteTaskNotification(taskId, student);
     }
 
 

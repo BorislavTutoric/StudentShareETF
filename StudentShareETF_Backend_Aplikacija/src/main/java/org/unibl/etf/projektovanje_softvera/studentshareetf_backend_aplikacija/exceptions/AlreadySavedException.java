@@ -2,7 +2,7 @@ package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.
 
 public class AlreadySavedException extends Exception {
     public AlreadySavedException(){
-        super("Već ste sačuvali materijal");
+        super("Materijal je već sačuvan!");
     }
     public AlreadySavedException(String message) {
         super(message);

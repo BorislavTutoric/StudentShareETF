@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { updateStudentPersonalInfo, emailChange, passwordChange } from "../services/profileService";
-import { checkEmail } from "../services/authService";
+import { updatePersonalInfo, emailChange, passwordChange } from "../services/profileService";
+import { checkEmail, checkUsername } from "../services/authService";
 
 function EditProfileModal({ profile, onClose, onUpdated, showToast }) {
   const [activeSection, setActiveSection] = useState(null);
 
-  const [name, setName] = useState(profile.name);
-  const [surname, setSurname] = useState(profile.surname);
+  const [username, setUsername] = useState(profile.username);
   const [studyProgram, setStudyProgram] = useState(profile.studyProgram);
   const [major, setMajor] = useState(profile.major);
 
@@ -19,14 +18,13 @@ function EditProfileModal({ profile, onClose, onUpdated, showToast }) {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const handleSavePersonal = async () => {
-    if (!name || !surname || !studyProgram || !major) {
+    if (!username || !studyProgram || !major) {
       showToast("Sva polja ličnih podataka moraju biti popunjena!", "warning");
       return;
     }
 
     try {
-      const res = await updateStudentPersonalInfo({ name, surname, studyProgram, major });
-      onUpdated(res.data);
+      const res = await updatePersonalInfo({ username, studyProgram, major });
       showToast("Lični podaci su uspješno ažurirani!", "success");
     } catch (err) {
       showToast(err.response?.data || "Greška prilikom ažuriranja ličnih podataka", "error");
@@ -98,21 +96,12 @@ function EditProfileModal({ profile, onClose, onUpdated, showToast }) {
           {activeSection === "personal" && (
             <div style={styles.sectionBody}>
               <div style={styles.inputGroup}>
-                <label style={styles.label}>Ime</label>
+                <label style={styles.label}>Korisničko ime</label>
                 <input
                   style={styles.input}
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  placeholder="Ime"
-                />
-              </div>
-              <div style={styles.inputGroup}>
-                <label style={styles.label}>Prezime</label>
-                <input
-                  style={styles.input}
-                  value={surname}
-                  onChange={(e) => setSurname(e.target.value)}
-                  placeholder="Prezime"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  placeholder="Korisničko ime"
                 />
               </div>
               <div style={styles.inputGroup}>

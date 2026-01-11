@@ -4,15 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.ExamResponse;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.EntityNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.PdfReadException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.*;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories.ExamScheduleRepository;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.utils.CyrillicToLatinConverter;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
-
 
 import java.io.*;
 import java.time.LocalDate;
@@ -27,101 +23,33 @@ import java.util.regex.Pattern;
 @RequiredArgsConstructor
 public class ExamScheduleService {
 
-    private final ExamScheduleRepository examScheduleRepository;
-    private final StorageService storageService;
-    private final StudentService studentService;
-    private final UserService userService;
-    private final MajorService majorService;
-    private final StudyProgramService studyProgramService;
     private final MajorSubjectService majorSubjectService;
     private final SubjectService subjectService;
     private final ExamService examService;
 
-
-    private static final List<String> HEADER_KEYWORDS = List.of(
-            "GODINA", "ISPITNI ROK", "NAZIV PREDMETA", "TERMIN", "VRIJEME", "SALA"
-    );
-
-    private boolean isHeaderLine(String line) {
-        for (String k : HEADER_KEYWORDS) {
-            if (line.toUpperCase().contains(k)) return true;
-        }
-        return false;
-    }
-
-    /*public List<ExamResponse> getExamsFromPdfByDate(Integer mon, Integer yr, String username) {
-        List<ExamResponse> responses = new ArrayList<>();
-        List<ExamSchedule> examSchedules = examScheduleRepository.findByActiveTrue();
-
-        User user = userService.getUserByUsername(username);
-        Student student = studentService.getStudentByUser(user);
-        Major major = majorService.getMajorByName(student.getMajor());
-        StudyProgram studentProgram = studyProgramService.getStudyProgramByName(student.getStudyProgram());
-        Integer studentMajorId = major.getMajorId();
-
-        List<MajorSubject> majorSubjects = majorSubjectService.getMajorSubjectList();
-        Map<String,Integer> subjects = subjectService.getSubjectNameToIdMap();
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd.MM.yyyy.");
-        Pattern pattern = Pattern.compile("(.+?)\\s+(\\d{3,4})\\s+(\\d{2}\\.\\d{2}\\.\\d{4}\\.)\\s+(\\d{2}:\\d{2})(?:\\s+(.*))?");
-
-        for (ExamSchedule examSchedule : examSchedules) {
-            try {
-                String text = storageService.readPdfFromBucket(examSchedule.getFileKey());
-                String[] lines = text.split("\n");
-
-                for (String raw : lines) {
-                    String line = raw.trim();
-                    if (line.isEmpty()) continue;
-                    if (!line.matches(".*\\d{2}\\.\\d{2}\\.\\d{4}\\..*")) continue;
-
-                    Matcher matcher = pattern.matcher(line);
-                    if (!matcher.find()) continue;
-
-                    String subjectName = matcher.group(1).trim();
-
-                    if (studentProgram.getName().equalsIgnoreCase("Računarstvo i informatika") && !subjectName.startsWith("РИ")) {
-                        continue;
-                    }
-                    else if(studentProgram.getName().equalsIgnoreCase("Elektronika i telekomunikacije") && !subjectName.startsWith("ЕТ"))
-                    {
-                        continue;
-                    }
-
-                    subjectName = subjectName.replaceFirst("^(ЕЕА|ЕИС|РИ|ЕТ)\\s+", "");
-                    subjectName = CyrillicToLatinConverter.toLatinUpper(subjectName);
-
-                    String dateStr = matcher.group(3);
-                    String time = matcher.group(4);
-                    String room = matcher.group(5);
-
-                    LocalDate date = LocalDate.parse(dateStr, formatter);
-                    if (date.getMonthValue() != mon || date.getYear() != yr) continue;
-
-                    Integer subjectId = subjects.getOrDefault(subjectName, 0);
-                    for(MajorSubject majorSubject : majorSubjects) {
-                        if(Objects.equals(majorSubject.getMajor().getMajorId(), studentMajorId) && Objects.equals(majorSubject.getSubject().getSubjectId(), subjectId)) {
-                            responses.add(new ExamResponse(subjectName, dateStr, time, room));
-                        }
-                    }
-
-                }
-            } catch (IOException e) {
-                throw new PdfReadException("Neuspjesno citanje pdfa.");
-            }
-        }
-        return responses;
-    }
-
-     */
 
     public ResponseEntity<?> createExamsFromPdf(MultipartFile file) {
         Set<Exam> exams = new HashSet<>();
         List<MajorSubject> majorSubjects = majorSubjectService.getMajorSubjectList();
         Map<String, Integer> subjects = subjectService.getSubjectNameToIdMap();
 
+        boolean doubleDate = false;
+        if (file.getOriginalFilename() != null &&
+                (file.getOriginalFilename().toLowerCase().contains("januar") ||
+                        file.getOriginalFilename().toLowerCase().contains("jun") ||
+                        file.getOriginalFilename().toLowerCase().contains("septembar"))) {
+            doubleDate = true;
+        }
+
         Pattern pattern = Pattern.compile(
-                "(.+?)\\s+(\\d{3,4})\\s+(\\d{2}\\.\\d{2}\\.\\d{4}\\.)\\s+(\\d{2}:\\d{2})(?:\\s+(\\S+))?"
+                "(.+?)\\s+(\\d{3,4})\\s+(\\d{2}\\.\\d{2}\\.\\d{4}\\.)\\s+(\\d{1,2}:\\d{2})(?:\\s+(.*))?"
+        );
+
+        Pattern patternDoubleDate = Pattern.compile(
+                "^(.+?)\\s+(\\d{3,4})\\s+" +
+                        "(\\d{2}\\.\\d{2}\\.\\d{4}\\.)\\s+(\\d{1,2}:\\d{2})\\s+" +
+                        "(\\d{2}\\.\\d{2}\\.\\d{4}\\.)\\s+(\\d{1,2}:\\d{2})" +
+                        "(?:\\s+(.*))?"
         );
 
         String text;
@@ -132,8 +60,6 @@ public class ExamScheduleService {
         }
 
         String[] lines = text.split("\n");
-
-        // --- NOVO: PAMETNO MERGE-OVANJE LINIJA ---
         String dateRegex = ".*\\d{2}\\.\\d{2}\\.\\d{4}\\..*";
         String codeOnlyRegex = "^\\d{3,4}$";
         String roomLikeRegex = ".*(\\d{3,4}|,|Bravo).*";
@@ -144,156 +70,127 @@ public class ExamScheduleService {
         for (int i = 0; i < n; i++) {
             String current = lines[i].trim();
             if (current.isEmpty()) continue;
-
             if (current.matches(dateRegex)) {
-
                 StringBuilder sb = new StringBuilder();
-
-                // --- 1) UZMI LINIJE IZNAD (naziv + šifra) ---
                 int back = i - 1;
                 int takenBack = 0;
                 Deque<String> backLines = new ArrayDeque<>();
-
                 while (back >= 0 && takenBack < 3) {
                     String b = lines[back].trim();
-                    if (b.isEmpty()) {
-                        back--;
-                        continue;
-                    }
-
+                    if (b.isEmpty()) { back--; continue; }
                     if (b.matches(dateRegex)) break;
-
                     if (b.matches(".*\\p{L}.*") || b.matches(codeOnlyRegex)) {
                         backLines.addFirst(b);
                         takenBack++;
                         back--;
                         continue;
                     }
-
                     break;
                 }
-
                 for (String s : backLines) {
                     if (sb.length() > 0) sb.append(" ");
                     sb.append(s);
                 }
-
-                // --- 2) DODAJ LINIJU SA DATUMOM ---
                 if (sb.length() > 0) sb.append(" ");
                 sb.append(current);
-
-                // --- 3) UZMI LINIJE ISPOD (sale) ---
                 int j = i + 1;
                 while (j < n) {
                     String next = lines[j].trim();
-                    if (next.isEmpty()) {
-                        j++;
-                        continue;
-                    }
-
+                    if (next.isEmpty()) { j++; continue; }
                     if (next.matches(dateRegex)) break;
-
-                    if (next.matches(roomLikeRegex) || next.matches(codeOnlyRegex) || next.matches(".*\\d{2}:\\d{2}.*")) {
+                    if (next.matches(roomLikeRegex) || next.matches(codeOnlyRegex) || next.matches(".*\\d{1,2}:\\d{2}.*")) {
                         sb.append(" ").append(next);
                         j++;
                         continue;
                     }
-
-                    if (next.matches(".*\\p{L}.*")) {
-                        break;
-                    }
-
+                    if (next.matches(".*\\p{L}.*") && !next.matches(".*Bravo.*")) break;
                     sb.append(" ").append(next);
                     j++;
                 }
-
                 mergedLines.add(sb.toString());
-
                 i = Math.max(i, j - 1);
             }
         }
 
-        StringBuilder res = new StringBuilder();
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy.");
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("H:mm");
 
         for (String line : mergedLines) {
+            Matcher matcher;
+            if (!doubleDate) matcher = pattern.matcher(line);
+            else matcher = patternDoubleDate.matcher(line);
 
-            Matcher matcher = pattern.matcher(line);
             if (!matcher.find()) continue;
 
-            String subjectName = matcher.group(1).trim();
-            subjectName = CyrillicToLatinConverter.toLatinUpper(subjectName);
+            String subjectNameRaw = matcher.group(1).trim();
+            String subjectNameClean = CyrillicToLatinConverter.toLatinUpper(subjectNameRaw)
+                    .replaceFirst("^[0-9]{3,4}\\s+", "")
+                    .replaceFirst("^(ЕЕА|EEA|ЕИС|EIS|РИ|RI|ЕТ|ET)\\s*,?\\s*", "")
+                    .trim();
 
-            subjectName = subjectName.replaceFirst("^[0-9]{3,4}\\s+", "");
+            String roomRaw = doubleDate ? matcher.group(7) : matcher.group(5);
+            String room = (roomRaw == null || roomRaw.isBlank()) ? "NEPOZNATO" : roomRaw.split(",")[0].trim();
 
-            subjectName = subjectName.replaceFirst("^(ЕЕА|EEA|ЕИС|EIS|РИ|RI|ЕТ|ET)\\s*,?\\s*", "");
+            List<TerminData> terminiZaObradu = new ArrayList<>();
 
-            subjectName = subjectName.trim();
+            terminiZaObradu.add(new TerminData(matcher.group(3), matcher.group(4)));
 
-            String dateStr = matcher.group(3);
-            String timeStr = matcher.group(4);
-
-            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy.");
-            DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
-
-            LocalDate date = LocalDate.parse(dateStr, dateFormatter);
-            LocalTime time = LocalTime.parse(timeStr, timeFormatter);
-            LocalDateTime dateTime = LocalDateTime.of(date, time);
-
-            String room = matcher.group(5);
-            if (room != null && room.contains(",")) {
-                room = room.split(",")[0].trim();
+            if (doubleDate) {
+                terminiZaObradu.add(new TerminData(matcher.group(5), matcher.group(6)));
             }
 
-            if (room == null || room.isBlank()) {
-                room = "NEPOZNATO";
-            }
-
-            String[] parts = subjectName.split(" ");
+            String[] parts = subjectNameClean.split(" ");
             Integer subjectId = 0;
-            if(parts.length >1){
-                res.setLength(0);
-                res.append(parts[parts.length - 1]);
-                for(int i = parts.length-1; i >=0; i--){
-                    System.out.println(res.toString());
-                    if(subjects.containsKey(res.toString())){
-                        subjectId = subjects.get(res.toString());
-                        System.out.println(res.toString());
+            String finalTitle = subjectNameClean;
+
+            if (parts.length > 1) {
+                StringBuilder tempTitle = new StringBuilder(parts[parts.length - 1]);
+                for (int k = parts.length - 1; k >= 0; k--) {
+                    if (subjects.containsKey(tempTitle.toString())) {
+                        subjectId = subjects.get(tempTitle.toString());
+                        finalTitle = tempTitle.toString();
                         break;
-                    }
-                    else {
-                        res.insert(0, parts[i - 1] + " ");
+                    } else if (k > 0) {
+                        tempTitle.insert(0, parts[k - 1] + " ");
                     }
                 }
-            }
-            else {
-                subjectId = subjects.get(subjectName);
-                res.setLength(0);
-                res.append(subjectName);
-                System.out.println(subjectName);
+            } else {
+                subjectId = subjects.get(subjectNameClean);
             }
 
+            for (TerminData t : terminiZaObradu) {
+                try {
+                    LocalDateTime dateTime = LocalDateTime.of(
+                            LocalDate.parse(t.datum, dateFormatter),
+                            LocalTime.parse(t.vrijeme, timeFormatter)
+                    );
 
-
-            for (MajorSubject majorSubject : majorSubjects) {
-                if (Objects.equals(subjectId, majorSubject.getSubject().getSubjectId())) {
-                    Exam exam = new Exam();
-                    exam.setDateTime(dateTime);
-                    exam.setRoom(room);
-                    exam.setTitle(res.toString());
-                    exam.setMajor(majorSubject.getMajor());
-                    exams.add(exam);
+                    for (MajorSubject majorSubject : majorSubjects) {
+                        if (Objects.equals(subjectId, majorSubject.getSubject().getSubjectId())) {
+                            Exam exam = new Exam();
+                            exam.setDateTime(dateTime);
+                            exam.setRoom(room);
+                            exam.setTitle(finalTitle);
+                            exam.setMajor(majorSubject.getMajor());
+                            exams.add(exam);
+                        }
+                    }
+                } catch (Exception e) {
+                    System.err.println("Greška pri obradi termina za: " + finalTitle);
                 }
             }
         }
 
         if (exams.isEmpty()) return ResponseEntity.notFound().build();
-        else {
-            List<Exam> result = exams.stream().toList();
-            examService.addExams(result);
-            return ResponseEntity.ok().build();
-        }
+        examService.addExams(exams.stream().toList());
+        return ResponseEntity.ok().build();
     }
 
+    private static class TerminData {
+        String datum;
+        String vrijeme;
+        TerminData(String d, String v) { this.datum = d; this.vrijeme = v; }
+    }
 
 
     public static String readPdfFromMultipartFile(MultipartFile file) throws IOException {
