@@ -41,7 +41,7 @@ function AkademskiKalendar({ calendarFile, facultyTasks = [], myTasks = [], hand
   const months = monthNames.map((name, index) => ({ name, year: displayYear }));
   const daysOfWeek = ['Ponedeljak', 'Utorak', 'Srijeda', 'Četvrtak', 'Petak', 'Subota', 'Nedjelja'];
 
-  const showToast = (message, type = 'success', duration = 5000) => {
+  const showToast = (message, type = 'success', duration = 3000) => {
     setToast({ message, type });
     setTimeout(() => setToast(null), duration);
   };

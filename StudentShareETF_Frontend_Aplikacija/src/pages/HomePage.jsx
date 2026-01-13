@@ -81,6 +81,7 @@ function Home() {
             materials={materials}
             isOpen={true}
             subjectName={selectedSubject}
+            back={handleSubjectsClick}
           />
         )}
 

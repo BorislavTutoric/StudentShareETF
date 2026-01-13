@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.StudentResponse;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.UpdateProfileInfoRequest;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.UserResponse;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.PasswordNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.UserNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.generics.UserHolder;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Student;
@@ -54,7 +55,7 @@ public class ProfileService {
     }
 
     @Transactional
-    public void updateStudentPersonalInfo(String username, UpdateStudentProfileInfoRequest request) {
+    public User updateStudentPersonalInfo(String username, UpdateStudentProfileInfoRequest request) {
 
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException(username));
@@ -62,14 +63,15 @@ public class ProfileService {
         Student student = studentRepository.findById(user.getUserId())
                 .orElseThrow(() -> new RuntimeException("Student not found"));
 
-        user.setName(request.getName());
-        user.setSurname(request.getSurname());
+        user.setUsername(request.getUsername());
 
         student.setStudyProgram(request.getStudyProgram());
         student.setMajor(request.getMajor());
 
         userRepository.save(user);
         studentRepository.save(student);
+
+        return user;
     }
 
     @Transactional
@@ -95,12 +97,16 @@ public class ProfileService {
     }
 
     @Transactional
-    public void changePassword(String username, String newPassword) throws UserNotFoundException {
+    public void changePassword(String username, String oldPassword, String newPassword) throws UserNotFoundException, PasswordNotFoundException {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UserNotFoundException());
 
-        user.setPassword(passwordEncoder.encode(newPassword));
-        userRepository.save(user);
+        if(passwordEncoder.matches(oldPassword, user.getPassword())){
+            user.setPassword(passwordEncoder.encode(newPassword));
+            userRepository.save(user);
+        }else{
+            throw new PasswordNotFoundException();
+        }
     }
 
     @Transactional

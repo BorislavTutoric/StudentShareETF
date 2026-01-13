@@ -24,6 +24,12 @@ export default function EventCreateModal({ onClose, onCreated, showToast }) {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Validate required fields only
+    if (!form.title.trim() || !form.location.trim() || !form.date.trim() || !form.description.trim()) {
+      showToast('Molimo popunite sva obavezna polja!', 'error');
+      return;
+    }
+
     const eventDataToSend = {
       ...form,
       time: form.time.trim() === "" ? null : form.time
@@ -67,7 +73,7 @@ export default function EventCreateModal({ onClose, onCreated, showToast }) {
           <div style={styles.formContainer}>
             <div style={styles.row}>
               <div style={styles.column}>
-                <label style={styles.label}>Naziv</label>
+                <label style={styles.label}>Naziv *</label>
                 <input
                   style={styles.input}
                   name="title"
@@ -76,11 +82,10 @@ export default function EventCreateModal({ onClose, onCreated, showToast }) {
                   placeholder="Unesite naziv događaja"
                   onFocus={(e) => e.target.style.borderColor = '#60e016'}
                   onBlur={(e) => e.target.style.borderColor = 'rgba(96, 224, 22, 0.3)'}
-                  required
                 />
               </div>
               <div style={styles.column}>
-                <label style={styles.label}>Mjesto</label>
+                <label style={styles.label}>Mjesto *</label>
                 <input
                   style={styles.input}
                   name="location"
@@ -89,14 +94,13 @@ export default function EventCreateModal({ onClose, onCreated, showToast }) {
                   placeholder="Unesite mjesto održavanja"
                   onFocus={(e) => e.target.style.borderColor = '#60e016'}
                   onBlur={(e) => e.target.style.borderColor = 'rgba(96, 224, 22, 0.3)'}
-                  required
                 />
               </div>
             </div>
 
             <div style={styles.row}>
               <div style={styles.column}>
-                <label style={styles.label}>Datum</label>
+                <label style={styles.label}>Datum *</label>
                 <input
                   type="date"
                   style={styles.input}
@@ -105,7 +109,6 @@ export default function EventCreateModal({ onClose, onCreated, showToast }) {
                   onChange={handleChange}
                   onFocus={(e) => e.target.style.borderColor = '#60e016'}
                   onBlur={(e) => e.target.style.borderColor = 'rgba(96, 224, 22, 0.3)'}
-                  required
                 />
               </div>
               <div style={styles.column}>
@@ -122,7 +125,7 @@ export default function EventCreateModal({ onClose, onCreated, showToast }) {
               </div>
             </div>
 
-            <label style={styles.label}>Opis</label>
+            <label style={styles.label}>Opis *</label>
             <textarea
               style={styles.textarea}
               name="description"
@@ -131,7 +134,6 @@ export default function EventCreateModal({ onClose, onCreated, showToast }) {
               placeholder="Unesite kratak opis događaja..."
               onFocus={(e) => e.target.style.borderColor = '#60e016'}
               onBlur={(e) => e.target.style.borderColor = 'rgba(96, 224, 22, 0.3)'}
-              required
             />
 
             <label style={styles.label}>Slika (opciono)</label>
@@ -312,6 +314,6 @@ const styles = {
   disabledButton: {
     backgroundColor: '#d1d5db',
     cursor: 'not-allowed',
-    opacity: 0.6,
+    opacity: '0.6',
   },
 };

@@ -70,7 +70,11 @@ public class EventService {
         event.setOpis(request.getDescription());
         event.setAktivan(false);
 
-        String time = request.getTime() != null && !request.getTime().isEmpty() ? request.getTime() : "00:00";
+        String time = request.getTime();
+        if (time == null || time.isEmpty() || "null".equalsIgnoreCase(time)) {
+            time = "00:00:00";
+        }
+
         LocalDateTime dateTime = LocalDateTime.parse(request.getDate() + "T" + time);
         event.setDatumVrijeme(dateTime);
 

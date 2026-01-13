@@ -15,7 +15,7 @@ function AdminAcademicCalendar() {
   const [toast, setToast] = useState(null);
   const [uploadingExams, setUploadingExams] = useState(false);
 
-  const showToast = (message, type = 'success', duration = 5000) => {
+  const showToast = (message, type = 'success', duration = 3000) => {
     setToast({ message, type });
     setTimeout(() => setToast(null), duration);
   };

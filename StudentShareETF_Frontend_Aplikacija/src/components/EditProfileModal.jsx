@@ -1,9 +1,12 @@
 import { useState } from "react";
-import { updatePersonalInfo, emailChange, passwordChange } from "../services/profileService";
+import { updateStudentPersonalInfo, emailChange, passwordChange } from "../services/profileService";
 import { checkEmail, checkUsername } from "../services/authService";
 
 function EditProfileModal({ profile, onClose, onUpdated, showToast }) {
   const [activeSection, setActiveSection] = useState(null);
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [username, setUsername] = useState(profile.username);
   const [studyProgram, setStudyProgram] = useState(profile.studyProgram);
@@ -24,7 +27,8 @@ function EditProfileModal({ profile, onClose, onUpdated, showToast }) {
     }
 
     try {
-      const res = await updatePersonalInfo({ username, studyProgram, major });
+      const res = await updateStudentPersonalInfo(username, studyProgram, major);
+      onUpdated();
       showToast("Lični podaci su uspješno ažurirani!", "success");
     } catch (err) {
       showToast(err.response?.data || "Greška prilikom ažuriranja ličnih podataka", "error");
@@ -59,13 +63,18 @@ function EditProfileModal({ profile, onClose, onUpdated, showToast }) {
       return;
     }
 
+    if (newPassword.length < 8) {
+      showToast("Nova lozinka mora imati najmanje 8 karaktera!", "error");
+      return;
+    }
+
     if (newPassword !== confirmPassword) {
       showToast("Nove lozinke se ne poklapaju!", "error");
       return;
     }
 
     try {
-      await passwordChange(newPassword);
+      await passwordChange(oldPassword, newPassword);
       showToast("Lozinka uspješno promijenjena!", "success");
       setOldPassword("");
       setNewPassword("");
@@ -196,35 +205,73 @@ function EditProfileModal({ profile, onClose, onUpdated, showToast }) {
             <div style={styles.sectionBody}>
               <div style={styles.inputGroup}>
                 <label style={styles.label}>Stara lozinka</label>
-                <input
-                  type="password"
-                  style={styles.input}
-                  value={oldPassword}
-                  onChange={(e) => setOldPassword(e.target.value)}
-                  placeholder="Stara lozinka"
-                />
+                <div style={styles.passwordInputWrapper}>
+                  <input
+                    type={showOldPassword ? "text" : "password"}
+                    style={styles.passwordInput}
+                    value={oldPassword}
+                    onChange={(e) => setOldPassword(e.target.value)}
+                    placeholder="Stara lozinka"
+                  />
+                  <button
+                    type="button"
+                    style={styles.eyeButton}
+                    onClick={() => setShowOldPassword(!showOldPassword)}
+                    title={showOldPassword ? "Sakrij lozinku" : "Prikaži lozinku"}
+                  >
+                    {showOldPassword ? "👁️" : "👁️‍🗨️"}
+                  </button>
+                </div>
               </div>
               <div style={styles.inputGroup}>
                 <label style={styles.label}>Nova lozinka</label>
-                <input
-                  type="password"
-                  style={styles.input}
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Nova lozinka"
-                />
+                <div style={styles.passwordInputWrapper}>
+                  <input
+                    type={showNewPassword ? "text" : "password"}
+                    style={styles.passwordInput}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    placeholder="Nova lozinka"
+                  />
+                  <button
+                    type="button"
+                    style={styles.eyeButton}
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    title={showNewPassword ? "Sakrij lozinku" : "Prikaži lozinku"}
+                  >
+                    {showNewPassword ? "👁️" : "👁️‍🗨️"}
+                  </button>
+                </div>
+                <p style={{
+                  color: newPassword.length < 8 && newPassword.length > 0 ? '#F44336' : newPassword.length >= 8 ? '#4CAF50' : 'rgba(255, 255, 255, 0.5)',
+                  fontSize: '12px',
+                  margin: '4px 0 0 0',
+                  fontWeight: '500'
+                }}>
+                  {newPassword.length === 0 ? 'Minimalno 8 karaktera' : newPassword.length < 8 ? `${8 - newPassword.length} karaktera nedostaje` : '✓ Lozinka je ispravna'}
+                </p>
               </div>
               <div style={styles.inputGroup}>
                 <label style={styles.label}>Potvrdi novu lozinku</label>
-                <input
-                  type="password"
-                  style={styles.input}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Potvrdi novu lozinku"
-                />
+                <div style={styles.passwordInputWrapper}>
+                  <input
+                    type={showConfirmPassword ? "text" : "password"}
+                    style={styles.passwordInput}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    placeholder="Potvrdi novu lozinku"
+                  />
+                  <button
+                    type="button"
+                    style={styles.eyeButton}
+                    onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                    title={showConfirmPassword ? "Sakrij lozinku" : "Prikaži lozinku"}
+                  >
+                    {showConfirmPassword ? "👁️" : "👁️‍🗨️"}
+                  </button>
+                </div>
               </div>
-              <button style={styles.saveButton} onClick={handlePasswordChange}>
+              <button style={{...styles.saveButton, opacity: newPassword.length < 8 ? 0.5 : 1, cursor: newPassword.length < 8 ? 'not-allowed' : 'pointer'}} onClick={handlePasswordChange} disabled={newPassword.length < 8}>
                 Promijeni lozinku
               </button>
             </div>
@@ -339,6 +386,37 @@ const styles = {
     transition: "all 0.2s ease", 
     fontWeight: "500",
     boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.2)',
+  },
+  passwordInputWrapper: {
+    position: "relative",
+    display: "flex",
+    alignItems: "center",
+  },
+  passwordInput: {
+    padding: "12px 45px 12px 15px",
+    borderRadius: "8px",
+    border: '2px solid rgba(96, 224, 22, 0.4)',
+    fontSize: "15px",
+    backgroundColor: 'rgba(96, 224, 22, 0.12)',
+    color: '#e0f7e5',
+    outline: "none",
+    transition: "all 0.2s ease",
+    fontWeight: "500",
+    boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.2)',
+    width: "100%",
+    boxSizing: "border-box",
+  },
+  eyeButton: {
+    position: "absolute",
+    right: "12px",
+    background: "none",
+    border: "none",
+    fontSize: "16px",
+    cursor: "pointer",
+    padding: "8px",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
   },
   select: { 
     padding: "12px 15px", 

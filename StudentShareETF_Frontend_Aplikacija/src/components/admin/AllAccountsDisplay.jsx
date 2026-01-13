@@ -16,12 +16,13 @@ function AccountsManagement() {
   const [expandedStudent, setExpandedStudent] = useState(null);
   const [changePasswordModal, setChangePasswordModal] = useState(null);
   const [newPassword, setNewPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const [moderators, setModerators] = useState([]);
 
   const [students, setStudents] = useState([]);
 
-  const showToast = (message, type = 'success', duration = 5000) => {
+  const showToast = (message, type = 'success', duration = 3000) => {
     setToast({ message, type });
     setTimeout(() => setToast(null), duration);
   };
@@ -105,6 +106,7 @@ function AccountsManagement() {
   const handleChangePassword = (userId, userName, username) => {
     setChangePasswordModal({ id: userId, name: userName, username: username });
     setNewPassword('');
+    setShowPassword(false);
   }
 
   const handleConfirmChangePassword = async () => {
@@ -112,16 +114,22 @@ function AccountsManagement() {
       showToast("Molimo unesite novu lozinku!", 'error');
       return;
     }
+    if (newPassword.length < 8) {
+      showToast("Lozinka mora imati minimalno 8 karaktera!", 'error');
+      return;
+    }
     try{
       const response = await changeModeratorPasswordApi(changePasswordModal.username, newPassword);
       showToast(`Uspješno ste izmjenili lozinku moderatora: ${changePasswordModal.name}!`, 'success');
       setChangePasswordModal(null);
       setNewPassword('');
+      setShowPassword(false);
     } catch (err){
       console.log(err);
       showToast("Greška pri izmjeni lozinke!", 'error')
       setChangePasswordModal(null);
       setNewPassword('');
+      setShowPassword(false);
     }
   }
 
@@ -250,7 +258,7 @@ function AccountsManagement() {
                 }}
                 onClick={() => setModeratorFilter('dogadjaji')}
               >
-                🎉 Moderatori za događaje
+                🎉 Moderatori za dogodaj
               </button>
             </div>
           </div>
@@ -563,23 +571,50 @@ function AccountsManagement() {
             <p style={styles.modalText}>
               Izmjena lozinke za korisnika: <strong>{changePasswordModal.name}</strong>
             </p>
-            <input
-              type="password"
-              placeholder="Unesite novu lozinku..."
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              style={styles.passwordInput}
-            />
+            <div style={styles.passwordInputWrapper}>
+              <input
+                type={showPassword ? "text" : "password"}
+                placeholder="Unesite novu lozinku..."
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                style={styles.passwordInput}
+              />
+              <button
+                type="button"
+                style={styles.eyeButtonModal}
+                onClick={() => setShowPassword(!showPassword)}
+                title={showPassword ? "Sakrij lozinku" : "Prikaži lozinku"}
+              >
+                {showPassword ? "👁️" : "👁️‍🗨️"}
+              </button>
+            </div>
+            <p style={{
+              color: newPassword.length < 8 && newPassword.length > 0 ? '#F44336' : newPassword.length >= 8 ? '#4CAF50' : 'rgba(255, 255, 255, 0.5)',
+              fontSize: '12px',
+              margin: '8px 0 24px 0',
+              fontWeight: '500'
+            }}>
+              {newPassword.length === 0 ? 'Minimalno 8 karaktera' : newPassword.length < 8 ? `${8 - newPassword.length} karaktera nedostaje` : '✓ Lozinka je ispravna'}
+            </p>
             <div style={styles.modalButtons}>
               <button
                 style={styles.cancelBtn}
-                onClick={() => setChangePasswordModal(null)}
+                onClick={() => {
+                  setChangePasswordModal(null);
+                  setShowPassword(false);
+                  setNewPassword('');
+                }}
               >
                 Otkaži
               </button>
               <button
-                style={styles.confirmDeleteBtn}
+                style={{
+                  ...styles.confirmDeleteBtn,
+                  opacity: newPassword.length < 8 ? 0.5 : 1,
+                  cursor: newPassword.length < 8 ? 'not-allowed' : 'pointer'
+                }}
                 onClick={handleConfirmChangePassword}
+                disabled={newPassword.length < 8}
               >
                 Izmjeni lozinku
               </button>
@@ -985,10 +1020,16 @@ const styles = {
     lineHeight: '1.6',
   },
 
+  passwordInputWrapper: {
+    position: 'relative',
+    display: 'flex',
+    alignItems: 'center',
+    marginBottom: '8px',
+  },
+
   passwordInput: {
     width: '100%',
-    padding: '12px 16px',
-    margin: '0 0 24px 0',
+    padding: '12px 40px 12px 16px',
     background: 'rgba(255, 255, 255, 0.1)',
     border: '2px solid rgba(255, 107, 53, 0.2)',
     borderRadius: '10px',
@@ -999,6 +1040,20 @@ const styles = {
     outline: 'none',
     transition: 'all 0.3s ease',
     fontFamily: 'inherit',
+  },
+
+  eyeButtonModal: {
+    position: 'absolute',
+    right: '12px',
+    backgroundColor: 'transparent',
+    border: 'none',
+    fontSize: '18px',
+    cursor: 'pointer',
+    padding: '5px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'all 0.2s ease',
   },
 
   modalButtons: {
