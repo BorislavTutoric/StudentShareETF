@@ -167,7 +167,7 @@ function ModeratorRequestsManagement() {
       <p style={styles.cardText}>Predmet: {material.subjectName}</p>
       <p style={styles.cardText}>Student: {material.studentName || "N/A"}</p>
       <p style={styles.cardDate}>
-        {new Date(material.uploadDate).toLocaleDateString("sr-RS")}
+        {new Date(material.uploadDate).toLocaleString("sr-RS")}
       </p>
       <div style={styles.cardActions}>
         <button
@@ -211,7 +211,7 @@ function ModeratorRequestsManagement() {
         </p>
         <p style={styles.cardText}>Autor: {item.studentName}</p>
         <p style={styles.cardDate}>
-          {new Date(item.date).toLocaleDateString("sr-RS")}
+          {new Date(item.date).toLocaleString("sr-RS")}
         </p>
         <div style={styles.cardActions}>
           <button
@@ -354,6 +354,12 @@ function ModeratorRequestsManagement() {
                     {selectedItem.type === "comment" && "Komentar na materijal"}
                     {selectedItem.type === "post" && "Post"}
                     {selectedItem.type === "postComment" && "Komentar na post"}
+                  </span>
+                </div>
+                <div style={styles.detailRow}>
+                  <span style={styles.detailLabel}>Predmet:</span>
+                  <span style={styles.detailValue}>
+                    {selectedItem.subject}
                   </span>
                 </div>
                 <div style={styles.detailRow}>

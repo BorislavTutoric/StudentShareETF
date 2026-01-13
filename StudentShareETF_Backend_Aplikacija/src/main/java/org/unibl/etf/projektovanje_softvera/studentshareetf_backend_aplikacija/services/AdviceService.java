@@ -171,6 +171,7 @@ public class AdviceService {
             response.setDate(advice.getDateTime().toString());
             String name = advice.getStudent().getUser().getName() + " " + advice.getStudent().getUser().getSurname() + " (" + advice.getStudent().getUser().getUsername() + ")";
             response.setStudentName(name);
+            response.setSubject(advice.getSubject().getName());
             return response;
         }).collect(Collectors.toList());
     }
@@ -188,18 +189,18 @@ public class AdviceService {
             advice.setReported(false);
             adviceRepository.save(advice);
 
-            String description = "Moderator " + moderator.getName() + " je odbio zahtjev za uklanjanje posta " + advice.getContent() + ".";
+            String description = "Moderator :" + moderator.getUsername() + " je odbio zahtjev za uklanjanje posta \"" + advice.getContent() + "\".";
             moderatorAuditService.logAction(moderator,description);
         }
         else
         {
             adviceRepository.delete(advice);
 
-            String description = "Moderator " + moderator.getName() + " je obrisao post korisnika " + advice.getStudent().getUser().getUsername() + " čiji je sadržaj " + advice.getContent();
+            String description = "Moderator :" + moderator.getUsername() + " je obrisao post korisnika :" + advice.getStudent().getUser().getUsername() + " čiji je sadržaj \"" + advice.getContent() + "\".";
             moderatorAuditService.logAction(moderator,description);
 
             String title = "Obavještenje o uklanjanju savjeta";
-            String message = "Vaš savjet " +  advice.getContent() + " je uklonjen.";
+            String message = "Vaš savjet \"" +  advice.getContent() + "\" je uklonjen.";
             notificationsService.createNotification(title, message,advice.getStudent(),LocalDateTime.now(),LocalDateTime.now());
         }
     }

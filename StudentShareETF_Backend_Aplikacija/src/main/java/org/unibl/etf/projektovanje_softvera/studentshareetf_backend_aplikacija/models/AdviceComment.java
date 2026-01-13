@@ -26,7 +26,6 @@ public class AdviceComment {
     @JoinColumn(name = "PostId", nullable = false)
     private Advice advice;
 
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "StudentId", nullable = false)
     private Student student;

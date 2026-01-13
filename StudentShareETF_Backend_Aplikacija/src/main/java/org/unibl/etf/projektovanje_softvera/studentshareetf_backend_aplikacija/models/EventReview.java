@@ -17,6 +17,11 @@ public class EventReview {
     @JoinColumn(name = "KorisnikId", nullable = false)
     private User user;
 
+    @MapsId("eventId")
+    @ManyToOne
+    @JoinColumn(name = "DogadjajId", nullable = false)
+    private Event event;
+
     @Column(name = "Ocjena", nullable = false)
     private Integer rating;
 

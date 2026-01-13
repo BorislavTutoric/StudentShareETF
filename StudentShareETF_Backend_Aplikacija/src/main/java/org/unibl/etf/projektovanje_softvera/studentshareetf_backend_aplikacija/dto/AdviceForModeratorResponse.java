@@ -19,4 +19,5 @@ public class AdviceForModeratorResponse {
     private String content;
     private String date;
     private String studentName;
+    private String subject;
 }

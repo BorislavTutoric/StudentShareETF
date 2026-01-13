@@ -1,14 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { X, Trash2 } from 'lucide-react';
-import { getEventComments, getEventReviews, deleteEventCommentById, deleteEvent } from '../../../services/eventService';
+import { getComments, deleteEventCommentById, deleteEvent } from '../../../services/eventService';
 import Toast from '../../Toast';
 
 function EventModalModerator({ event, onClose, onEventDeleted }) {
   const [allComments, setAllComments] = useState([]);
-  const [allReviews, setAllReviews] = useState([]);
-  const [activeTab, setActiveTab] = useState('comments');
   const [loading, setLoading] = useState(true);
-  const [averageRating, setAverageRating] = useState(0);
   const [toast, setToast] = useState(null);
   const [showDeleteEventConfirm, setShowDeleteEventConfirm] = useState(false);
   const [showDeleteCommentConfirm, setShowDeleteCommentConfirm] = useState(null);
@@ -18,14 +15,10 @@ function EventModalModerator({ event, onClose, onEventDeleted }) {
     const loadData = async () => {
       try {
         setLoading(true);
-        const commentsData = await getEventComments(event.dogadjajId);
-        const reviewsData = await getEventReviews(event.dogadjajId);
+        const commentsData = await getComments(event.dogadjajId);
 
         const sortedComments = commentsData.sort((a, b) => new Date(b.dateTime) - new Date(a.dateTime));
         setAllComments(sortedComments);
-        
-        const sortedReviews = reviewsData.sort((a, b) => new Date(b.dateTime) - new Date(a.dateTime));
-        setAllReviews(sortedReviews);
       } catch (err) {
         console.error(err);
       } finally {
@@ -37,16 +30,6 @@ function EventModalModerator({ event, onClose, onEventDeleted }) {
       document.body.style.overflow = 'unset';
     };
   }, [event.dogadjajId]);
-
-  useEffect(() => {
-    if (allReviews.length > 0) {
-      const totalRating = allReviews.reduce((sum, review) => sum + review.rating, 0);
-      const newAverageRating = (totalRating / allReviews.length).toFixed(1);
-      setAverageRating(newAverageRating);
-    } else {
-      setAverageRating(0);
-    }
-  }, [allReviews]);
 
   const showToast = (message, type = 'success', duration = 10000) => {
     setToast({ message, type });
@@ -159,146 +142,49 @@ function EventModalModerator({ event, onClose, onEventDeleted }) {
               <p style={styles.descriptionText}>{event.opis}</p>
             </div>
 
-            <div style={styles.tabsContainer}>
-              <button
-                onClick={() => setActiveTab('comments')}
-                style={{
-                  ...styles.tabButton,
-                  ...(activeTab === 'comments' ? styles.activeTab : {})
-                }}
-              >
-                💬 Komentari ({allComments.length})
-              </button>
-              <button
-                onClick={() => setActiveTab('reviews')}
-                style={{
-                  ...styles.tabButton,
-                  ...(activeTab === 'reviews' ? styles.activeTab : {})
-                }}
-              >
-                ⭐ Recenzije ({allReviews.length})
-              </button>
-            </div>
-
-            {activeTab === 'comments' && (
-              <div style={styles.tabContent}>
-                <div style={styles.listSection}>
-                  <h3 style={styles.sectionTitle}>💬 Svi komentari</h3>
-                  {allComments.length === 0 ? (
-                    <div style={styles.emptyState}>
-                      <p>Nema komentara za ovaj događaj.</p>
-                    </div>
-                  ) : (
-                    <div style={styles.commentsList}>
-                      {allComments.map((com) => (
-                        <div key={com.id} style={styles.commentCard}>
-                          <div style={styles.commentHeader}>
-                            <div style={styles.avatarCircle}>
-                              {com.name?.charAt(0)}{com.surname?.charAt(0)}
-                            </div>
-                            <div style={styles.commentMeta}>
-                              <strong style={styles.commentAuthor}>
-                                {com.name} {com.surname}
-                              </strong>
-                              <span style={styles.commentDate}>
-                                {new Date(com.dateTime).toLocaleString('sr-RS')}
-                              </span>
-                            </div>
-                            <button 
-                              style={styles.deleteButton}
-                              onClick={() => setShowDeleteCommentConfirm({ id: com.id, author: `${com.name} ${com.surname}` })}
-                              onMouseEnter={(e) => e.currentTarget.style.color = '#ef4444'}
-                              onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(239, 68, 68, 0.7)'}
-                              title="Obriši komentar"
-                            >
-                              <Trash2 size={20} />
-                            </button>
-                          </div>
-                          <p style={styles.commentText}>{com.content}</p>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+            <div style={styles.listSection}>
+              <h3 style={styles.sectionTitle}>💬 Komentari</h3>
+              {allComments.length === 0 ? (
+                <div style={styles.emptyState}>
+                  <p>Nema komentara za ovaj događaj.</p>
                 </div>
-              </div>
-            )}
-
-            {activeTab === 'reviews' && (
-              <div style={styles.tabContent}>
-                
-                {allReviews.length > 0 && (
-                  <div style={styles.averageRatingSection}>
-                    <h3 style={styles.averageRatingTitle}>Prosječna ocjena</h3>
-                    <div style={styles.averageRatingContent}>
-                      <div style={styles.averageRatingNumber}>{averageRating}</div>
-                      <div style={styles.averageRatingStarsWrapper}>
-                        <div style={styles.averageRatingStars}>
-                          {[1, 2, 3, 4, 5].map((star) => {
-                            const fill = Math.min(Math.max(averageRating - star + 1, 0), 1);
-                            return (
-                              <span
-                                key={star}
-                                style={{
-                                  background: `linear-gradient(90deg, #facc15 ${fill * 100}%, #d1d5db ${fill * 100}%)`,
-                                  WebkitBackgroundClip: 'text',
-                                  WebkitTextFillColor: 'transparent',
-                                  backgroundClip: 'text',
-                                }}
-                              >
-                                ★
-                              </span>
-                            );
-                          })}
+              ) : (
+                <div style={styles.commentsList}>
+                  {allComments.map((com) => (
+                    <div key={com.id} style={styles.commentCard}>
+                      <div style={styles.commentHeader}>
+                        <div style={styles.avatarCircle}>
+                          {com.name?.charAt(0)}{com.surname?.charAt(0)}
                         </div>
-                        <p style={styles.averageRatingText}>
-                          na osnovu {allReviews.length} {allReviews.length === 1 ? 'ocjene' : allReviews.length < 5 ? 'ocjene' : 'ocjena'}
-                        </p>
+                        <div style={styles.commentMeta}>
+                          <strong style={styles.commentAuthor}>
+                            {com.name} {com.surname}
+                          </strong>
+                          <span style={styles.commentDate}>
+                            {new Date(com.dateTime).toLocaleString('sr-RS')}
+                          </span>
+                        </div>
+                        <button 
+                          style={styles.deleteButton}
+                          onClick={() => setShowDeleteCommentConfirm({ id: com.id, author: `${com.name} ${com.surname}` })}
+                          onMouseEnter={(e) => e.currentTarget.style.color = '#ef4444'}
+                          onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(239, 68, 68, 0.7)'}
+                          title="Obriši komentar"
+                        >
+                          <Trash2 size={20} />
+                        </button>
                       </div>
+                      <p style={styles.commentText}>{com.content}</p>
                     </div>
-                  </div>
-                )}
-
-                <div style={styles.listSection}>
-                  <h3 style={styles.sectionTitle}>⭐ Sve recenzije</h3>
-
-                  {allReviews.length === 0 ? (
-                    <div style={styles.emptyState}>
-                      <p>Nema recenzija za ovaj događaj.</p>
-                    </div>
-                  ) : (
-                    <div style={styles.reviewsList}>
-                      {allReviews.map((rev) => (
-                        <div key={rev.id} style={styles.reviewCard}>
-                          <div style={styles.reviewHeader}>
-                            <div style={styles.avatarCircle}>
-                              {rev.name?.charAt(0)}{rev.surname?.charAt(0)}
-                            </div>
-                            <div style={styles.reviewMeta}>
-                              <strong style={styles.reviewAuthor}>
-                                {rev.name} {rev.surname}
-                              </strong>
-                              <div style={styles.reviewStars}>
-                                {'★'.repeat(rev.rating)}
-                                {'☆'.repeat(5 - rev.rating)}
-                              </div>
-                              <span style={styles.reviewDate}>
-                                {new Date(rev.dateTime).toLocaleString('sr-RS')}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                  ))}
                 </div>
-              </div>
-            )}
+              )}
+            </div>
 
           </div>
         </div>
       </div>
 
-      {/* Potvrda za brisanje događaja - Novi stil */}
       {showDeleteEventConfirm && (
         <div style={styles.confirmOverlay} onClick={() => setShowDeleteEventConfirm(false)}>
           <div style={styles.confirmDialog} onClick={(e) => e.stopPropagation()}>
@@ -326,7 +212,6 @@ function EventModalModerator({ event, onClose, onEventDeleted }) {
         </div>
       )}
 
-      {/* Potvrda za brisanje komentara - Novi stil */}
       {showDeleteCommentConfirm && (
         <div style={styles.confirmOverlay} onClick={() => setShowDeleteCommentConfirm(null)}>
           <div style={styles.confirmDialog} onClick={(e) => e.stopPropagation()}>
@@ -497,6 +382,7 @@ const styles = {
     backgroundColor: 'white',
     borderRadius: '8px',
     border: '1px solid rgba(0,0,0,0.1)',
+    marginBottom: '25px',
   },
   descriptionTitle: {
     fontSize: '18px',
@@ -511,101 +397,11 @@ const styles = {
     margin: 0,
   },
   
-  tabsContainer: {
-    display: 'flex',
-    gap: '10px',
-    marginTop: '30px',
-    marginBottom: '20px',
-  },
-  tabButton: {
-    flex: 1,
-    padding: '14px',
-    backgroundColor: 'white',
-    borderRadius: '8px',
-    border: '2px solid rgba(0,0,0,0.1)',
-    fontSize: '16px',
-    fontWeight: '600',
-    cursor: 'pointer',
-    transition: 'all 0.2s ease',
-    color: '#4b5563',
-  },
-  activeTab: {
-    backgroundColor: '#6366f1',
-    color: 'white',
-    borderColor: '#6366f1',
-    transform: 'scale(1.02)',
-  },
-  
-  tabContent: {
-    marginTop: '20px',
-  },
-  
   listSection: {
     backgroundColor: 'white',
     padding: '20px',
     borderRadius: '8px',
     border: '1px solid rgba(0,0,0,0.1)',
-    marginBottom: '20px',
-  },
-
-  averageRatingSection: {
-    background: 'linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%)',
-    padding: '22px 26px',
-    borderRadius: '14px',
-    border: '2px solid #c4b5fd',
-    marginBottom: '20px',
-    textAlign: 'center',
-    boxShadow: '0 6px 16px rgba(99, 102, 241, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.6)',
-  },
-  averageRatingTitle: {
-    fontSize: '13px',
-    fontWeight: '950',
-    color: '#4c1d95',
-    margin: '0 0 14px 0',
-    letterSpacing: '2px',
-    textTransform: 'uppercase',
-    fontFamily: '"Segoe UI", "Helvetica Neue", sans-serif',
-    textShadow: '0 2px 4px rgba(99, 102, 241, 0.1)',
-    fontStyle: 'italic',
-  },
-  averageRatingContent: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '22px',
-  },
-  averageRatingNumber: {
-    fontSize: '54px',
-    fontWeight: '950',
-    background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)',
-    WebkitBackgroundClip: 'text',
-    WebkitTextFillColor: 'transparent',
-    lineHeight: 1,
-    fontFamily: '"Segoe UI", "Helvetica Neue", sans-serif',
-    letterSpacing: '-2px',
-    filter: 'drop-shadow(0 2px 6px rgba(99, 102, 241, 0.15))',
-  },
-  averageRatingStarsWrapper: {
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: '8px',
-  },
-  averageRatingStars: {
-    fontSize: '22px',
-    color: '#facc15',
-    letterSpacing: '4px',
-    textShadow: '0 3px 8px rgba(250, 204, 21, 0.25)',
-    filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))',
-  },
-  averageRatingText: {
-    fontSize: '12px',
-    color: '#5b21b6',
-    margin: 0,
-    fontWeight: '800',
-    fontFamily: '"Segoe UI", "Helvetica Neue", sans-serif',
-    letterSpacing: '0.8px',
-    textTransform: 'lowercase',
   },
 
   sectionTitle: {
@@ -665,43 +461,6 @@ const styles = {
     color: '#4b5563',
     margin: 0,
   },
-  
-  reviewsList: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '15px',
-  },
-  reviewCard: {
-    padding: '15px',
-    backgroundColor: '#f9fafb',
-    borderRadius: '8px',
-    border: '1px solid #e5e7eb',
-  },
-  reviewHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: '12px',
-  },
-  reviewMeta: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '4px',
-    flex: 1,
-  },
-  reviewAuthor: {
-    fontSize: '15px',
-    color: '#1f2937',
-    fontWeight: '700',
-  },
-  reviewStars: {
-    fontSize: '18px',
-    color: '#facc15',
-    letterSpacing: '2px',
-  },
-  reviewDate: {
-    fontSize: '12px',
-    color: '#6b7280',
-  },
 
   deleteButton: {
     background: 'none',
@@ -721,7 +480,6 @@ const styles = {
     color: '#6b7280',
   },
 
-  // Confirmation Dialog Styles - Isti kao u ModeratorEventRequestsManagement
   confirmOverlay: {
     position: 'fixed',
     top: 0,
