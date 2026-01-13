@@ -18,7 +18,7 @@ const AdviceDisplay = ({ subjectId, subjectName, year, onBack }) => {
     const [hoverBack, setHoverBack] = useState(false);
     const [toast, setToast] = useState(null);
 
-    const showToast = (message, type = 'success', duration = 5000) => {
+    const showToast = (message, type = 'success', duration = 3000) => {
         setToast({ message, type });
         setTimeout(() => setToast(null), duration);
     };

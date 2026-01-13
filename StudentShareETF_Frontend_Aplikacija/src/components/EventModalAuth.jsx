@@ -66,7 +66,7 @@ function EventModalAuth({ event, onClose }) {
     }
   }, [otherReviews, myReview]);
 
-  const showToast = (message, type = 'success', duration = 10000) => {
+  const showToast = (message, type = 'success', duration = 3000) => {
     setToast({ message, type });
     setTimeout(() => setToast(null), duration);
   };

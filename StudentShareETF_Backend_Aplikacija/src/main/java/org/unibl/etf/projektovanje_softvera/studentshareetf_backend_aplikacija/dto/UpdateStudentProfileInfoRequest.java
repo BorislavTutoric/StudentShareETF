@@ -9,8 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UpdateStudentProfileInfoRequest {
-    private String name;
-    private String surname;
+    private String username;
     private String studyProgram;
     private String major;
 }

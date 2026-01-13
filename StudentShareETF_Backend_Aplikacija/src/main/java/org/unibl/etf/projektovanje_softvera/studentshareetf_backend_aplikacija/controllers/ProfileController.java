@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.*;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.PasswordNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.UserNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.generics.UserHolder;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.User;
@@ -36,11 +37,12 @@ public class ProfileController {
         }
     }
 
-    @PutMapping("/student-update")
+    @PostMapping("/student-update")
     public ResponseEntity<?> updateStudentProfileInformation(@RequestBody UpdateStudentProfileInfoRequest request){
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        profileService.updateStudentPersonalInfo(username,request);
-        return ResponseEntity.ok("Profil uspješno izmjenjen!");
+        User user = profileService.updateStudentPersonalInfo(username,request);
+        String token = jwtService.generateToken(user);
+        return ResponseEntity.ok(token);
     }
 
     @PutMapping("/email-change")
@@ -55,14 +57,14 @@ public class ProfileController {
         }
     }
 
-    @PutMapping("/password-change")
+    @PostMapping("/password-change")
     public ResponseEntity<?> changePassword(@RequestBody NewPasswordRequest request) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         try {
-            profileService.changePassword(username, request.getNewPassword());
+            profileService.changePassword(username, request.getOldPassword(), request.getNewPassword());
             return ResponseEntity.ok(Map.of("message", "Lozinka je uspješno promijenjena"));
-        } catch (UserNotFoundException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        } catch (UserNotFoundException | PasswordNotFoundException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
