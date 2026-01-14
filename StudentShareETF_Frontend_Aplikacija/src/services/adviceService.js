@@ -44,11 +44,10 @@ const mapCommentResponse = (comment) => {
         fullName: fullName, 
         initials: initials.toUpperCase(), 
         
-        // ⭐ DODAJEMO USERNAME SA BACKENDA!
-        username: comment.username || 'student', // Koristimo fallback 'student' samo za sigurnost
+        username: comment.username || 'student', 
         
         isMine: comment.isMine || false, 
-        isReported: comment.reported || false,
+        reported: comment.reported || false,
     };
 };
 
@@ -144,6 +143,21 @@ export const reportComment = async (commentId) => {
     }
 };
 
+export const deleteComment = async (commentId) => {
+    try {
+        await api.delete(`${API_ADVICE_BASE}/comments/${commentId}`);
+        return true; 
+    } catch (err) {
+        if (err.response?.status === 403) {
+            throw "Nemate pravo da obrišete ovaj komentar.";
+        }
+        if (err.response?.status === 404) {
+            throw "Komentar nije pronađen.";
+        }
+        throw err.response?.data || "Greška pri brisanju komentara";
+    }
+};
+
 export default {
     getSubjectsWithId,
     getAdvicesBySubjectId,
@@ -153,5 +167,6 @@ export default {
     getCommentsByAdviceId,
     postComment,
     reportComment,
-    deleteAdvice
+    deleteAdvice,
+    deleteComment
 };

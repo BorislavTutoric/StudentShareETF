@@ -16,7 +16,8 @@ export const AdvicePostComponent = ({
     handleReportAdvice,
     handleDeleteAdvice, 
     handlePostComment,
-    handleReportComment
+    handleReportComment,
+    handleDeleteComment
 }) => {
     
     const [newComment, setNewComment] = useState('');
@@ -30,7 +31,7 @@ export const AdvicePostComponent = ({
       setConfirmModalOpen(false);
     }
     
-    const authorName = `${advice.name || 'Anonimni'} ${advice.surname || 'Korisnik'}`;
+    const authorName = `${advice.name} ${advice.surname }`;
     const initials = (advice.name ? advice.name.charAt(0) : '') + (advice.surname ? advice.surname.charAt(0) : '');
     
     const date = new Date(advice.dateTime).toLocaleString('sr-RS', {
@@ -145,6 +146,7 @@ export const AdvicePostComponent = ({
                             adviceId={advice.id}
                             comment={comment}
                             handleReportComment={handleReportComment}
+                            handleDeleteComment={handleDeleteComment}
                         />
                     ))}
 

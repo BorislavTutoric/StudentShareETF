@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Trash2 } from 'lucide-react';
+import ConfirmationModal from './ConfirmationModal';
 
 const PRIMARY_ACCENT = '#60e016';
 const SECONDARY_ACCENT = '#5c6bc0';
@@ -10,11 +11,23 @@ export const CommentItemComponent = ({ adviceId, comment, handleReportComment, h
         day: '2-digit', month: '2-digit', year: 'numeric',
         hour: '2-digit', minute: '2-digit'
     });
+
+    const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+    const [onConfirm, setOnConfirm] = useState(null);
+    const [message, setMessage] = useState("");
     
     const authorName = `${comment.name || 'Anonimni'} ${comment.surname || 'Korisnik'}`;
     const initials = (comment.name ? comment.name.charAt(0) : '') + (comment.surname ? comment.surname.charAt(0) : '');
 
     return (
+        <>
+        <ConfirmationModal
+            isOpen={confirmModalOpen}
+            message={message}
+            onConfirm={onConfirm}
+            onCancel={() => setConfirmModalOpen(false)}
+        />
+
         <div 
             style={{ 
                 ...styles.commentItem,
@@ -47,11 +60,15 @@ export const CommentItemComponent = ({ adviceId, comment, handleReportComment, h
 
             {comment.isMine ? (
                 <button
-                    onClick={() => handleDeleteComment(comment.id, adviceId)}
+                    onClick={() => {
+                        setMessage("obrisati ovaj komentar?");
+                        setOnConfirm(() => () => handleDeleteComment(comment.id, adviceId));
+                        setConfirmModalOpen(true);
+                    }}
                     style={styles.deleteCommentButton}
                     title="Obriši komentar"
                 >
-                    <Trash2 size={12} style={{marginRight: '3px'}} /> Obriši
+                    <Trash2 size={12} style={{ marginRight: '3px' }} /> Obriši
                 </button>
             ) : comment.reported ? (
                 <span style={styles.reportedBadgeAbsolute}>PRIJAVLJENO</span>
@@ -65,6 +82,7 @@ export const CommentItemComponent = ({ adviceId, comment, handleReportComment, h
                 </button>
             )}
         </div>
+    </>
     );
 };
 
