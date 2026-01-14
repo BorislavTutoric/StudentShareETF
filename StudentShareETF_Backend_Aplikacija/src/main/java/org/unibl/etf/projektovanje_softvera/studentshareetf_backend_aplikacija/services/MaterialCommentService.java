@@ -48,12 +48,14 @@ public class MaterialCommentService {
         return commentResponses;
     }
 
+    @Transactional
     public MaterialCommentResponse postComment(String username, String content, Integer materialId) throws UserNotFoundException, EntityNotFoundException {
         User user = userService.getUserByUsername(username);
         Material material = materialService.getMaterialById(materialId);
         LocalDateTime  dateTime = LocalDateTime.now();
         MaterialComments materialComment = new MaterialComments(content, dateTime, material, user);
-        materialCommentRepository.save(materialComment);
+        materialCommentRepository.saveAndFlush(materialComment);
+        System.out.println(materialComment.getId());
         return new MaterialCommentResponse(materialComment.getId(), materialComment.getSadrzaj(), dateTime, user.getName(), user.getSurname(), true);
     }
 

@@ -132,14 +132,14 @@ public class AuthController {
     }
 
 
-    @GetMapping("/forgotten-password-request")
-    public ResponseEntity<?> forgottenPasswordRequest(@RequestParam String email){
+    @PostMapping("/forgotten-password-request")
+    public ResponseEntity<?> forgottenPasswordRequest(@RequestBody ForgottenPasswordRequest forgottenPasswordRequest) {
         try {
-            changePasswordService.passwordChangeMailSender(email);
-            return ResponseEntity.ok(Map.of("message", "Email je poslat."));
+            changePasswordService.passwordChangeMailSender(forgottenPasswordRequest.getEmail());
+            return ResponseEntity.ok(Map.of("message", "Email za izmjenu je poslat."));
         }
         catch (EmailNotFoundException ex) {
-            return ResponseEntity.status(400).body(Map.of("error", ex.getMessage()));
+            return ResponseEntity.status(400).body(ex.getMessage());
         }
     }
 
@@ -150,7 +150,7 @@ public class AuthController {
             return ResponseEntity.ok(Map.of("message", "Lozinka je izmijenjena."));
         }
         catch (UserNotFoundException ex) {
-            return ResponseEntity.status(400).body(Map.of("error", ex.getMessage()));
+            return ResponseEntity.status(400).body(ex.getMessage());
         }
     }
 }

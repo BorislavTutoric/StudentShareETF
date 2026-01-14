@@ -5,6 +5,7 @@ import Verify from "./pages/Verify";
 import StudentPage from "./pages/StudentPage";
 import AdminPage from "./pages/AdminPage";
 import ModeratorEvents from "./pages/ModeratorEvents"
+import PasswordChange from "./pages/PasswordChange"
 
 // 1. Uvezi nove komponente (koje ćeš kreirati ispod)
 import ModeratorMaterials from "./pages/ModeratorMaterials";
@@ -16,6 +17,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/verify" element={<Verify />} />
+        <Route path="/password-change" element={<PasswordChange />} />
         <Route path="/student" element={<StudentPage />} />
         <Route path="/admin" element={<AdminPage />} />
         
