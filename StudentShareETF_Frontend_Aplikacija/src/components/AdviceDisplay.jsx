@@ -154,10 +154,10 @@ const AdviceDisplay = ({ subjectId, subjectName, year, onBack }) => {
     };
 
     const handleDeleteComment = async (commentId, adviceId) => {
-        if (!window.confirm("Jeste li sigurni da želite obrisati ovaj komentar?")) return;
+        
         try {
             await adviceService.deleteComment(commentId);
-            alert('Komentar uspješno obrisan.');
+            showToast('Komentar uspješno obrisan.', 'success');
             
             setAllComments(prev => {
                 const updatedComments = (prev[adviceId] || []).filter(c => c.id !== commentId);
@@ -170,7 +170,7 @@ const AdviceDisplay = ({ subjectId, subjectName, year, onBack }) => {
                 return { ...prev, [adviceId]: updatedComments };
             });
         } catch (e) {
-            alert('Greška pri brisanju komentara: ' + e);
+            showToast('Greška pri brisanju komentara: ', 'error');
         }
     };
     

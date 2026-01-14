@@ -47,4 +47,10 @@ public class EventReview {
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public void setEvent(Event event) {
+        this.event = event;
+    }
+
+    public Event getEvent() { return event; }
 }

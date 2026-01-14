@@ -126,7 +126,7 @@ function AdviceHome({ onOpenAdvice, startYear = 1, subjectsView = "all" }) {
         return (
             <AdviceDisplay 
                 subjectId={adviceSubject.id}
-                subjectName={adviceSubject.name} 
+                subjectName={adviceSubject.name} 
                 year={adviceSubject.year} 
                 onBack={handleBackToSubjects}
             />

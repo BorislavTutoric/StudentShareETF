@@ -18,8 +18,8 @@ import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.s
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.SubjectAdvice;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.SubjectService;
 
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.LikePostService; // ⭐ DODAJ OVO
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.LikePostResponse; // ⭐ I OVO
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.LikePostService;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.LikePostResponse;
 
 import java.util.List;
 

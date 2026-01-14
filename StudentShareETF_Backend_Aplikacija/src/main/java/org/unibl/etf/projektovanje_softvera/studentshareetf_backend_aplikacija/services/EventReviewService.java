@@ -48,6 +48,7 @@ public class EventReviewService {
             review.setUser(user);
             review.setRating(request.getRating());
             review.setCreatedAt(LocalDateTime.now());
+            review.setEvent(event);
 
             reviewRepository.save(review);
 
