@@ -32,7 +32,7 @@ public class MaterialComments {
 
     @Version
     @Column(name = "Version")
-    private Long version = 0L;
+    private Long version;
 
     public MaterialComments() {}
 
@@ -43,7 +43,7 @@ public class MaterialComments {
         this.korisnik = user;
     }
 
-    public Integer getId() { return id; }
+    public Integer getId() { return this.id; }
     public void setId(Integer id) { this.id = id; }
 
     public String getSadrzaj() { return sadrzaj; }

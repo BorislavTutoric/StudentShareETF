@@ -62,3 +62,23 @@ export const loginCheck = async () => {
     throw err;
   }
 };
+
+export const forgottenPasswordRequest = async (email) => {
+  try {
+    const res = await api.post("all/auth/forgotten-password-request", { email }); 
+    return res.data; 
+  } catch (err) {
+    throw err;
+  }
+};
+
+export const forgottenPasswordChange = async (token, password) => {
+  try {
+    const res = await api.post("all/auth/forgotten-password-change", { token, password }); 
+    return res.data; 
+  } catch (err) {
+    throw err;
+  }
+};
+
+

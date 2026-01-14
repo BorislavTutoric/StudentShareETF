@@ -453,7 +453,7 @@ function CommentsSection({ isOpen, onClose, documentName, materialId, showToast,
 
             <div style={styles.listSection}>
               <h3 style={styles.sectionTitle}>⭐ Sve recenzije</h3>
-              {otherReviews.length === 0 ? (
+              {otherReviews.length === 0 && myReview === null? (
                 <div style={styles.emptyState}>
                   <p>Još uvijek nema recenzija.</p>
                   <p style={styles.emptyStateSubtext}>Budite prvi koji će ocijeniti!</p>

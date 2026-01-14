@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { login } from "../services/authService";
+import { forgottenPasswordRequest, login } from "../services/authService";
 import RegistrationModal from "../components/RegistrationModal";
 
 function LoginModal({ isOpen, onClose, onLoginSuccess }) {
@@ -8,6 +8,11 @@ function LoginModal({ isOpen, onClose, onLoginSuccess }) {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
+
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotMessage, setForgotMessage] = useState("");
+  const [loadingForgot, setLoadingForgot] = useState(false);
 
   const handleRegistrationClick = (e) => {
     e.preventDefault();
@@ -27,28 +32,45 @@ function LoginModal({ isOpen, onClose, onLoginSuccess }) {
       localStorage.setItem("name", data.name);
       localStorage.setItem("username", data.username);
       localStorage.setItem("userRole", data.role);
-      if(data.role === "ROLE_STUDENT"){
+      if (data.role === "ROLE_STUDENT") {
         window.location.href = "/student";
-      }else if(data.role === "ROLE_ADMIN"){
+      } else if (data.role === "ROLE_ADMIN") {
         window.location.href = "/admin";
-      }else if (data.role === "ROLE_MODERATOR_ZA_MATERIJALE") {
+      } else if (data.role === "ROLE_MODERATOR_ZA_MATERIJALE") {
         window.location.href = "/moderator/materijali";
       } else if (data.role === "ROLE_MODERATOR_ZA_DOGAĐAJE") {
         window.location.href = "/moderator/dogadjaji";
-      }else {
+      } else {
         console.warn("Nepoznata uloga:", data.role);
       }
-
     } catch (err) {
-        setError(err);
+      setError(err);
     }
-};
+  };
+
+  const handleForgotPasswordSubmit = async (e) => {
+    e.preventDefault();
+    setLoadingForgot(true);
+    setForgotMessage("");
+
+    try {
+      const response = await forgottenPasswordRequest(forgotEmail);
+      setForgotMessage(response.message);
+    } catch (err) {
+      setForgotMessage(err.response.data);
+    } finally {
+      setLoadingForgot(false);
+    }
+  };
 
   const resetForm = () => {
     setUsername("");
     setPassword("");
     setShowPassword(false);
     setError("");
+    setIsForgotPassword(false);
+    setForgotEmail("");
+    setForgotMessage("");
   };
 
   const handleClose = () => {
@@ -56,13 +78,8 @@ function LoginModal({ isOpen, onClose, onLoginSuccess }) {
     onClose();
   };
 
-  const clearUsername = () => {
-    setUsername("");
-  };
-
-  const clearPassword = () => {
-    setPassword("");
-  };
+  const clearUsername = () => setUsername("");
+  const clearPassword = () => setPassword("");
 
   if (!isOpen) return null;
 
@@ -77,7 +94,7 @@ function LoginModal({ isOpen, onClose, onLoginSuccess }) {
 
       <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
         <button style={styles.closeIcon} onClick={handleClose}>✕</button>
-        {/* Avatar i form */}
+
         <div style={styles.avatarContainer}>
           <div style={styles.avatar}>
             <svg style={styles.avatarIcon} viewBox="0 0 24 24" fill="white">
@@ -86,75 +103,102 @@ function LoginModal({ isOpen, onClose, onLoginSuccess }) {
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <div style={styles.inputGroup}>
-            <label style={styles.label}>Korisničko ime</label>
-            <div style={styles.inputWrapper}>
-              <input
-                style={styles.input}
-                type="text"
-                placeholder="Unesite korisničko ime"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                required
-              />
-              {username && (
-                <button
-                  type="button"
-                  style={styles.clearButton}
-                  onClick={clearUsername}
-                  title="Očisti"
-                >
-                  ✕
-                </button>
-              )}
+        {/* LOGIN FORM */}
+        {!isForgotPassword && (
+          <form onSubmit={handleSubmit} style={styles.form}>
+            <div style={styles.inputGroup}>
+              <label style={styles.label}>Korisničko ime</label>
+              <div style={styles.inputWrapper}>
+                <input
+                  style={styles.input}
+                  type="text"
+                  placeholder="Unesite korisničko ime"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  required
+                />
+                {username && (
+                  <button type="button" style={styles.clearButton} onClick={clearUsername} title="Očisti">✕</button>
+                )}
+              </div>
             </div>
-          </div>
 
-          <div style={styles.inputGroup}>
-            <label style={styles.label}>Lozinka</label>
-            <div style={styles.inputWrapper}>
-              <input
-                style={styles.input}
-                type={showPassword ? "text" : "password"}
-                placeholder="•••••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-              />
-              {password && (
-                <button
-                  type="button"
-                  style={styles.clearButton}
-                  onClick={clearPassword}
-                  title="Očisti"
-                >
-                  ✕
+            <div style={styles.inputGroup}>
+              <label style={styles.label}>Lozinka</label>
+              <div style={styles.inputWrapper}>
+                <input
+                  style={styles.input}
+                  type={showPassword ? "text" : "password"}
+                  placeholder="•••••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+                {password && (
+                  <button type="button" style={styles.clearButton} onClick={clearPassword} title="Očisti">✕</button>
+                )}
+                <button type="button" style={styles.eyeButton} onClick={() => setShowPassword(!showPassword)} title={showPassword ? "Sakrij lozinku" : "Prikaži lozinku"}>
+                  {showPassword ? "👁️" : "👁️‍🗨️"}
                 </button>
-              )}
-              <button
-                type="button"
-                style={styles.eyeButton}
-                onClick={() => setShowPassword(!showPassword)}
-                title={showPassword ? "Sakrij lozinku" : "Prikaži lozinku"}
+              </div>
+              <a
+                href="#"
+                style={styles.forgotLink}
+                onClick={(e) => { e.preventDefault(); setIsForgotPassword(true); setError(""); }}
               >
-                {showPassword ? "👁️" : "👁️‍🗨️"}
-              </button>
+                Zaboravili ste lozinku?
+              </a>
             </div>
-            <a href="#" style={styles.forgotLink}>Zaboravili ste lozinku?</a>
-          </div>
 
-          {error && <p style={styles.error}>{error}</p>}
+            {error && <p style={styles.error}>{error}</p>}
 
-          <button type="submit" style={styles.submitButton}>Prijava</button>
+            <button type="submit" style={styles.submitButton}>Prijava</button>
 
-          <p style={styles.registerText}>
-            Prvi put ste ovdje?{" "}
-            <a style={styles.registerLink} onClick={handleRegistrationClick}>
-              Registrujte se!
-            </a>
-          </p>
-        </form>
+            <p style={styles.registerText}>
+              Prvi put ste ovdje?{" "}
+              <a style={styles.registerLink} onClick={handleRegistrationClick}>
+                Registrujte se!
+              </a>
+            </p>
+          </form>
+        )}
+
+        {/* FORGOT PASSWORD FORM */}
+        {isForgotPassword && (
+          <form onSubmit={handleForgotPasswordSubmit} style={styles.form}>
+            <h3 style={{ color: "#fff", marginBottom: "10px" }}>Izmjena zaboravljene lozinke</h3>
+
+            <div style={styles.inputGroup}>
+              <label style={styles.label}>Email adresa</label>
+              <input
+                style={styles.input}
+                type="email"
+                placeholder="Unesite email"
+                value={forgotEmail}
+                onChange={(e) => setForgotEmail(e.target.value)}
+                required
+              />
+            </div>
+
+            {forgotMessage && <p style={styles.error}>{forgotMessage}</p>}
+
+            <button type="submit" style={styles.submitButton} disabled={loadingForgot}>
+              {loadingForgot ? "Slanje..." : "Pošalji email"}
+            </button>
+
+            <p
+              style={{ ...styles.registerText, cursor: "pointer" }}
+              onClick={() => {
+                setIsForgotPassword(false);
+                setForgotEmail("");
+                setForgotMessage("");
+              }}
+            >
+              ← Nazad na prijavu
+            </p>
+          </form>
+        )}
+
       </div>
     </div>
   );
@@ -203,11 +247,7 @@ const styles = {
     transition: "all 0.3s ease",
     boxShadow: "0 4px 15px rgba(0, 255, 0, 0.3)",
   },
-  avatarContainer: {
-    display: "flex",
-    justifyContent: "center",
-    marginBottom: "25px",
-  },
+  avatarContainer: { display: "flex", justifyContent: "center", marginBottom: "25px" },
   avatar: {
     width: "100px",
     height: "100px",
@@ -219,19 +259,9 @@ const styles = {
     boxShadow: "0 10px 40px rgba(59, 130, 246, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)",
     border: "3px solid #00ff00",
   },
-  avatarIcon: {
-    width: "55px",
-    height: "55px",
-    color: "white",
-  },
-  form: {
-    display: "flex",
-    flexDirection: "column",
-    gap: "18px",
-  },
-  inputGroup: {
-    textAlign: "left",
-  },
+  avatarIcon: { width: "55px", height: "55px", color: "white" },
+  form: { display: "flex", flexDirection: "column", gap: "18px" },
+  inputGroup: { textAlign: "left" },
   label: {
     display: "block",
     fontSize: "14px",
@@ -241,11 +271,7 @@ const styles = {
     letterSpacing: "0.5px",
     textShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
   },
-  inputWrapper: {
-    position: "relative",
-    display: "flex",
-    alignItems: "center",
-  },
+  inputWrapper: { position: "relative", display: "flex", alignItems: "center" },
   input: {
     width: "100%",
     padding: "12px 15px",
@@ -319,11 +345,7 @@ const styles = {
     transition: "all 0.3s ease",
     boxShadow: "0 8px 20px rgba(0, 255, 0, 0.35)",
   },
-  registerText: {
-    fontSize: "14px",
-    color: "#e3f2fd",
-    margin: "10px 0 0 0",
-  },
+  registerText: { fontSize: "14px", color: "#e3f2fd", margin: "10px 0 0 0" },
   registerLink: {
     color: "#00ff00",
     fontWeight: "700",
