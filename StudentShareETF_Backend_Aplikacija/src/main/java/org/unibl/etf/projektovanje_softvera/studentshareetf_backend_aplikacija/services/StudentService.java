@@ -99,10 +99,4 @@ public class StudentService {
         return accounts;
     }
 
-    public void deleteStudentAccount(Integer id) throws UserNotFoundException {
-        User user = userService.getUserById(id);
-        Student student = getStudentByUser(user);
-        studentRepository.delete(student);
-        userService.deleteAccount(user);
-    }
 }

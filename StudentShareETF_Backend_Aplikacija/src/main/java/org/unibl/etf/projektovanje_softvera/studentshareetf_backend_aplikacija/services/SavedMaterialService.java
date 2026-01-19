@@ -12,8 +12,6 @@ import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.m
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.User;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories.SavedMaterialRepository;
 
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 public class SavedMaterialService {

@@ -126,7 +126,7 @@ public class MaterialService {
             material.setModerator(moderator);
             materialRepository.save(material);
 
-            String description = "Moderator :" + moderator.getName() + " je odobrio materijal \"" + material.getName() + "\".";
+            String description = "Moderator: " + moderator.getName() + " je odobrio materijal \"" + material.getName() + "\".";
             moderatorAuditService.logAction(moderator,description);
 
             String title = "Zahtjev postavljanja materijala";
@@ -137,7 +137,7 @@ public class MaterialService {
         {
             materialRepository.delete(material);
 
-            String description = "Moderator :" + moderator.getName() + " je dobio materijal \"" + material.getName() + "\".";
+            String description = "Moderator: " + moderator.getName() + " je dobio materijal \"" + material.getName() + "\".";
             moderatorAuditService.logAction(moderator,description);
 
             String title = "Zahtjev postavljanja materijala";
@@ -155,7 +155,7 @@ public class MaterialService {
         materialRepository.delete(material);
 
         User moderator = userService.getUserByUsername(username);
-        String description = "Moderator :" + moderator.getUsername() + " je obrisao materijal \"" + material.getName() + "\".";
+        String description = "Moderator: " + moderator.getUsername() + " je obrisao materijal \"" + material.getName() + "\".";
 
         moderatorAuditService.logAction(moderator, description);
     }

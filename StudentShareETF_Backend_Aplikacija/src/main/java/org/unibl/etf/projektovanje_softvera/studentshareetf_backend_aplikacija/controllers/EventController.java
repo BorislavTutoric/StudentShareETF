@@ -1,6 +1,5 @@
 package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.controllers;
 
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,10 +17,9 @@ import java.util.Map;
 public class EventController {
 
     private final EventService eventService;
-    private final EventRepository eventRepository;
 
     @GetMapping
-    public ResponseEntity<?> getAllAktivniEvents() {
+    public ResponseEntity<?> getAllActiveEvents() {
         try {
             List<EventResponse> events = eventService.getAllAktivniDogadjaji();
             return ResponseEntity.ok(events);
@@ -40,8 +38,4 @@ public class EventController {
         }
     }
 
-    @GetMapping("/test")
-    public List<Event> testAll() {
-        return eventRepository.findAll();
-    }
 }

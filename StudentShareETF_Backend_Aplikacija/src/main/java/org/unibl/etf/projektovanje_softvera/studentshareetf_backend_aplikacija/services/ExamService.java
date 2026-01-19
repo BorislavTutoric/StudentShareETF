@@ -1,12 +1,10 @@
 package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services;
 
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.DeleteExamsRequest;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.ExamResponse;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Exam;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Major;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Student;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.User;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories.ExamRepository;
@@ -26,16 +24,8 @@ public class ExamService {
     private final StudentService studentService;
     private final MajorService majorService;
 
-    public Exam addExam(Exam exam) {
-        return examRepository.save(exam);
-    }
-
     public List<Exam> addExams(List<Exam> exams) {
         return examRepository.saveAll(exams);
-    }
-
-    public List<Exam> getAllExams() {
-        return examRepository.findAll();
     }
 
     public List<ExamResponse> getExamsForMajor(String username, Integer month, Integer year) {

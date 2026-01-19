@@ -8,8 +8,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.*;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.EntityNotFoundException;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.EventService;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.UserService;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.EventCommentService;
 
 import java.util.List;

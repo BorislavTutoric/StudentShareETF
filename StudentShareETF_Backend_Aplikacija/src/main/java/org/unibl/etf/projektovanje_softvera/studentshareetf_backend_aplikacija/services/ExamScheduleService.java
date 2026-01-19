@@ -192,7 +192,6 @@ public class ExamScheduleService {
         TerminData(String d, String v) { this.datum = d; this.vrijeme = v; }
     }
 
-
     public static String readPdfFromMultipartFile(MultipartFile file) throws IOException {
         try (InputStream is = file.getInputStream();
              PDDocument document = PDDocument.load(is)) {

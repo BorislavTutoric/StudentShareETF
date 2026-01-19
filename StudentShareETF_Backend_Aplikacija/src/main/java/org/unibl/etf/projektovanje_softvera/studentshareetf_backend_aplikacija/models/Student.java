@@ -92,12 +92,6 @@ public class Student {
     public void setVerified(boolean  verified) {
         this.verified = verified;
     }
-    public boolean isVerified() {
-        return verified;
-    }
-    public String getVerificationToken() {
-        return verificationToken;
-    }
     public void setPendingEmail(String pendingEmail) {
         this.pendingEmail = pendingEmail;
     }

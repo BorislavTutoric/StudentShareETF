@@ -12,13 +12,11 @@ import java.util.List;
 @Repository
 public interface AdviceCommentRepository extends JpaRepository<AdviceComment, Integer> {
 
-    List<AdviceComment> findByAdviceAndParentCommentIsNullOrderByDateTimeAsc(Advice advice);
     @Query("SELECT c.advice.id, COUNT(c) FROM AdviceComment c WHERE c.advice IN :advices AND c.parentComment IS NULL GROUP BY c.advice.id")
     List<Object[]> countTopLevelByAdviceIn(@Param("advices") List<Advice> advices);
 
     @Query("SELECT ac FROM AdviceComment ac JOIN FETCH ac.student s JOIN FETCH s.user u WHERE ac.advice = :advice ORDER BY ac.dateTime ASC")
     List<AdviceComment> findAllByAdviceWithDetails(@Param("advice") Advice advice);
-    long countByAdvice(Advice advice);
 
     List<AdviceComment> findByAdvice(Advice advice);
 

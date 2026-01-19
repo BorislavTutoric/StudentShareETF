@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.*;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.*;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.EntityNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.AdviceCommentService;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.AdviceService;
 
 import java.util.List;
 import java.util.Map;
@@ -21,7 +20,7 @@ public class AdviceComments {
     private final AdviceCommentService adviceCommentService;
 
     @GetMapping
-    public ResponseEntity<?> getMaterialRequests()
+    public ResponseEntity<?> getAdviceCommentRequests()
     {
         List<AdviceForModeratorResponse> advices = adviceCommentService.getPendingAdvicesForModerator();
 
@@ -36,9 +35,7 @@ public class AdviceComments {
     public ResponseEntity<?> reviewAdvices(@RequestBody AdviceApprovalRequest request) {
         try {
             String username = SecurityContextHolder.getContext().getAuthentication().getName();
-
             adviceCommentService.reviewAdvice(request.getAdviceId(), request.isApproved(), username);
-
             return ResponseEntity.ok(Map.of("message", "Komentar na post je obrađen"));
         } catch (OptimisticLockException ex) {
             return ResponseEntity.status(409)

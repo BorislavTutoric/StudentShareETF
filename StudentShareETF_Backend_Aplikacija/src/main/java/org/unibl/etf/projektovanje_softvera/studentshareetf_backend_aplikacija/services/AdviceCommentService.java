@@ -6,7 +6,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.AdviceCommentRequest;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.AdviceCommentResponse;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.AdviceForModeratorResponse;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.AdviceResponse;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.EntityNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.UserNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.*;
@@ -28,7 +27,7 @@ public class AdviceCommentService {
     private final ModeratorAuditService moderatorAuditService;
     private final NotificationsService notificationsService;
 
-    private Student getStudentByUsername(String username) throws UserNotFoundException, EntityNotFoundException {
+    private Student getStudentByUsername(String username) throws UserNotFoundException {
         User user = userService.getUserByUsername(username);
         return studentService.getStudentByUser(user);
     }
@@ -161,14 +160,14 @@ public class AdviceCommentService {
             adviceComment.setReported(false);
             adviceCommentRepository.save(adviceComment);
 
-            String description = "Moderator :" + moderator.getUsername() + " je odbio zahtjev za uklanjanje komentara na post \"" + adviceComment.getContent() + "\".";
+            String description = "Moderator: " + moderator.getUsername() + " je odbio zahtjev za uklanjanje komentara na post \"" + adviceComment.getContent() + "\".";
             moderatorAuditService.logAction(moderator,description);
         }
         else
         {
             adviceCommentRepository.delete(adviceComment);
 
-            String description = "Moderator :" + moderator.getUsername() + " je obrisao komentar na post korisnika :" + adviceComment.getStudent().getUser().getUsername() + " čiji je sadržaj \"" + adviceComment.getContent() + "\".";
+            String description = "Moderator: " + moderator.getUsername() + " je obrisao komentar na post korisnika: " + adviceComment.getStudent().getUser().getUsername() + " čiji je sadržaj \"" + adviceComment.getContent() + "\".";
             moderatorAuditService.logAction(moderator,description);
 
             String title = "Obavještenje o uklanjanju komentara na savjet";

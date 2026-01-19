@@ -13,8 +13,6 @@ import java.util.List;
 @Repository
 public interface NotificationsRepository extends JpaRepository<Notification, Integer> {
 
-    List<Notification> findByStudent(Student student);
-
     @Query("""
         SELECT n FROM Notification n
         WHERE n.student = :student

@@ -20,7 +20,7 @@ public class Advices {
     private final AdviceService adviceService;
 
     @GetMapping
-    public ResponseEntity<?> getMaterialRequests()
+    public ResponseEntity<?> getAdviceRequests()
     {
         List<AdviceForModeratorResponse> advices = adviceService.getPendingAdvicesForModerator();
 
@@ -32,7 +32,7 @@ public class Advices {
     }
 
     @PostMapping("/review")
-    public ResponseEntity<?> reviewAdvices(@RequestBody AdviceApprovalRequest request) {
+    public ResponseEntity<?> reviewAdvice(@RequestBody AdviceApprovalRequest request) {
 
         try {
             String username = SecurityContextHolder.getContext().getAuthentication().getName();

@@ -1,21 +1,15 @@
 package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.EventCreateRequest;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.EventResponse;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.EventResponseForModerator;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.MaterialResponse;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.EntityNotFoundException;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.UserNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Event;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories.EventRepository;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.*;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories.UserRepository;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories.StudentRepository;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -134,7 +128,7 @@ public class EventService {
             event.setModerator(moderator);
             eventRepository.save(event);
 
-            String description = "Moderator :" + moderator.getUsername() + " je odobrio dogadjaj \"" + event.getNaziv() + "\".";
+            String description = "Moderator: " + moderator.getUsername() + " je odobrio dogadjaj \"" + event.getNaziv() + "\".";
             moderatorAuditService.logAction(moderator,description);
 
             String title = "Zahtjev postavljanja dogadjaja";
@@ -145,7 +139,7 @@ public class EventService {
         {
             eventRepository.delete(event);
 
-            String description = "Moderator :" + moderator.getUsername() + " je odbio postavljanje dogadjaja \"" + event.getNaziv() + "\".";
+            String description = "Moderator: " + moderator.getUsername() + " je odbio postavljanje dogadjaja \"" + event.getNaziv() + "\".";
             moderatorAuditService.logAction(moderator,description);
 
             String title = "Zahtjev postavljanja dogadjaja";
@@ -163,7 +157,7 @@ public class EventService {
         eventRepository.delete(event);
 
         User moderator = userService.getUserByUsername(username);
-        String description = "Moderator :" + moderator.getUsername() + " je obrisao događaj \"" + event.getNaziv() + "\".";
+        String description = "Moderator: " + moderator.getUsername() + " je obrisao događaj \"" + event.getNaziv() + "\".";
 
         moderatorAuditService.logAction(moderator, description);
     }

@@ -12,7 +12,6 @@ import java.util.Optional;
 @Repository
 public interface AcademicCalendarRepository extends JpaRepository<AcademicCalendar, Integer> {
 
-    // Vrati jedini aktivni kalendar (pošto će uvijek postojati samo jedan)
     Optional<AcademicCalendar> findByAktivan(boolean aktivan);
 
     @Modifying

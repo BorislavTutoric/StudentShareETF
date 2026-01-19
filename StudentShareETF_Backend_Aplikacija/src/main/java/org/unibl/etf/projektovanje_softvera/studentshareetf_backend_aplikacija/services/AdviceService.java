@@ -118,23 +118,6 @@ public class AdviceService {
         adviceRepository.save(advice);
     }
 
-    @Transactional
-    public boolean toggleLike(Integer adviceId, String currentUsername) throws UserNotFoundException, EntityNotFoundException {
-        Student currentStudent = getStudentByUsername(currentUsername);
-        Advice advice = getAdviceById(adviceId);
-
-        Optional<LikePost> existingLike = likePostRepository.findByAdviceAndStudent(advice, currentStudent);
-
-        if (existingLike.isPresent()) {
-            likePostRepository.delete(existingLike.get());
-            return false;
-        }
-        else {
-            LikePost newLike = new LikePost(advice, currentStudent);
-            likePostRepository.save(newLike);
-            return true;
-        }
-    }
 
     @Transactional
     public void reportAdvice(Integer adviceId) throws EntityNotFoundException {
@@ -189,14 +172,14 @@ public class AdviceService {
             advice.setReported(false);
             adviceRepository.save(advice);
 
-            String description = "Moderator :" + moderator.getUsername() + " je odbio zahtjev za uklanjanje posta \"" + advice.getContent() + "\".";
+            String description = "Moderator: " + moderator.getUsername() + " je odbio zahtjev za uklanjanje posta \"" + advice.getContent() + "\".";
             moderatorAuditService.logAction(moderator,description);
         }
         else
         {
             adviceRepository.delete(advice);
 
-            String description = "Moderator :" + moderator.getUsername() + " je obrisao post korisnika :" + advice.getStudent().getUser().getUsername() + " čiji je sadržaj \"" + advice.getContent() + "\".";
+            String description = "Moderator: " + moderator.getUsername() + " je obrisao post korisnika: " + advice.getStudent().getUser().getUsername() + " čiji je sadržaj \"" + advice.getContent() + "\".";
             moderatorAuditService.logAction(moderator,description);
 
             String title = "Obavještenje o uklanjanju savjeta";

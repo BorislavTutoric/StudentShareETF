@@ -3,10 +3,8 @@ package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.ModeratorAuditResponse;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.ModeratorAuditService;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin")

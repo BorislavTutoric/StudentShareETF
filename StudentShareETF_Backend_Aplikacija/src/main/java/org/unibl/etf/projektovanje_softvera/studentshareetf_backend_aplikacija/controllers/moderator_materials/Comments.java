@@ -8,12 +8,9 @@ import org.springframework.web.bind.annotation.*;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.*;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.EntityNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.MaterialCommentService;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.MaterialService;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.UserService;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/moderator/materials/comments")
@@ -23,15 +20,15 @@ public class Comments {
     private final MaterialCommentService materialCommentService;
 
     @GetMapping
-    public ResponseEntity<?> getMaterialRequests()
+    public ResponseEntity<?> getCommentRequests()
     {
-        List<MaterialCommentResponseForModerator> materials = materialCommentService.getPendingMaterialCommentForModerator();
+        List<MaterialCommentResponseForModerator> comments = materialCommentService.getPendingMaterialCommentForModerator();
 
-        if (materials.isEmpty()) {
+        if (comments.isEmpty()) {
             return ResponseEntity.ok(Map.of("message", "Trenutno nema materijala na odobravanje"));
         }
 
-        return ResponseEntity.ok(materials);
+        return ResponseEntity.ok(comments);
     }
 
     @PostMapping("/review")

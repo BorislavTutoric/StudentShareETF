@@ -23,11 +23,7 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    //public UserService(UserRepository userRepository) {
-        //this.userRepository = userRepository;
-    //}
 
-    // Dobavljanje svih korisnika koji su studenti
     public List<User> getAllStudents() {
         return userRepository.findAll()
                 .stream()
@@ -35,7 +31,6 @@ public class UserService implements UserDetailsService {
                 .collect(Collectors.toList());
     }
 
-    // Promjena statusa korisnika
     public void updateUserStatus(Integer userId, Boolean aktivan) throws UserNotFoundException {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException());
@@ -103,9 +98,6 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    public void deleteAccount(User user){
-        userRepository.delete(user);
-    }
 
     public void deactivateAccount(Integer id) throws UserNotFoundException {
         User user = getUserById(id);
