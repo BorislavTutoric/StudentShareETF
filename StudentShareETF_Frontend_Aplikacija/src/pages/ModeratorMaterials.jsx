@@ -46,8 +46,6 @@ function ModeratorMaterials() {
         </div>
       );
     }
-
-    // 1. POČETNA (MATERIJALI)
     if (activeTab === "Početna") {
       return (
         <>
@@ -68,7 +66,6 @@ function ModeratorMaterials() {
         </>
       );
     }
-
     if (activeTab === "Događaji") {
       return (
         <div style={styles.fixedContentWrapper}>          
@@ -78,7 +75,6 @@ function ModeratorMaterials() {
         </div>
       );
     }
-
     if (activeTab === "Studentski nalozi") {
       return (
         <div style={styles.fixedContentWrapper}>
@@ -88,7 +84,6 @@ function ModeratorMaterials() {
         </div>
       );
     }
-
     if (activeTab === "Zahtjevi") {
       return (
         <div style={styles.fixedContentWrapper}>
@@ -98,12 +93,9 @@ function ModeratorMaterials() {
         </div>
       );
     }
-
-    // 5. OSTALE SEKCIJE
     const titles = {
       "Profil": "Moj Profil",
     };
-
     return (
       <div style={styles.card}>
         <h2 style={styles.sectionTitle}>{titles[activeTab]}</h2>

@@ -5,7 +5,6 @@ function ModeratorMenuBar({ onLogoutClick, onMenuClick }) {
   const [hoveredItem, setHoveredItem] = useState(null);
   const [activeItem, setActiveItem] = useState('Početna');
 
-  // Funkcija za dobijanje naziva role
   const getRoleDisplayName = () => {
     const role = localStorage.getItem('userRole');
     
@@ -19,7 +18,6 @@ function ModeratorMenuBar({ onLogoutClick, onMenuClick }) {
     }
   };
 
-  // Dinamički generisanje stavki menija na osnovu role
   const menuItems = useMemo(() => {
     const role = localStorage.getItem('userRole');
     
@@ -30,13 +28,11 @@ function ModeratorMenuBar({ onLogoutClick, onMenuClick }) {
       { name: 'Zahtjevi', icon: FileText },
     ];
 
-    // Dodaj stavku na osnovu role
     if (role === 'ROLE_MODERATOR_ZA_MATERIJALE') {
       baseItems.push({ name: 'Događaji', icon: Bell });
     } else if (role === 'ROLE_MODERATOR_ZA_DOGAĐAJE') {
       baseItems.push({ name: 'Materijali', icon: BookOpen });
     } else {
-      // Default: dodaj oboje ili ni jedno, zavisi od tvoje logike
       baseItems.push({ name: 'Događaji', icon: Bell });
     }
 

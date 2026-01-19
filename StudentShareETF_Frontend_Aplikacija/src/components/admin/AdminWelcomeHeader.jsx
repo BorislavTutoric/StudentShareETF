@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Shield, Zap } from 'lucide-react';
+import { Shield } from 'lucide-react';
 
 function AdminWelcomeHeader() {
   const [isHovered, setIsHovered] = useState(false);
@@ -87,7 +87,6 @@ const styles = {
     width: "100%",
     perspective: '1000px',
   },
-
   header: {
     background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
     borderRadius: "16px",
@@ -101,25 +100,21 @@ const styles = {
     position: 'relative',
     overflow: 'hidden',
   },
-
   headerHover: {
     boxShadow: '0 25px 80px rgba(255, 107, 53, 0.15), inset 0 1px 0 rgba(255, 107, 53, 0.15)',
   },
-
   textContainer: {
     display: 'flex',
     flexDirection: 'column',
     gap: '12px',
     flex: 1,
   },
-
   greeting: {
     display: 'flex',
     flexWrap: 'wrap',
     gap: '8px',
     alignItems: 'baseline',
   },
-
   greetingText: {
     fontSize: "28px",
     fontWeight: 600,
@@ -127,7 +122,6 @@ const styles = {
     letterSpacing: "0.3px",
     margin: 0,
   },
-
   namePart: {
     fontSize: "28px",
     fontWeight: 900,
@@ -139,7 +133,6 @@ const styles = {
     filter: 'drop-shadow(0 0 8px rgba(255, 107, 53, 0.3))',
     margin: 0,
   },
-
   subtitle: {
     color: 'rgba(255, 255, 255, 0.65)',
     fontSize: "14px",
@@ -149,7 +142,6 @@ const styles = {
     textTransform: 'uppercase',
     transition: 'all 0.3s ease',
   },
-
   avatarContainer: {
     position: 'relative',
     width: "110px",
@@ -160,7 +152,6 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
   },
-
   avatarGlow: {
     position: 'absolute',
     width: "110px",
@@ -170,12 +161,10 @@ const styles = {
     filter: 'blur(15px)',
     transition: 'all 0.4s ease',
   },
-
   avatarGlowActive: {
     background: 'radial-gradient(circle, rgba(255, 107, 53, 0.6) 0%, transparent 70%)',
     filter: 'blur(20px)',
   },
-
   avatar: {
     position: 'relative',
     zIndex: 1,
@@ -191,7 +180,6 @@ const styles = {
     border: '3px solid rgba(255, 255, 255, 0.15)',
     transition: 'all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
   },
-
   shieldIcon: {
     position: 'absolute',
     top: '-8px',
@@ -204,7 +192,6 @@ const styles = {
     border: '2px solid rgba(255, 107, 53, 0.4)',
     transition: 'all 0.4s ease',
   },
-
   avatarContainerHover: {
     filter: 'drop-shadow(0 0 25px rgba(255, 107, 53, 0.5))',
   },

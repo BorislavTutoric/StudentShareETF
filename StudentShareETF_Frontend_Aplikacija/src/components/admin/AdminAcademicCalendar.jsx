@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import Toast from '../Toast';
 import { Upload, FileText, Trash2, Calendar, AlertCircle, X } from 'lucide-react';
 import { deleteExams, getAcademicCalendarApi, openAcademicCalendar, setExamSchedule, uploadAcademicCalendar } from '../../services/calendarService,';
-import Toast from '../Toast';
 
 function AdminAcademicCalendar() {
   const [activeTab, setActiveTab] = useState('calendar');
@@ -22,13 +22,13 @@ function AdminAcademicCalendar() {
 
   const getAcademicCalendar = async () => {
     try{
-        setLoading(true);
-        const response = await getAcademicCalendarApi();
-        setCurrentCalendar(response)
+      setLoading(true);
+      const response = await getAcademicCalendarApi();
+      setCurrentCalendar(response)
     }catch(err){
-        console.log(err);
+      console.log(err);
     }finally{
-        setLoading(false);
+      setLoading(false);
     }
   }
 
@@ -43,37 +43,37 @@ function AdminAcademicCalendar() {
 
   const handleUploadCalendar = async () => {
     if (selectedFile) {
-        const fd = new FormData();
-        fd.append("file", selectedFile);
-        try{
-            const response = await uploadAcademicCalendar(fd);
-            setCurrentCalendar(response);
-            setSelectedFile(null);
-            showToast("Uspješno dodan novi akademski kalendar", 'success');
-        }catch(err){
-            console.log(err);
-            showToast("Greška pri dodavanju novog akademskog kalendara!", 'error');
-            setSelectedFile(null);
-        }
+      const fd = new FormData();
+      fd.append("file", selectedFile);
+      try{
+        const response = await uploadAcademicCalendar(fd);
+        setCurrentCalendar(response);
+        setSelectedFile(null);
+        showToast("Uspješno dodan novi akademski kalendar", 'success');
+      }catch(err){
+        console.log(err);
+        showToast("Greška pri dodavanju novog akademskog kalendara!", 'error');
+        setSelectedFile(null);
+      }
     }
   };
 
   const handleUploadExamSchedule = async () => {
     if (selectedFile) {
-        const fd = new FormData();
-        fd.append("file", selectedFile);
-        try{
-            setUploadingExams(true);
-            const response = await setExamSchedule(fd);
-            setSelectedFile(null);
-            showToast("Uspješno ste dodali raspored ispita", 'success');
-        }catch(err){
-            console.log(err);
-            showToast("Greška pri dodavanju rasporeda ispita!", 'error');
-            setSelectedFile(null);
-        }finally{
-            setUploadingExams(false);
-        }
+      const fd = new FormData();
+      fd.append("file", selectedFile);
+      try{
+        setUploadingExams(true);
+        const response = await setExamSchedule(fd);
+        setSelectedFile(null);
+        showToast("Uspješno ste dodali raspored ispita", 'success');
+      }catch(err){
+        console.log(err);
+        showToast("Greška pri dodavanju rasporeda ispita!", 'error');
+        setSelectedFile(null);
+      }finally{
+          setUploadingExams(false);
+      }
     }
   };
 
@@ -99,11 +99,11 @@ function AdminAcademicCalendar() {
 
   const handleViewCalendar = async (calendarId) => {
     try{
-        const url = await openAcademicCalendar(calendarId);
-        window.open(url, "_blank");
+      const url = await openAcademicCalendar(calendarId);
+      window.open(url, "_blank");
     }catch(err){
-        console.log(err);
-        showToast("Greška pri otvaranju akademskog kalendara!", 'error');
+      console.log(err);
+      showToast("Greška pri otvaranju akademskog kalendara!", 'error');
     }
   };
 
@@ -303,7 +303,6 @@ function AdminAcademicCalendar() {
         </div>
       )}
 
-      {/* Modal za potvrdu brisanja */}
       {deleteConfirm && (
         <div style={styles.modalOverlay} onClick={() => setDeleteConfirm(false)}>
           <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -340,7 +339,6 @@ function AdminAcademicCalendar() {
 const styles = {
   container: {
     width: '100%',
-    //maxWidth: '900px',
     margin: '0 auto',
     padding: '30px',
     background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
@@ -677,7 +675,6 @@ const styles = {
   },
 };
 
-// Dodaj CSS animaciju
 const styleSheet = document.createElement("style");
 styleSheet.textContent = `
   @keyframes spin {

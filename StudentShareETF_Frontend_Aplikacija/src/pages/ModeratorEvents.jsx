@@ -22,7 +22,6 @@ function ModeratorEvents() {
 
   const handleMenuClick = (tabName) => {
     setActiveTab(tabName);
-    // Reset materials view kada se prebacimo na drugi tab
     if (tabName !== "Materijali") {
       setActiveComponent("subjects");
       setSelectedSubject("");

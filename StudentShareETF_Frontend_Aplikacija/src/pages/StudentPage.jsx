@@ -9,10 +9,10 @@ import EventsDisplayAuth from "../components/EventsDisplayAuth";
 import SavedMaterials from "../components/SavedMaterials";
 import SavedMaterialsDisplay from "../components/SavedMaterialsDisplay";
 import Notifications from "../components/Notifications";
-import { getNotificationsApi, getNumOfUnreadNotificationsApi } from "../services/notificationsService";
 import AcademicCalendar from "../components/AcademicCalendar";
-import { getAcademicCalendarApi } from "../services/calendarService,";
 import Toast from "../components/Toast";
+import { getNotificationsApi, getNumOfUnreadNotificationsApi } from "../services/notificationsService";
+import { getAcademicCalendarApi } from "../services/calendarService,";
 import { getFacultyMonthTasksApi, getMyMonthTasksApi } from "../services/taskService";
 
 function StudentPage() {
@@ -60,7 +60,6 @@ function StudentPage() {
     setYearSM(selectedYear);
     setSubjectsSM(subs);
   }
-
 
   const handleNotificationsClick = async () => {
     try{

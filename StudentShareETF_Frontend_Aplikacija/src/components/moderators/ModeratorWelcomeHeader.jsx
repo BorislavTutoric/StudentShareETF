@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { ShieldCheck } from 'lucide-react';
 
 function ModeratorWelcomeHeader() {
   const [isHovered, setIsHovered] = useState(false);
@@ -125,7 +124,7 @@ const styles = {
   namePart: {
     fontSize: "28px",
     fontWeight: 900,
-    color: '#6366f1', // Normalna plava boja
+    color: '#6366f1', 
     letterSpacing: "0.5px",
     textShadow: '0 2px 10px rgba(99, 102, 241, 0.5)',
     margin: 0,

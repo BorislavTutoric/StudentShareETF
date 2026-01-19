@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { getSubjects, getMaterials } from '../../services/materialsService';
-import { Filter, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 import SearchInput from '../SearchInput';
 
 function AdminSubjectsDisplay({ onOpenMaterials, startYear = 1 }) {
@@ -13,10 +13,10 @@ function AdminSubjectsDisplay({ onOpenMaterials, startYear = 1 }) {
 
   const fetchSubjects = async (year) => {
     try {
-        const data = await getSubjects(year);
-        setCourses(data);
+      const data = await getSubjects(year);
+      setCourses(data);
     }catch (error) {
-        console.error('Greška pri učitavanju predmeta:', error);
+      console.error('Greška pri učitavanju predmeta:', error);
     }
   };
 
@@ -30,32 +30,30 @@ function AdminSubjectsDisplay({ onOpenMaterials, startYear = 1 }) {
   };
 
   const filterSubjectsFirstSemester = (course) => {
-    if(course.semester === 1)
-    {
-        if(isSearchButtonClicked){
-          if(course.name.toLowerCase().includes(searchTerm.toLowerCase())){
-            return true;
-          }else{
-            return false;
-          }
+    if(course.semester === 1){
+      if(isSearchButtonClicked){
+        if(course.name.toLowerCase().includes(searchTerm.toLowerCase())){
+          return true;
+        }else{
+          return false;
         }
-        return true;
+      }
+      return true;
     }else{
       return false;
     }
   }
 
   const filterSubjectsSecondSemester = (course) => {
-    if(course.semester === 2)
-    {
-        if(isSearchButtonClicked){
-          if(course.name.toLowerCase().includes(searchTerm.toLowerCase())){
-            return true;
-          }else{
-            return false;
-          }
+    if(course.semester === 2){
+      if(isSearchButtonClicked){
+        if(course.name.toLowerCase().includes(searchTerm.toLowerCase())){
+          return true;
+        }else{
+          return false;
         }
-        return true;
+      }
+      return true;
     }else{
       return false;
     }
@@ -193,7 +191,6 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     background: 'linear-gradient(180deg, #2d3347 0%, #273d52 50%, #22496a 100%)',
-    //background: 'linear-gradient(180deg, #323d5c 0%, #2d4a70 50%, #2a5a8a 100%)',
   },
   filterSearchContainer: {
     background: 'linear-gradient(180deg, #0f1643 0%, #16213e 100%)',

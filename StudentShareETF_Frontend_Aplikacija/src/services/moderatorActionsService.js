@@ -8,8 +8,8 @@ export const getAllModeratorActionsApi = async () => {
     throw err;
   }
 };
+
 export const moderatorActionService = {
-  // --- STUDENTI ---
   getAllStudents: async () => {
     const response = await api.get("api/moderator/materials/students");
     return response.data;
@@ -24,10 +24,9 @@ export const moderatorActionService = {
     const response = await api.get(
       `/api/moderator/materials/students/${studentId}/suspension-status`
     );
-    return response.data; // true / false
+    return response.data; 
   },
 
-  // --- MATERIJALI (Lijeva kolona) ---
   getPendingMaterials: async () => {
     const response = await api.get("api/moderator/materials");
     return Array.isArray(response.data) ? response.data : [];
@@ -48,8 +47,6 @@ export const moderatorActionService = {
     }
   },
 
-  // --- PRIJAVE/MODERACIJA (Desna kolona) ---
-  // 1. Komentari na materijale
   getPendingComments: async () => {
     const response = await api.get("api/moderator/materials/comments");
     return Array.isArray(response.data) ? response.data : [];
@@ -60,7 +57,6 @@ export const moderatorActionService = {
     return response.data;
   },
 
-  // 2. Postovi
   getPendingPosts: async () => {
     const response = await api.get("api/moderator/materials/posts");
     return Array.isArray(response.data) ? response.data : [];
@@ -71,7 +67,6 @@ export const moderatorActionService = {
     return response.data;
   },
 
-  // 3. Komentari na postove
   getPendingPostComments: async () => {
     const response = await api.get("api/moderator/materials/post-comments");
     return Array.isArray(response.data) ? response.data : [];

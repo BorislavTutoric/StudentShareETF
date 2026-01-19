@@ -1,8 +1,8 @@
-import { act, useEffect, useState } from 'react';
-import { Trash2, Plus, Search } from 'lucide-react';
-import { activateUserAccountApi, changeModeratorPasswordApi, deactivateUserAccountApi, getModeratorAccounts, getStudentAccounts } from '../../services/accountsService';
+import { useEffect, useState } from 'react';
 import CreateAccountModal from './CreateAccountModal';
 import Toast from '../Toast';
+import { Plus, Search } from 'lucide-react';
+import { activateUserAccountApi, changeModeratorPasswordApi, deactivateUserAccountApi, getModeratorAccounts, getStudentAccounts } from '../../services/accountsService';
 
 function AccountsManagement() {
   const [activeTab, setActiveTab] = useState('moderator');
@@ -17,9 +17,7 @@ function AccountsManagement() {
   const [changePasswordModal, setChangePasswordModal] = useState(null);
   const [newPassword, setNewPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-
   const [moderators, setModerators] = useState([]);
-
   const [students, setStudents] = useState([]);
 
   const showToast = (message, type = 'success', duration = 3000) => {
@@ -29,15 +27,15 @@ function AccountsManagement() {
 
   const getAllAccounts = async () => {
     try{
-        const [moderatorsResponse, studentsResponse] = await Promise.all([
-            getModeratorAccounts(),
-            getStudentAccounts()
-        ]);
-        setModerators(moderatorsResponse);
-        setStudents(studentsResponse);
+      const [moderatorsResponse, studentsResponse] = await Promise.all([
+          getModeratorAccounts(),
+          getStudentAccounts()
+      ]);
+      setModerators(moderatorsResponse);
+      setStudents(studentsResponse);
     }catch (err){
-        console.error(err);
-        showToast("Greška pri učitavanju naloga", 'error');
+      console.error(err);
+      showToast("Greška pri učitavanju naloga", 'error');
     }
   }
 
@@ -179,7 +177,6 @@ function AccountsManagement() {
             setModerators={setModerators}
             showToast={showToast}
         />
-      {/* Tabovi */}
       <div style={styles.tabContainer}>
         <button
           style={{
@@ -209,7 +206,6 @@ function AccountsManagement() {
         </button>
       </div>
 
-      {/* Header sa pretraguom i dugmetom */}
       <div style={styles.headerRow}>
         <div style={styles.searchContainer}>
           <Search size={20} color="rgba(255, 255, 255, 0.5)" />
@@ -227,7 +223,6 @@ function AccountsManagement() {
         </button>)}
       </div>
 
-      {/* Filteri */}
       <div style={styles.filterContainer}>
         {activeTab === 'moderator' ? (
           <div style={styles.filterGroup}>
@@ -298,10 +293,8 @@ function AccountsManagement() {
         )}
       </div>
 
-      {/* Lista naloga */}
       {activeTab === 'moderator' ? (
         <div style={styles.twoColumnContainer}>
-          {/* Aktivni moderatori */}
           <div style={styles.sectionContainer}>
             <h3 style={styles.sectionTitle}>Aktivni moderatori</h3>
             <div style={styles.singleColumnList}>
@@ -363,7 +356,6 @@ function AccountsManagement() {
             </div>
           </div>
 
-          {/* Neaktivni moderatori */}
           <div style={styles.sectionContainer}>
             <h3 style={styles.sectionTitle}>Deaktivirani moderatori</h3>
             <div style={styles.singleColumnList}>
@@ -503,7 +495,6 @@ function AccountsManagement() {
         </div>
       )}
 
-      {/* Modal za potvrdu deaktivacije */}
       {deactivateConfirm && (
         <div style={styles.modalOverlay} onClick={() => setDeactivateConfirm(null)}>
           <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -533,7 +524,6 @@ function AccountsManagement() {
         </div>
       )}
 
-      {/* Modal za potvrdu aktivacije */}
       {activateConfirm && (
         <div style={styles.modalOverlay} onClick={() => setActivateConfirm(null)}>
           <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -563,7 +553,6 @@ function AccountsManagement() {
         </div>
       )}
 
-      {/* Modal za promenu lozinke */}
       {changePasswordModal && (
         <div style={styles.modalOverlay} onClick={() => setChangePasswordModal(null)}>
           <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -634,14 +623,12 @@ const styles = {
     flexDirection: 'column',
     gap: '24px',
   },
-
   tabContainer: {
     display: 'flex',
     gap: '12px',
     borderBottom: '3px solid rgba(255, 107, 53, 0.1)',
     paddingBottom: '0',
   },
-
   tab: {
     background: 'transparent',
     border: 'none',
@@ -657,21 +644,18 @@ const styles = {
     textTransform: 'uppercase',
     outline: 'none',
   },
-
   tabActive: {
     background: 'transparent',
     borderColor: '#ff6b35',
     color: '#ff6b35',
     boxShadow: 'none',
   },
-
   headerRow: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     gap: '12px',
   },
-
   title: {
     color: '#ffffff',
     fontSize: '24px',
@@ -679,7 +663,6 @@ const styles = {
     margin: 0,
     letterSpacing: '0.5px',
   },
-
   createBtn: {
     background: 'linear-gradient(135deg, #ff6b35 0%, #f7a600 100%)',
     border: 'none',
@@ -695,7 +678,6 @@ const styles = {
     boxShadow: '0 6px 20px rgba(255, 107, 53, 0.3)',
     flexShrink: 0,
   },
-
   searchContainer: {
     display: 'flex',
     alignItems: 'center',
@@ -707,7 +689,6 @@ const styles = {
     backdropFilter: 'blur(10px)',
     flex: 1,
   },
-
   searchInput: {
     flex: 1,
     background: 'none',
@@ -718,7 +699,6 @@ const styles = {
     fontWeight: '500',
     fontFamily: 'inherit',
   },
-
   filterContainer: {
     display: 'flex',
     gap: '16px',
@@ -728,24 +708,20 @@ const styles = {
     border: '2px solid rgba(255, 107, 53, 0.1)',
     borderRadius: '12px',
   },
-
   filterGroup: {
     display: 'flex',
     alignItems: 'center',
     gap: '12px',
   },
-
   filterLabel: {
     color: 'rgba(255, 255, 255, 0.7)',
     fontWeight: '600',
     fontSize: '14px',
   },
-
   filterButtons: {
     display: 'flex',
     gap: '8px',
   },
-
   filterBtn: {
     background: 'rgba(255, 255, 255, 0.08)',
     border: '2px solid rgba(255, 107, 53, 0.2)',
@@ -757,20 +733,17 @@ const styles = {
     transition: 'all 0.3s ease',
     fontSize: '13px',
   },
-
   filterBtnActive: {
     background: '#ff6b35',
     borderColor: '#ff6b35',
     color: '#ffffff',
     boxShadow: '0 4px 12px rgba(255, 107, 53, 0.3)',
   },
-
   sectionContainer: {
     display: 'flex',
     flexDirection: 'column',
     gap: '16px',
   },
-
   sectionTitle: {
     color: '#ffffff',
     fontSize: '18px',
@@ -778,19 +751,16 @@ const styles = {
     margin: 0,
     letterSpacing: '0.3px',
   },
-
   twoColumnContainer: {
     display: 'grid',
     gridTemplateColumns: '1fr 1fr',
     gap: '24px',
   },
-
   singleColumnList: {
     display: 'flex',
     flexDirection: 'column',
     gap: '16px',
   },
-
   accountCard: {
     background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(247, 166, 0, 0.05) 100%)',
     border: '2px solid rgba(255, 107, 53, 0.15)',
@@ -803,33 +773,28 @@ const styles = {
     transition: 'all 0.3s ease',
     backdropFilter: 'blur(10px)',
   },
-
   accountInfo: {
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
     gap: '14px',
   },
-
   accountHeader: {
     display: 'flex',
     alignItems: 'center',
     gap: '12px',
   },
-
   accountName: {
     color: '#ffffff',
     fontSize: '16px',
     fontWeight: '700',
     letterSpacing: '0.3px',
   },
-
   accountDetails: {
     display: 'flex',
     flexDirection: 'column',
     gap: '10px',
   },
-
   detail: {
     display: 'flex',
     alignItems: 'center',
@@ -837,17 +802,14 @@ const styles = {
     fontSize: '13px',
     flexWrap: 'wrap',
   },
-
   label: {
     color: 'rgba(255, 255, 255, 0.6)',
     fontWeight: '600',
   },
-
   value: {
     color: 'rgba(255, 255, 255, 0.85)',
     fontWeight: '500',
   },
-
   typeTag: {
     background: 'rgba(255, 107, 53, 0.2)',
     padding: '4px 12px',
@@ -856,31 +818,26 @@ const styles = {
     fontWeight: '600',
     color: '#ff6b35',
   },
-
   statusBadge: {
     padding: '4px 12px',
     borderRadius: '6px',
     fontSize: '12px',
     fontWeight: '600',
   },
-
   statusActive: {
     background: 'rgba(76, 175, 80, 0.2)',
     color: '#4CAF50',
   },
-
   statusInactive: {
     background: 'rgba(244, 67, 54, 0.2)',
     color: '#F44336',
   },
-
   buttonGroup: {
     display: 'flex',
     gap: '8px',
     flexDirection: 'column',
     flexShrink: 0,
   },
-
   passwordBtn: {
     background: 'rgba(100, 150, 255, 0.2)',
     border: '2px solid rgba(100, 150, 255, 0.4)',
@@ -896,7 +853,6 @@ const styles = {
     fontWeight: '600',
     whiteSpace: 'nowrap',
   },
-
   deleteBtn: {
     background: 'rgba(255, 107, 53, 0.2)',
     border: '2px solid rgba(255, 107, 53, 0.4)',
@@ -913,7 +869,6 @@ const styles = {
     fontWeight: '600',
     whiteSpace: 'nowrap',
   },
-
   activateBtn: {
     background: 'rgba(76, 175, 80, 0.2)',
     border: '2px solid rgba(76, 175, 80, 0.4)',
@@ -930,7 +885,6 @@ const styles = {
     fontWeight: '600',
     whiteSpace: 'nowrap',
   },
-
   studentCard: {
     background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(247, 166, 0, 0.05) 100%)',
     border: '2px solid rgba(255, 107, 53, 0.15)',
@@ -943,7 +897,6 @@ const styles = {
     transition: 'all 0.3s ease',
     backdropFilter: 'blur(10px)',
   },
-
   studentCardContent: {
     display: 'flex',
     justifyContent: 'space-between',
@@ -951,13 +904,11 @@ const styles = {
     gap: '16px',
     width: '100%',
   },
-
   studentActions: {
     display: 'flex',
     gap: '8px',
     flexShrink: 0,
   },
-
   expandBtn: {
     background: 'rgba(255, 107, 53, 0.2)',
     border: '2px solid rgba(255, 107, 53, 0.4)',
@@ -972,7 +923,6 @@ const styles = {
     fontSize: '14px',
     fontWeight: '700',
   },
-
   noResults: {
     gridColumn: '1 / -1',
     textAlign: 'center',
@@ -980,7 +930,6 @@ const styles = {
     color: 'rgba(255, 255, 255, 0.5)',
     fontSize: '16px',
   },
-
   modalOverlay: {
     position: 'fixed',
     top: 0,
@@ -994,7 +943,6 @@ const styles = {
     zIndex: 1000,
     backdropFilter: 'blur(5px)',
   },
-
   modal: {
     background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
     borderRadius: '16px',
@@ -1004,7 +952,6 @@ const styles = {
     boxShadow: '0 20px 60px rgba(0, 0, 0, 0.6)',
     border: '2px solid rgba(255, 107, 53, 0.2)',
   },
-
   modalTitle: {
     color: '#ffffff',
     fontSize: '20px',
@@ -1012,21 +959,18 @@ const styles = {
     margin: '0 0 16px 0',
     letterSpacing: '0.3px',
   },
-
   modalText: {
     color: 'rgba(255, 255, 255, 0.75)',
     fontSize: '14px',
     margin: '0 0 24px 0',
     lineHeight: '1.6',
   },
-
   passwordInputWrapper: {
     position: 'relative',
     display: 'flex',
     alignItems: 'center',
     marginBottom: '8px',
   },
-
   passwordInput: {
     width: '100%',
     padding: '12px 40px 12px 16px',
@@ -1041,7 +985,6 @@ const styles = {
     transition: 'all 0.3s ease',
     fontFamily: 'inherit',
   },
-
   eyeButtonModal: {
     position: 'absolute',
     right: '12px',
@@ -1055,13 +998,11 @@ const styles = {
     justifyContent: 'center',
     transition: 'all 0.2s ease',
   },
-
   modalButtons: {
     display: 'flex',
     gap: '12px',
     justifyContent: 'flex-end',
   },
-
   cancelBtn: {
     background: 'rgba(255, 255, 255, 0.1)',
     border: '2px solid rgba(255, 255, 255, 0.2)',
@@ -1072,7 +1013,6 @@ const styles = {
     cursor: 'pointer',
     transition: 'all 0.3s ease',
   },
-
   confirmDeleteBtn: {
     background: 'linear-gradient(135deg, #ff6b35 0%, #f7a600 100%)',
     border: 'none',

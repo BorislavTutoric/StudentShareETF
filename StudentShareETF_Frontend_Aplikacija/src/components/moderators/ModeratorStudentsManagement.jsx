@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Search, UserCheck, UserX } from 'lucide-react';
-import { moderatorActionService } from "../../services/moderatorActionsService";
 import Toast from './../Toast';
+import { moderatorActionService } from "../../services/moderatorActionsService";
 
-export default function ModeratorStudentsManagement() {
+function ModeratorStudentsManagement() {
   const [students, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -62,7 +62,6 @@ export default function ModeratorStudentsManagement() {
   const getFilteredList = () => {
     let list = [...students];
 
-    // Primeni pretragu
     const searchLower = searchTerm.toLowerCase();
     list = list.filter(student => {
       const name = student.name || student.ime || '';
@@ -76,7 +75,6 @@ export default function ModeratorStudentsManagement() {
       );
     });
 
-    // Primeni filter
     if (statusFilter === 'aktivni') {
       list = list.filter(s => s.active === true || s.aktivan === 1 || s.active === 1);
     } else if (statusFilter === 'neaktivni') {
@@ -100,8 +98,6 @@ export default function ModeratorStudentsManagement() {
   return (
     <div style={styles.container}>
       {toast && <Toast message={toast.message} type={toast.type} />}
-
-      {/* Header sa pretraguom */}
       <div style={styles.headerRow}>
         <div style={styles.searchContainer}>
           <Search size={20} color="rgba(255, 255, 255, 0.5)" />
@@ -115,7 +111,6 @@ export default function ModeratorStudentsManagement() {
         </div>
       </div>
 
-      {/* Filteri */}
       <div style={styles.filterContainer}>
         <div style={styles.filterGroup}>
           <span style={styles.filterLabel}>Filtriraj studente:</span>
@@ -151,7 +146,6 @@ export default function ModeratorStudentsManagement() {
         </div>
       </div>
 
-      {/* Lista studenata */}
       <div style={styles.listContainer}>
         {filteredList.length > 0 ? (
           filteredList.map((student) => {
@@ -225,7 +219,6 @@ export default function ModeratorStudentsManagement() {
         )}
       </div>
 
-      {/* Modal za potvrdu akcije */}
       {confirmAction && (
         <div style={styles.modalOverlay} onClick={() => setConfirmAction(null)}>
           <div style={styles.modal} onClick={(e) => e.stopPropagation()}>
@@ -567,7 +560,8 @@ modalOverlay: {
   },
 };
 
-// Dodaj CSS animaciju za spinner
+export default ModeratorStudentsManagement;
+
 const styleSheet = document.createElement("style");
 styleSheet.innerText = `
   @keyframes spin {

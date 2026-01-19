@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { Zap, X, Trash2, Shield } from 'lucide-react';
-import Toast from '../Toast';
 import { getAllModeratorActionsApi } from '../../services/moderatorActionsService';
 
 function ModeratorActions() {
@@ -168,7 +167,6 @@ const styles = {
     position: 'relative',
     overflow: 'hidden',
   },
-
   header: {
     display: 'flex',
     justifyContent: 'space-between',
@@ -177,13 +175,11 @@ const styles = {
     paddingBottom: '24px',
     borderBottom: '2px solid rgba(255, 107, 53, 0.2)',
   },
-
   headerContent: {
     display: 'flex',
     alignItems: 'center',
     gap: '16px',
   },
-
   iconWrapper: {
     background: 'linear-gradient(135deg, #ff6b35 0%, #f7a600 100%)',
     borderRadius: '12px',
@@ -194,7 +190,6 @@ const styles = {
     boxShadow: '0 6px 20px rgba(255, 107, 53, 0.3)',
     border: '2px solid rgba(255, 255, 255, 0.1)',
   },
-
   title: {
     color: '#ffffff',
     fontSize: '28px',
@@ -202,7 +197,6 @@ const styles = {
     margin: 0,
     letterSpacing: '0.5px',
   },
-
   badge: {
     background: 'linear-gradient(135deg, #ff6b35 0%, #f7a600 100%)',
     color: '#1a1a2e',
@@ -215,7 +209,6 @@ const styles = {
     textAlign: 'center',
     border: '2px solid rgba(255, 255, 255, 0.2)',
   },
-
   actionsList: {
     display: 'flex',
     flexDirection: 'column',
@@ -225,7 +218,6 @@ const styles = {
     overflowX: 'hidden',
     paddingRight: '8px',
   },
-
   actionItem: {
     background: 'rgba(255, 255, 255, 0.05)',
     borderRadius: '14px',
@@ -243,13 +235,10 @@ const styles = {
     WebkitTapHighlightColor: 'transparent',
     boxSizing: 'border-box',
   },
-
   actionItemHover: {
     background: 'rgba(255, 107, 53, 0.1)',
-    //borderColor: 'rgba(255, 255, 255, 0.25)',
     outline: 'none',
   },
-
   actionIndicator: {
     width: '10px',
     height: '10px',
@@ -260,7 +249,6 @@ const styles = {
     boxShadow: '0 0 12px rgba(255, 107, 53, 0.6)',
     transition: 'all 0.3s ease',
   },
-
   emptyState: {
     display: 'flex',
     flexDirection: 'column',
@@ -269,14 +257,12 @@ const styles = {
     padding: '80px 20px',
     gap: '20px',
   },
-
   emptyIconWrapper: {
     background: 'rgba(255, 107, 53, 0.08)',
     borderRadius: '50%',
     padding: '24px',
     marginBottom: '8px',
   },
-
   emptyStateText: {
     color: '#ffffff',
     fontSize: '18px',
@@ -284,7 +270,6 @@ const styles = {
     margin: 0,
     letterSpacing: '0.3px',
   },
-
   emptyStateSubtext: {
     color: 'rgba(255, 255, 255, 0.5)',
     fontSize: '14px',
@@ -292,14 +277,12 @@ const styles = {
     margin: 0,
     letterSpacing: '0.3px',
   },
-
   actionContent: {
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
     gap: '8px',
   },
-
   actionTitle: {
     color: '#ff6b35',
     fontSize: '16px',
@@ -310,7 +293,6 @@ const styles = {
     wordBreak: 'break-word',
     overflowWrap: 'break-word',
   },
-
   actionDate: {
     color: 'rgba(255, 255, 255, 0.8)',
     fontSize: '14px',
@@ -318,7 +300,6 @@ const styles = {
     margin: 0,
     letterSpacing: '0.3px',
   },
-
   deleteButton: {
     background: 'rgba(239, 68, 68, 0.15)',
     border: 'none',
@@ -331,7 +312,6 @@ const styles = {
     transition: 'all 0.3s ease',
     flexShrink: 0,
   },
-
   modalOverlay: {
     position: 'fixed',
     top: 0,
@@ -346,7 +326,6 @@ const styles = {
     backdropFilter: 'blur(8px)',
     animation: 'fadeIn 0.3s ease',
   },
-
   modal: {
     background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
     borderRadius: '24px',
@@ -359,7 +338,6 @@ const styles = {
     border: '2px solid rgba(255, 107, 53, 0.3)',
     animation: 'slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1)',
   },
-
   modalHeader: {
     display: 'flex',
     justifyContent: 'space-between',
@@ -368,14 +346,12 @@ const styles = {
     paddingBottom: '20px',
     borderBottom: '2px solid rgba(255, 107, 53, 0.2)',
   },
-
   modalHeaderContent: {
     display: 'flex',
     alignItems: 'center',
     gap: '16px',
     flex: 1,
   },
-
   modalIconWrapper: {
     background: 'linear-gradient(135deg, #ff6b35 0%, #f7a600 100%)',
     borderRadius: '12px',
@@ -385,7 +361,6 @@ const styles = {
     justifyContent: 'center',
     boxShadow: '0 6px 20px rgba(255, 107, 53, 0.3)',
   },
-
   modalTitle: {
     color: '#ffffff',
     fontSize: '22px',
@@ -396,7 +371,6 @@ const styles = {
     wordBreak: 'break-word',
     overflowWrap: 'break-word',
   },
-
   closeButton: {
     background: 'rgba(255, 255, 255, 0.05)',
     border: 'none',
@@ -409,19 +383,16 @@ const styles = {
     transition: 'all 0.3s ease',
     flexShrink: 0,
   },
-
   modalBody: {
     display: 'flex',
     flexDirection: 'column',
     gap: '24px',
   },
-
   modalSection: {
     display: 'flex',
     flexDirection: 'column',
     gap: '8px',
   },
-
   modalLabel: {
     color: 'rgba(255, 255, 255, 0.6)',
     fontSize: '13px',
@@ -430,7 +401,6 @@ const styles = {
     letterSpacing: '0.5px',
     textTransform: 'uppercase',
   },
-
   modalValue: {
     color: '#ff6b35',
     fontSize: '18px',
@@ -438,13 +408,11 @@ const styles = {
     margin: 0,
     letterSpacing: '0.3px',
   },
-
   divider: {
     height: '1px',
     background: 'rgba(255, 107, 53, 0.2)',
     margin: '4px 0',
   },
-
   modalDescription: {
     color: 'rgba(255, 255, 255, 0.9)',
     fontSize: '16px',
@@ -463,7 +431,6 @@ const styles = {
     minHeight: '300px',
     color: '#ffffff'
   },
-
   spinner: {
     width: '40px',
     height: '40px',
@@ -472,7 +439,6 @@ const styles = {
     borderRadius: '50%',
     animation: 'spin 1s linear infinite'
   },
-
   loadingText: {
     marginTop: '15px',
     fontSize: '16px',

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { getAllEvents } from "../../services/eventService";
 import AdminEventCard from "./AdminEventCard";
 import AdminEventModal from "./AdminEventModal";
+import { getAllEvents } from "../../services/eventService";
 
 function AdminEventsDisplay() {
   const [events, setEvents] = useState([]);
@@ -155,7 +155,6 @@ const styles = {
 
 export default AdminEventsDisplay;
 
-// Dodaj CSS animaciju za spinner
 const styleSheet = document.createElement("style");
 styleSheet.innerText = `
   @keyframes spin {

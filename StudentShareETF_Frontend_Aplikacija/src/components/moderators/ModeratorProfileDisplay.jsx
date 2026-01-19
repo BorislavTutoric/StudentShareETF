@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Shield, Lock, X, Eye, EyeOff } from 'lucide-react';
-import { checkUsername } from '../../services/authService';
 import Toast from '../Toast';
-import { passwordChange, updatePersonalInfo, checkPassword, getProfileDetails } from '../../services/profileService';
+import { passwordChange, checkPassword, getProfileDetails } from '../../services/profileService';
 
 function ModeratorProfileDisplay() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -13,7 +12,6 @@ function ModeratorProfileDisplay() {
   const [loading, setLoading] = useState(true);
   const [passwordError, setPasswordError] = useState("");
   const [toast, setToast] = useState(null);
-
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
     newPassword: '',
@@ -21,7 +19,7 @@ function ModeratorProfileDisplay() {
   });
 
   const getRoleDisplayName = () => {
-    const role = localStorage.getItem('userRole'); // ili profileData.role ako dolazi iz API-ja
+    const role = localStorage.getItem('userRole'); 
     
     switch(role) {
       case 'ROLE_MODERATOR_ZA_MATERIJALE':
@@ -180,7 +178,6 @@ function ModeratorProfileDisplay() {
         </div>
       </div>
 
-      {/* Modal */}
       {isModalOpen && (
         <div style={styles.modalOverlay} onClick={() => setIsModalOpen(false)}>
           <div 

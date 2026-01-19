@@ -9,7 +9,6 @@ import AdminEventsDisplay from "../components/admin/AdminEventsDisplay";
 import AdminAcademicCalendar from "../components/admin/AdminAcademicCalendar";
 import ModeratorActions from "../components/admin/ModeratorActions";
 
-
 function AdminPage() {
   const [activeSection, setActiveSection] = useState("Početna");
   const [activeComponent, setActiveComponent] = useState("subjects");
@@ -104,8 +103,6 @@ const styles = {
     display: "flex",
     height: "100vh",
     backgroundColor: "#64aaf1ff",
-    //background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%)",
-    //backgroundColor: "white",
   },
 
   leftMenu: {

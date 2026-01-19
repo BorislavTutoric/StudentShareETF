@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
+import Toast from '../Toast';
 import { Shield, Lock, Edit2, X, Eye, EyeOff } from 'lucide-react';
 import { checkUsername } from '../../services/authService';
-import Toast from '../Toast';
 import { passwordChange, updatePersonalInfo, checkPassword, getProfileDetails } from '../../services/profileService';
 
 function AdminProfileDisplay() {
@@ -14,7 +14,6 @@ function AdminProfileDisplay() {
   const [loading, setLoading] = useState(true);
   const [toast, setToast] = useState(null);
   const [errors, setErrors] = useState({});
-
   const [editData, setEditData] = useState(profileData);
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
@@ -86,46 +85,37 @@ function AdminProfileDisplay() {
 
   const validateInfoForm = () => {
     const newErrors = {};
-
     if (!editData.username || !editData.username.trim()) {
       newErrors.username = 'Korisničko ime je obavezno';
     }
-
     if (!editData.name || !editData.name.trim()) {
       newErrors.name = 'Ime je obavezno';
     }
-
     if (!editData.surname || !editData.surname.trim()) {
       newErrors.surname = 'Prezime je obavezno';
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const validatePasswordForm = () => {
     const newErrors = {};
-
     if (!passwordData.currentPassword) {
       newErrors.currentPassword = 'Trenutna lozinka je obavezna';
     }
-
     if (!passwordData.newPassword) {
       newErrors.newPassword = 'Nova lozinka je obavezna';
     } else if (passwordData.newPassword.length < 8) {
       newErrors.newPassword = 'Lozinka mora imati najmanje 8 karaktera';
     }
-
     if (!passwordData.confirmPassword) {
       newErrors.confirmPassword = 'Potvrda lozinke je obavezna';
     } else if (passwordData.confirmPassword.length < 8) {
       newErrors.confirmPassword = 'Lozinka mora imati najmanje 8 karaktera';
     }
-
     if (passwordData.newPassword && passwordData.confirmPassword && passwordData.newPassword !== passwordData.confirmPassword) {
       newErrors.confirmPassword = 'Lozinke se ne poklapaju';
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -134,14 +124,12 @@ function AdminProfileDisplay() {
     if (!validateInfoForm()) {
       return;
     }
-
     if (profileData.username === editData.username && 
         profileData.name === editData.name && 
         profileData.surname === editData.surname) {
       setIsModalOpen(false);
       return;
     }
-
     try {
       await updatePersonalInfo(editData.username, editData.name, editData.surname);
       setProfileData(editData);
@@ -157,7 +145,6 @@ function AdminProfileDisplay() {
     if (!validatePasswordForm()) {
       return;
     }
-
     try {
       await passwordChange(passwordData.newPassword);
       setIsModalOpen(false);
@@ -174,7 +161,6 @@ function AdminProfileDisplay() {
       ...prev,
       [field]: value
     }));
-
     if (errors[field]) {
       setErrors(prev => ({
         ...prev,
@@ -188,7 +174,6 @@ function AdminProfileDisplay() {
       ...prev,
       [field]: value
     }));
-
     if (errors[field]) {
       setErrors(prev => ({
         ...prev,

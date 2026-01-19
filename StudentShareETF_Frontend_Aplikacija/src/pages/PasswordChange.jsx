@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { CheckCircle, XCircle, Loader, Eye, EyeOff } from 'lucide-react';
-import { forgottenPasswordChange } from '../services/authService'; // import funkcije za promenu lozinke
+import { forgottenPasswordChange } from '../services/authService';
 
 function PasswordChange() {
-  const [status, setStatus] = useState('form'); // form, loading, success, error
+  const [status, setStatus] = useState('form');
   const [message, setMessage] = useState('');
-
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -27,39 +26,31 @@ function PasswordChange() {
 
   const validateForm = () => {
     const newErrors = {};
-
     if (!password) {
       newErrors.password = 'Lozinka je obavezna';
     } else if (password.length < 8) {
       newErrors.password = 'Lozinka mora imati najmanje 8 karaktera';
     }
-
     if (!confirmPassword) {
       newErrors.confirmPassword = 'Potvrda lozinke je obavezna';
     }
-
     if (password && confirmPassword && password !== confirmPassword) {
       newErrors.confirmPassword = 'Lozinke se ne poklapaju';
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     if (!validateForm()) return;
-
     const currentToken = new URLSearchParams(window.location.search).get('token');
     if (!currentToken) {
       setStatus('error');
       setMessage('Nevalidan URL ili token.');
       return;
     }
-
     setStatus('loading');
-
     try {
       await forgottenPasswordChange(currentToken, password);
       setStatus('success');
@@ -72,7 +63,6 @@ function PasswordChange() {
 
   return (
     <div style={styles.container}>
-      {/* Header */}
       <div style={styles.header}>
         <div style={styles.logo}>
           <div style={styles.logoIcon}>
@@ -86,7 +76,6 @@ function PasswordChange() {
         </div>
       </div>
 
-      {/* Main Content */}
       <div style={styles.content}>
         <div style={styles.card}>
           {status === 'form' && (
@@ -95,7 +84,6 @@ function PasswordChange() {
               <p style={styles.subtitle}>Unesite novu lozinku dva puta</p>
 
               <div style={styles.form}>
-                {/* Password Field */}
                 <div style={styles.formGroup}>
                   <label style={styles.label}>Nova Lozinka</label>
                   <div style={styles.passwordInputContainer}>
@@ -120,7 +108,6 @@ function PasswordChange() {
                   {errors.password && <p style={styles.errorText}>{errors.password}</p>}
                 </div>
 
-                {/* Confirm Password Field */}
                 <div style={styles.formGroup}>
                   <label style={styles.label}>Potvrdi Lozinku</label>
                   <div style={styles.passwordInputContainer}>

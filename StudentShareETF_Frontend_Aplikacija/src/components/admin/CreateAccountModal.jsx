@@ -11,7 +11,6 @@ function CreateAccountModal({ isOpen, onClose, setModerators, showToast }) {
     password: '',
     role: ''
   });
-
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -20,13 +19,13 @@ function CreateAccountModal({ isOpen, onClose, setModerators, showToast }) {
 
   const usernameCheck = async () => {
     try {
-        const data = await checkUsername(formData.username);
-        if (!data.available) {
-            setErrors({...errors, username: 'Korisničko ime je zauzeto!'})
-            setFormData({...formData, username: ''});
-        } else {
-            setErrors({...errors, username: ''})
-        }
+      const data = await checkUsername(formData.username);
+      if (!data.available) {
+          setErrors({...errors, username: 'Korisničko ime je zauzeto!'})
+          setFormData({...formData, username: ''});
+      } else {
+          setErrors({...errors, username: ''})
+      }
     } catch (err) {
         console.error(err);
     }
@@ -53,27 +52,21 @@ function CreateAccountModal({ isOpen, onClose, setModerators, showToast }) {
 
   const validateForm = () => {
     const newErrors = {};
-
     if (!formData.name.trim()) {
       newErrors.name = 'Ime je obavezno';
     }
-
     if (!formData.surname.trim()) {
       newErrors.surname = 'Prezime je obavezno';
     }
-
     if (!formData.username.trim()) {
       newErrors.username = 'Korisničko ime je obavezno';
     }
-
     if (!formData.password.trim()) {
       newErrors.password = 'Lozinka je obavezna';
     }
-
     if (!formData.role) {
       newErrors.role = 'Vrsta naloga je obavezna';
     }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -83,7 +76,6 @@ function CreateAccountModal({ isOpen, onClose, setModerators, showToast }) {
       ...prev,
       [field]: value
     }));
-    
     if (errors[field]) {
       setErrors(prev => ({
         ...prev,
@@ -141,7 +133,6 @@ function CreateAccountModal({ isOpen, onClose, setModerators, showToast }) {
         </div>
 
         <form onSubmit={handleSubmit} style={styles.form}>
-          {/* Ime */}
           <div style={styles.formGroup}>
             <label style={styles.label}>
               Ime <span style={styles.required}>*</span>
@@ -161,7 +152,6 @@ function CreateAccountModal({ isOpen, onClose, setModerators, showToast }) {
             )}
           </div>
 
-          {/* Prezime */}
           <div style={styles.formGroup}>
             <label style={styles.label}>
               Prezime <span style={styles.required}>*</span>
@@ -181,7 +171,6 @@ function CreateAccountModal({ isOpen, onClose, setModerators, showToast }) {
             )}
           </div>
 
-          {/* Korisničko ime */}
           <div style={styles.formGroup}>
             <label style={styles.label}>
               Korisničko ime <span style={styles.required}>*</span>
@@ -202,7 +191,6 @@ function CreateAccountModal({ isOpen, onClose, setModerators, showToast }) {
             )}
           </div>
 
-          {/* Lozinka */}
           <div style={styles.formGroup}>
             <label style={styles.label}>
               Lozinka <span style={styles.required}>*</span>
@@ -232,7 +220,6 @@ function CreateAccountModal({ isOpen, onClose, setModerators, showToast }) {
             )}
           </div>
 
-          {/* Vrsta naloga */}
           <div style={styles.formGroup}>
             <label style={styles.label}>
               Vrsta naloga <span style={styles.required}>*</span>
@@ -266,12 +253,10 @@ function CreateAccountModal({ isOpen, onClose, setModerators, showToast }) {
             )}
           </div>
 
-          {/* Submit greška */}
           {errors.submit && (
             <div style={styles.submitError}>{errors.submit}</div>
           )}
 
-          {/* Dugmad */}
           <div style={styles.formButtons}>
             <button
               type="button"
@@ -314,7 +299,6 @@ const styles = {
     backdropFilter: 'blur(8px)',
     padding: '20px',
   },
-
   modal: {
     background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)',
     borderRadius: '16px',
@@ -325,7 +309,6 @@ const styles = {
     boxShadow: '0 20px 60px rgba(0, 0, 0, 0.6)',
     border: '2px solid rgba(255, 107, 53, 0.2)',
   },
-
   modalHeader: {
     display: 'flex',
     justifyContent: 'space-between',
@@ -333,7 +316,6 @@ const styles = {
     padding: '24px 32px',
     borderBottom: '2px solid rgba(255, 107, 53, 0.1)',
   },
-
   modalTitle: {
     color: '#ffffff',
     fontSize: '22px',
@@ -341,7 +323,6 @@ const styles = {
     margin: 0,
     letterSpacing: '0.3px',
   },
-
   closeBtn: {
     background: 'rgba(255, 255, 255, 0.1)',
     border: '2px solid rgba(255, 255, 255, 0.2)',
@@ -354,31 +335,26 @@ const styles = {
     justifyContent: 'center',
     transition: 'all 0.3s ease',
   },
-
   form: {
     padding: '32px',
     display: 'flex',
     flexDirection: 'column',
     gap: '24px',
   },
-
   formGroup: {
     display: 'flex',
     flexDirection: 'column',
     gap: '8px',
   },
-
   label: {
     color: '#ffffff',
     fontSize: '14px',
     fontWeight: '600',
     letterSpacing: '0.3px',
   },
-
   required: {
     color: '#ff6b35',
   },
-
   input: {
     background: 'rgba(255, 255, 255, 0.05)',
     border: '2px solid rgba(255, 107, 53, 0.2)',
@@ -391,22 +367,18 @@ const styles = {
     transition: 'all 0.3s ease',
     fontFamily: 'inherit',
   },
-
   inputError: {
     borderColor: '#F44336',
   },
-
   errorText: {
     color: '#F44336',
     fontSize: '12px',
     fontWeight: '500',
     marginTop: '4px',
   },
-
   passwordContainer: {
     position: 'relative',
   },
-
   passwordToggle: {
     position: 'absolute',
     right: '12px',
@@ -422,13 +394,11 @@ const styles = {
     justifyContent: 'center',
     transition: 'all 0.3s ease',
   },
-
   roleButtons: {
     display: 'flex',
     flexDirection: 'column',
     gap: '12px',
   },
-
   roleBtn: {
     background: 'rgba(255, 255, 255, 0.05)',
     border: '2px solid rgba(255, 107, 53, 0.2)',
@@ -445,18 +415,15 @@ const styles = {
     textAlign: 'left',
     fontFamily: 'inherit',
   },
-
   roleBtnActive: {
     background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.2) 0%, rgba(247, 166, 0, 0.1) 100%)',
     borderColor: '#ff6b35',
     color: '#ffffff',
     boxShadow: '0 4px 12px rgba(255, 107, 53, 0.3)',
   },
-
   roleIcon: {
     fontSize: '20px',
   },
-
   submitError: {
     background: 'rgba(244, 67, 54, 0.15)',
     border: '2px solid rgba(244, 67, 54, 0.3)',
@@ -467,14 +434,12 @@ const styles = {
     fontWeight: '500',
     textAlign: 'center',
   },
-
   formButtons: {
     display: 'flex',
     gap: '12px',
     justifyContent: 'flex-end',
     marginTop: '8px',
   },
-
   cancelBtn: {
     background: 'rgba(255, 255, 255, 0.1)',
     border: '2px solid rgba(255, 255, 255, 0.2)',
@@ -487,7 +452,6 @@ const styles = {
     fontSize: '14px',
     fontFamily: 'inherit',
   },
-
   submitBtn: {
     background: 'linear-gradient(135deg, #ff6b35 0%, #f7a600 100%)',
     border: 'none',
@@ -504,57 +468,10 @@ const styles = {
     fontSize: '14px',
     fontFamily: 'inherit',
   },
-
   submitBtnDisabled: {
     opacity: 0.6,
     cursor: 'not-allowed',
   },
 };
-
-// Demo wrapper za prikaz
-function Demo() {
-  const [showModal, setShowModal] = useState(true);
-
-  const handleSuccess = (data) => {
-    console.log('Kreiran moderator:', data);
-    alert(`Uspješno kreiran moderator: ${data.name} ${data.surname}`);
-  };
-
-  return (
-    <div style={{ 
-      minHeight: '100vh', 
-      background: 'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '20px'
-    }}>
-      {showModal && (
-        <AddModeratorAccount 
-          onClose={() => setShowModal(false)}
-          onSuccess={handleSuccess}
-        />
-      )}
-      {!showModal && (
-        <button
-          onClick={() => setShowModal(true)}
-          style={{
-            background: 'linear-gradient(135deg, #ff6b35 0%, #f7a600 100%)',
-            border: 'none',
-            borderRadius: '12px',
-            padding: '16px 32px',
-            color: '#ffffff',
-            fontWeight: '600',
-            cursor: 'pointer',
-            fontSize: '16px',
-            boxShadow: '0 6px 20px rgba(255, 107, 53, 0.3)',
-          }}
-        >
-          Otvori formu ponovo
-        </button>
-      )}
-    </div>
-  );
-}
 
 export default CreateAccountModal;

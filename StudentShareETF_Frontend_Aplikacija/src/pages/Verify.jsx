@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { CheckCircle, XCircle, Loader, AlertCircle } from 'lucide-react';
+import { CheckCircle, XCircle, Loader } from 'lucide-react';
 import { useSearchParams } from "react-router-dom";
 import { mailVerification } from '../services/authService';
 
 function Verify() {
-  const [status, setStatus] = useState('loading'); // loading, success, already_verified, error
+  const [status, setStatus] = useState('loading'); 
   const [message, setMessage] = useState('');
   const [params] = useSearchParams();
   const token = params.get("token");
@@ -31,7 +31,6 @@ function Verify() {
 
   return (
     <div style={styles.container}>
-      {/* Header */}
       <div style={styles.header}>
         <div style={styles.logo}>
           <div style={styles.logoIcon}>
@@ -45,7 +44,6 @@ function Verify() {
         </div>
       </div>
 
-      {/* Main Content */}
       <div style={styles.content}>
         <div style={styles.card}>
           {status === 'loading' && (
@@ -207,7 +205,6 @@ const styles = {
   }
 };
 
-// CSS animacija za spinner
 const styleSheet = document.createElement("style");
 styleSheet.innerText = `
   @keyframes spin {
