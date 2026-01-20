@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Search, X } from 'lucide-react';
 
 function SearchInput({ value, onChange, clearFunction}) {

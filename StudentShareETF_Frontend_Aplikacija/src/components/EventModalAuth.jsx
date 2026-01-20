@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { X, Trash2, Flag } from 'lucide-react';
-import { getEventComments, getEventReviews, addEventComment, addEventReview, deleteEventReview,
-  reportEventComment,deleteEventComment } from '../services/eventService';
 import Toast from './Toast';
 import ConfirmationModal from './ConfirmationModal';
+import { getEventComments, getEventReviews, addEventComment, addEventReview, deleteEventReview,
+  reportEventComment,deleteEventComment } from '../services/eventService';
 
 function EventModalAuth({ event, onClose }) {
   const [allComments, setAllComments] = useState([]);
@@ -18,7 +18,6 @@ function EventModalAuth({ event, onClose }) {
   const [submittingReview, setSubmittingReview] = useState(false);
   const [averageRating, setAverageRating] = useState(0);
   const [toast, setToast] = useState(null);
-
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [onConfirm, setOnConfirm] = useState(null);
   const [message, setMessage] = useState("");
@@ -100,7 +99,6 @@ function EventModalAuth({ event, onClose }) {
     }
   };
 
-
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
     try {
@@ -125,7 +123,6 @@ function EventModalAuth({ event, onClose }) {
         ...savedReview,
         isMyRating: true,
       };
-      
       setAllReviews(prev => [...prev, newReview]);
       setMyReview(newReview);
       showToast(`Ocjenili ste događaj: ${event.naziv} sa ${rating} ${rating === 1 ? "zvjezdicom!" : "zvjezdica!"}`,'success');
@@ -137,14 +134,11 @@ function EventModalAuth({ event, onClose }) {
     }
   };
 
-
   const handleDeleteReview = async () => {
     try {
       await deleteEventReview(event.dogadjajId);
-      
       setMyReview(null);
       setAllReviews(otherReviews);
-      
       showToast(`Obrisali ste vašu recenziju za događaj: ${event.naziv}!`,'success');
     } catch (err) {
       console.error(err);
@@ -982,6 +976,8 @@ const styles = {
   },
 };
 
+export default EventModalAuth;
+
 const styleSheet = document.createElement("style");
 styleSheet.innerText = `
   @keyframes spin {
@@ -990,5 +986,3 @@ styleSheet.innerText = `
   }
 `;
 document.head.appendChild(styleSheet);
-
-export default EventModalAuth;

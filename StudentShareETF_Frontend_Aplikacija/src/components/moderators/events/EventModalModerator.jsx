@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { X, Trash2 } from 'lucide-react';
-import { getComments, deleteEventCommentById, deleteEvent } from '../../../services/eventService';
 import Toast from '../../Toast';
+import { getComments, deleteEventCommentById, deleteEvent } from '../../../services/eventService';
 
 function EventModalModerator({ event, onClose, onEventDeleted }) {
   const [allComments, setAllComments] = useState([]);
@@ -16,7 +16,6 @@ function EventModalModerator({ event, onClose, onEventDeleted }) {
       try {
         setLoading(true);
         const commentsData = await getComments(event.dogadjajId);
-
         const sortedComments = commentsData.sort((a, b) => new Date(b.dateTime) - new Date(a.dateTime));
         setAllComments(sortedComments);
       } catch (err) {
@@ -545,6 +544,8 @@ const styles = {
   },
 };
 
+export default EventModalModerator;
+
 const styleSheet = document.createElement("style");
 styleSheet.innerText = `
   @keyframes spin {
@@ -553,5 +554,3 @@ styleSheet.innerText = `
   }
 `;
 document.head.appendChild(styleSheet);
-
-export default EventModalModerator;

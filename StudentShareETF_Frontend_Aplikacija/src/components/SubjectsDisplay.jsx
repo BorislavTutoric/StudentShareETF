@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Search, X } from 'lucide-react';
-import { getSubjects, getMaterials } from "../services/materialsService";
 import SearchInput from './SearchInput';
+import { getSubjects, getMaterials } from "../services/materialsService";
 
 function SubjectsDisplay({ onOpenMaterials }) {
   const [courses, setCourses] = useState([]);

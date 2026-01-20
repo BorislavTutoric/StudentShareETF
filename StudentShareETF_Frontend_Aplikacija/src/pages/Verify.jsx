@@ -205,6 +205,8 @@ const styles = {
   }
 };
 
+export default Verify;
+
 const styleSheet = document.createElement("style");
 styleSheet.innerText = `
   @keyframes spin {
@@ -213,5 +215,3 @@ styleSheet.innerText = `
   }
 `;
 document.head.appendChild(styleSheet);
-
-export default Verify;

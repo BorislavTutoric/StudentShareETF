@@ -338,7 +338,8 @@ const styles = {
   },
 };
 
-// CSS animacija za spinner
+export default PasswordChange;
+
 const styleSheet = document.createElement("style");
 styleSheet.innerText = `
   @keyframes spin {
@@ -347,5 +348,3 @@ styleSheet.innerText = `
   }
 `;
 document.head.appendChild(styleSheet);
-
-export default PasswordChange;

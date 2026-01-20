@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { ThumbsUp, MessageSquare, AlertTriangle, Send, Trash2 } from 'lucide-react';
-import { CommentItemComponent } from './CommentItemComponent'; 
 import ConfirmationModal from './ConfirmationModal';
+import { CommentItemComponent } from './CommentItemComponent'; 
 
 const PRIMARY_ACCENT = '#60e016';
 const SECONDARY_ACCENT = '#5c6bc0';
 
-export const AdvicePostComponent = ({ 
+const AdvicePostComponent = ({ 
     advice, 
     isMineStyle, 
     expandedComments, 
@@ -22,7 +22,6 @@ export const AdvicePostComponent = ({
     
     const [newComment, setNewComment] = useState('');
     const [isCommenting, setIsCommenting] = useState(false);
-
     const [confirmModalOpen, setConfirmModalOpen] = useState(false);
     const [onConfirm, setOnConfirm] = useState(null);
     const [message, setMessage] = useState("");
@@ -312,3 +311,5 @@ const styles = {
         justifyContent: 'center',
     }
 };
+
+export default AdvicePostComponent;

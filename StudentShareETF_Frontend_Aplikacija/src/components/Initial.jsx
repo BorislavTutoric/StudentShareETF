@@ -4,7 +4,6 @@ import banner2 from "../assets/classroom2.jpg";
 import banner3 from "../assets/building3.jpg";
 
 function Initial() {
-  const [hoveredCard, setHoveredCard] = useState(null);
 
   return (
     <div style={styles.container}>
@@ -12,7 +11,6 @@ function Initial() {
       
       <main style={styles.main}>
         <div style={styles.contentWrapper}>
-          {/* Left Column */}
           <div style={styles.leftColumn}>
             <h1 style={styles.title}>Dobrodošli na StudentShareETF! 🎓</h1>
             
@@ -20,7 +18,6 @@ function Initial() {
               StudentShareETF je platforma namijenjena studentima Elektrotehničkog fakulteta u Banjoj Luci za razmjenu materijala, savjeta i iskustava tokom studiranja.
             </p>
 
-            {/* Main Features */}
             <div style={styles.featuresBlock}>
               <p style={styles.featureText}>
                 <strong>Brz i jednostavan pristup materijalima</strong> – pronađi skripte, zadatke i druge korisne resurse.
@@ -33,13 +30,11 @@ function Initial() {
               </p>
             </div>
 
-            {/* CTA Section */}
             <div style={styles.ctaSection}>
               <p style={styles.ctaText}>✨ Pridruži se StudentShareETF zajednici i učini studiranje lakšim!</p>
               <p style={styles.ctaSubtext}>(Klikni na "Prijavi se" i istraži sve mogućnosti aplikacije!)</p>
             </div>
 
-            {/* Questions Section */}
             <div style={styles.divider}></div>
             
             <div style={styles.questionsSection}>
@@ -52,7 +47,6 @@ function Initial() {
               </div>
             </div>
 
-            {/* Stats Section */}
             <div style={styles.divider}></div>
             
             <div style={styles.statsSection}>
@@ -63,7 +57,6 @@ function Initial() {
               </div>
             </div>
 
-            {/* Contact Section */}
             <div style={styles.divider}></div>
             
             <div style={styles.contactSection}>
@@ -79,7 +72,6 @@ function Initial() {
             </div>
           </div>
 
-          {/* Right Column - Images */}
           <div style={styles.rightColumn}>
             <div style={styles.imageWrapper}>
               <img src={banner1} alt="Building" style={styles.image} />

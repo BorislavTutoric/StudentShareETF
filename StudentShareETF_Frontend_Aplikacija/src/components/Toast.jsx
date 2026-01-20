@@ -1,5 +1,3 @@
-import React from 'react';
-
 function Toast({ message, type = 'success' }) {
   const getIcon = () => {
     const icons = {

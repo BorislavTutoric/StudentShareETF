@@ -1,14 +1,13 @@
 import { useEffect, useState } from "react";
-import { getProfileDetails } from "../services/profileService";
 import EditProfileModal from "../components/EditProfileModal";
 import Toast from "../components/Toast";
+import { getProfileDetails } from "../services/profileService";
 
 function ProfileDisplay() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  
   const [toast, setToast] = useState(null);
 
   const fetchProfile = async () => {
@@ -92,7 +91,6 @@ function ProfileDisplay() {
         </div>
       </div>
 
-      {/* Modal */}
       {isModalOpen && (
         <EditProfileModal
           profile={profile}
@@ -105,7 +103,6 @@ function ProfileDisplay() {
         />
       )}
 
-      {/* Toast Notifikacija */}
       {toast && (
         <Toast
           message={toast.message}

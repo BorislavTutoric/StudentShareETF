@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { getMaterial } from '../services/materialsService';
-import { AlignCenter } from 'lucide-react';
 
 function MaterialsDisplay({ materials, isOpen, subjectName, back }) {
   const [expandedSections, setExpandedSections] = useState({

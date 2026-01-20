@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { getMaterial } from '../services/materialsService';
 import Toast from './Toast';
-import { removeSavedMaterial } from '../services/savedMaterialsService';
 import ConfirmationModal from './ConfirmationModal';
+import { getMaterial } from '../services/materialsService';
+import { removeSavedMaterial } from '../services/savedMaterialsService';
 
 function SavedMaterialsDisplay({ materials, setMaterials, isOpen, onClose, subjectName }) {
   const [expandedSections, setExpandedSections] = useState({
@@ -12,7 +12,6 @@ function SavedMaterialsDisplay({ materials, setMaterials, isOpen, onClose, subje
     ostalo: true
   });
   const [toast, setToast] = useState(null);
-
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [onConfirm, setOnConfirm] = useState(null);
   const [message, setMessage] = useState("");
@@ -44,11 +43,11 @@ function SavedMaterialsDisplay({ materials, setMaterials, isOpen, onClose, subje
 
   const handleUnsaveMaterial = async (materialId, name) => {
     try{
-        const response = await removeSavedMaterial(materialId);
-        setMaterials(prev => prev.filter(material => Number(material.materialId) !== Number(materialId)));
-        showToast(`Uklonili ste materijal: ${name} iz sekcije sačuvano`, 'success');
+      const response = await removeSavedMaterial(materialId);
+      setMaterials(prev => prev.filter(material => Number(material.materialId) !== Number(materialId)));
+      showToast(`Uklonili ste materijal: ${name} iz sekcije sačuvano`, 'success');
     }catch(err){
-        showToast("Greška pri uklanjanju sačuvanog materijala", 'error');
+      showToast("Greška pri uklanjanju sačuvanog materijala", 'error');
     }
   }
 

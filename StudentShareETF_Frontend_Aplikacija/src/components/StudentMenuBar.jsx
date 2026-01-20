@@ -254,7 +254,8 @@ const styles = {
   },
 };
 
-// Dodaj keyframes za animaciju
+export default StudentMenuBar;
+
 const styleSheet = document.createElement("style");
 styleSheet.textContent = `
   @keyframes pulse {
@@ -273,5 +274,3 @@ styleSheet.textContent = `
   }
 `;
 document.head.appendChild(styleSheet);
-
-export default StudentMenuBar;

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from "react";
 import moderatorActionService from "../../../services/moderatorActionsService";
 import Toast from "../../Toast";
 
-// CSS za custom scrollbar
 const scrollbarStyles = `
   .popup-body::-webkit-scrollbar {
     width: 8px;
@@ -131,7 +130,6 @@ function ModeratorRequestsManagement() {
           "success"
         );
       }
-      
       setShowConfirmPopup(false);
       setShowDetailsPopup(false);
       setConfirmAction(null);
@@ -1059,4 +1057,5 @@ const styles = {
     gap: "10px",
   },
 };
+
 export default ModeratorRequestsManagement;

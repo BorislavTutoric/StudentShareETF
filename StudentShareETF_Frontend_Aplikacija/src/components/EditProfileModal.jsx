@@ -1,21 +1,18 @@
 import { useState } from "react";
 import { updateStudentPersonalInfo, emailChange, passwordChange } from "../services/profileService";
-import { checkEmail, checkUsername } from "../services/authService";
+import { checkEmail } from "../services/authService";
 
 function EditProfileModal({ profile, onClose, onUpdated, showToast }) {
   const [activeSection, setActiveSection] = useState(null);
   const [showOldPassword, setShowOldPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-
   const [username, setUsername] = useState(profile.username);
   const [studyProgram, setStudyProgram] = useState(profile.studyProgram);
   const [major, setMajor] = useState(profile.major);
-
   const [currentEmail] = useState(profile.email);
   const [pendingEmail, setPendingEmail] = useState(profile.pendingEmail || "");
   const [newEmail, setNewEmail] = useState("");
-
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -47,7 +44,6 @@ function EditProfileModal({ profile, onClose, onUpdated, showToast }) {
         showToast("Ovaj email već postoji u sistemu!", "error");
         return;
       }
-
       await emailChange(newEmail);
       setPendingEmail(newEmail);
       showToast("Verifikacioni email je poslan. Provjerite inbox.", "success");
@@ -62,17 +58,14 @@ function EditProfileModal({ profile, onClose, onUpdated, showToast }) {
       showToast("Sva polja lozinke moraju biti popunjena!", "warning");
       return;
     }
-
     if (newPassword.length < 8) {
       showToast("Nova lozinka mora imati najmanje 8 karaktera!", "error");
       return;
     }
-
     if (newPassword !== confirmPassword) {
       showToast("Nove lozinke se ne poklapaju!", "error");
       return;
     }
-
     try {
       await passwordChange(oldPassword, newPassword);
       showToast("Lozinka uspješno promijenjena!", "success");
@@ -287,7 +280,6 @@ function EditProfileModal({ profile, onClose, onUpdated, showToast }) {
     </div>
   );
 }
-
 
 const styles = {
   overlay: {

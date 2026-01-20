@@ -1,15 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Bell, X, Trash2 } from 'lucide-react';
-import { deleteNotificationApi, setReadNotification } from '../services/notificationsService';
 import Toast from './Toast';
 import ConfirmationModal from './ConfirmationModal';
+import { deleteNotificationApi, setReadNotification } from '../services/notificationsService';;
 
 function NotificationsPanel({ studentNotifications, setUnreadNotifications }) {
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [selectedNotification, setSelectedNotification] = useState(null);
   const [toast, setToast] = useState(null);
   const [notifications, setNotifications] = useState([]);
-
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [onConfirm, setOnConfirm] = useState(null);
   const [message, setMessage] = useState("");
@@ -48,12 +47,12 @@ function NotificationsPanel({ studentNotifications, setUnreadNotifications }) {
 
   const handleDeleteNotification = async (notification) => {
     try{
-        const response = await deleteNotificationApi(notification.notificationId);
-        setNotifications(prevNotifications => prevNotifications.filter(notificationPrev => notificationPrev.notificationId !== notification.notificationId));
-        showToast(response, "success");
+      const response = await deleteNotificationApi(notification.notificationId);
+      setNotifications(prevNotifications => prevNotifications.filter(notificationPrev => notificationPrev.notificationId !== notification.notificationId));
+      showToast(response, "success");
     } catch (err){
-        console.log(err);
-        showToast(`${err}`, 'error');
+      console.log(err);
+      showToast(`${err}`, 'error');
     }
   };
 

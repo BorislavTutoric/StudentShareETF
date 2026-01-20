@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { X } from 'lucide-react';
 import { createEvent } from '../services/eventService'; 
 
-export default function EventCreateModal({ onClose, onCreated, showToast }) {
+function EventCreateModal({ onClose, onCreated, showToast }) {
   const [form, setForm] = useState({
     title: "",
     location: "",
@@ -23,18 +23,14 @@ export default function EventCreateModal({ onClose, onCreated, showToast }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    // Validate required fields only
     if (!form.title.trim() || !form.location.trim() || !form.date.trim() || !form.description.trim()) {
       showToast('Molimo popunite sva obavezna polja!', 'error');
       return;
     }
-
     const eventDataToSend = {
       ...form,
       time: form.time.trim() === "" ? null : form.time
     };
-
     try {
       setSubmitting(true);
       await createEvent(eventDataToSend);
@@ -317,3 +313,5 @@ const styles = {
     opacity: '0.6',
   },
 };
+
+export default EventCreateModal;

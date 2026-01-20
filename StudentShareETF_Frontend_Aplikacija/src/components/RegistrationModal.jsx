@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { X } from 'lucide-react';
 import { checkUsername, checkEmail, registration } from "../services/authService";
 
 function RegistrationModal({ isOpen, onClose}) {
@@ -22,15 +21,15 @@ function RegistrationModal({ isOpen, onClose}) {
 
   const usernameCheck = async () => {
     try {
-        const data = await checkUsername(formData.username);
-        if (!data.available) {
-            setUsernameError("Korisničko ime je zauzeto");
-            setFormData({...formData, username: ''});
-        } else {
-            setUsernameError("");
-        }
+      const data = await checkUsername(formData.username);
+      if (!data.available) {
+          setUsernameError("Korisničko ime je zauzeto");
+          setFormData({...formData, username: ''});
+      } else {
+          setUsernameError("");
+      }
     } catch (err) {
-        console.error(err);
+      console.error(err);
     }
   };
 
@@ -57,14 +56,14 @@ function RegistrationModal({ isOpen, onClose}) {
 
   const handleSubmit = async () => {
     if (formData.password !== formData.confirmPassword) {
-        setPasswordError("Lozinke se ne poklapaju");
-        setFormData({...formData, confirmPassword: ''});
-        return; 
+      setPasswordError("Lozinke se ne poklapaju");
+      setFormData({...formData, confirmPassword: ''});
+      return; 
     } else if (formData.password.length < 8) {
-        setPasswordError("Lozinka mora imati najmanje 8 karaktera");
-        return;
+      setPasswordError("Lozinka mora imati najmanje 8 karaktera");
+      return;
     } else {
-        setPasswordError(""); 
+      setPasswordError(""); 
     }
 
     const missingFields = [];
@@ -85,23 +84,23 @@ function RegistrationModal({ isOpen, onClose}) {
     }
 
     try {
-        const data = await registration(
-            formData.name,
-            formData.surname,
-            formData.email,
-            formData.studyProgram,
-            formData.major,
-            formData.username,
-            formData.password
-        );
-        setSuccessMessage("Uspješno ste se registrovali! Verifikujte vaš email.");
-        setTimeout(() => {
-          setSuccessMessage("");
-          onClose();
-        }, 5000);
+      const data = await registration(
+          formData.name,
+          formData.surname,
+          formData.email,
+          formData.studyProgram,
+          formData.major,
+          formData.username,
+          formData.password
+      );
+      setSuccessMessage("Uspješno ste se registrovali! Verifikujte vaš email.");
+      setTimeout(() => {
+        setSuccessMessage("");
+        onClose();
+      }, 5000);
     } catch (err) {
-        console.error(err);
-        alert(err); 
+      console.error(err);
+      alert(err); 
     }
   };
 

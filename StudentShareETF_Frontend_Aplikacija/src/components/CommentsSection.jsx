@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Star, X, Trash2,  Flag } from 'lucide-react';
-import { addCommentApi, addReview, deleteCommentApi, deleteReview, getReviews, reportCommentApi } from '../services/materialsService';
+import { X, Trash2,  Flag } from 'lucide-react';
 import ConfirmationModal from './ConfirmationModal';
+import { addCommentApi, addReview, deleteCommentApi, deleteReview, reportCommentApi } from '../services/materialsService';
 
 function CommentsSection({ isOpen, onClose, documentName, materialId, showToast, 
   allReviews, setAllReviews, setNewRating, allMaterialComments, setAllMaterialComments }) {
 
   const [otherReviews, setOtherReviews] = useState([]);
   const [myReview, setMyReview] = useState(null);
-
   const [newComment, setNewComment] = useState("");
   const [hoveredStar, setHoveredStar] = useState(0);
   const [activeTab, setActiveTab] = useState('comments');
@@ -16,7 +15,6 @@ function CommentsSection({ isOpen, onClose, documentName, materialId, showToast,
   const [submittingReview, setSubmittingReview] = useState(false);
   const [averageRating, setAverageRating] = useState(0);
   const [materialComments, setMaterialComments] = useState(allMaterialComments);
-
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [onConfirm, setOnConfirm] = useState(null);
   const [message, setMessage] = useState("");
@@ -92,7 +90,6 @@ function CommentsSection({ isOpen, onClose, documentName, materialId, showToast,
     try {
       setSubmittingReview(true);
       const response = await addReview(materialId, rating);
-
       const newReview = {
         ...response,
         isMyReview: response.myReview,
@@ -213,7 +210,6 @@ function CommentsSection({ isOpen, onClose, documentName, materialId, showToast,
           </button>
         </div>
 
-        {/* TABOVI */}
         <div style={styles.tabsContainer}>
           <button
             onClick={() => setActiveTab('comments')}
@@ -239,10 +235,8 @@ function CommentsSection({ isOpen, onClose, documentName, materialId, showToast,
           </button>
         </div>
 
-        {/* KOMENTARI TAB */}
         {activeTab === 'comments' && (
           <div style={styles.tabContent}>
-            {/* Forma za dodavanje komentara - UVIJEK VIDLJIVA */}
             <div style={styles.addCommentSection}>
               <h3 style={styles.sectionTitle}>✍️ Dodaj komentar</h3>
               <textarea
@@ -275,7 +269,6 @@ function CommentsSection({ isOpen, onClose, documentName, materialId, showToast,
               </button>
             </div>
 
-            {/* SVI KOMENTARI - uključujući i moje */}
             <div style={styles.listSection}>
               <h3 style={styles.sectionTitle}>💬 Svi komentari</h3>
               {materialComments.length === 0 ? (
@@ -349,11 +342,8 @@ function CommentsSection({ isOpen, onClose, documentName, materialId, showToast,
           </div>
         )}
 
-        {/* RECENZIJE TAB */}
         {activeTab === 'reviews' && (
           <div style={styles.tabContent}>
-            
-            {/* PROSJEČNA RECENZIJA */}
             {otherReviews.length > 0 && (
               <div style={styles.averageRatingSection}>
                 <h3 style={styles.averageRatingTitle}>Prosječna ocjena</h3>
@@ -367,7 +357,6 @@ function CommentsSection({ isOpen, onClose, documentName, materialId, showToast,
               </div>
             )}
 
-            {/* Forma za dodavanje recenzije */}
             {!myReview ? (
               <div style={styles.addReviewSection}>
                 <h3 style={styles.sectionTitle}>⭐ Ocijenite materijal</h3>
@@ -402,7 +391,6 @@ function CommentsSection({ isOpen, onClose, documentName, materialId, showToast,
               </div>
             ) : null}
 
-            {/* MOJA RECENZIJA */}
             {myReview && (
               <div style={styles.listSection}>
                 <h3 style={styles.sectionTitle}>Moja ocjena</h3>

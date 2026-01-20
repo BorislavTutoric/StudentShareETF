@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { forgottenPasswordRequest, login } from "../services/authService";
 import RegistrationModal from "../components/RegistrationModal";
+import { forgottenPasswordRequest, login } from "../services/authService";
 
 function LoginModal({ isOpen, onClose, onLoginSuccess }) {
   const [username, setUsername] = useState("");
@@ -8,7 +8,6 @@ function LoginModal({ isOpen, onClose, onLoginSuccess }) {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
-
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
   const [forgotMessage, setForgotMessage] = useState("");
@@ -52,7 +51,6 @@ function LoginModal({ isOpen, onClose, onLoginSuccess }) {
     e.preventDefault();
     setLoadingForgot(true);
     setForgotMessage("");
-
     try {
       const response = await forgottenPasswordRequest(forgotEmail);
       setForgotMessage(response.message);
@@ -103,7 +101,6 @@ function LoginModal({ isOpen, onClose, onLoginSuccess }) {
           </div>
         </div>
 
-        {/* LOGIN FORM */}
         {!isForgotPassword && (
           <form onSubmit={handleSubmit} style={styles.form}>
             <div style={styles.inputGroup}>
@@ -163,7 +160,6 @@ function LoginModal({ isOpen, onClose, onLoginSuccess }) {
           </form>
         )}
 
-        {/* FORGOT PASSWORD FORM */}
         {isForgotPassword && (
           <form onSubmit={handleForgotPasswordSubmit} style={styles.form}>
             <h3 style={{ color: "#fff", marginBottom: "10px" }}>Izmjena zaboravljene lozinke</h3>
@@ -247,7 +243,11 @@ const styles = {
     transition: "all 0.3s ease",
     boxShadow: "0 4px 15px rgba(0, 255, 0, 0.3)",
   },
-  avatarContainer: { display: "flex", justifyContent: "center", marginBottom: "25px" },
+  avatarContainer: { 
+    display: "flex", 
+    justifyContent: "center", 
+    marginBottom: "25px" 
+  },
   avatar: {
     width: "100px",
     height: "100px",
@@ -259,9 +259,19 @@ const styles = {
     boxShadow: "0 10px 40px rgba(59, 130, 246, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2)",
     border: "3px solid #00ff00",
   },
-  avatarIcon: { width: "55px", height: "55px", color: "white" },
-  form: { display: "flex", flexDirection: "column", gap: "18px" },
-  inputGroup: { textAlign: "left" },
+  avatarIcon: { 
+    width: "55px", 
+    height: "55px", 
+    color: "white" 
+  },
+  form: { 
+    display: "flex", 
+    flexDirection: "column", 
+    gap: "18px" 
+  },
+  inputGroup: { 
+    textAlign: "left" 
+  },
   label: {
     display: "block",
     fontSize: "14px",
@@ -271,7 +281,11 @@ const styles = {
     letterSpacing: "0.5px",
     textShadow: "0 2px 4px rgba(0, 0, 0, 0.2)",
   },
-  inputWrapper: { position: "relative", display: "flex", alignItems: "center" },
+  inputWrapper: { 
+    position: "relative", 
+    display: "flex", 
+    alignItems: "center" 
+  },
   input: {
     width: "100%",
     padding: "12px 15px",
@@ -345,7 +359,11 @@ const styles = {
     transition: "all 0.3s ease",
     boxShadow: "0 8px 20px rgba(0, 255, 0, 0.35)",
   },
-  registerText: { fontSize: "14px", color: "#e3f2fd", margin: "10px 0 0 0" },
+  registerText: { 
+    fontSize: "14px", 
+    color: "#e3f2fd", 
+    margin: "10px 0 0 0"
+  },
   registerLink: {
     color: "#00ff00",
     fontWeight: "700",

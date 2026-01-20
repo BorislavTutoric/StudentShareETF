@@ -74,25 +74,67 @@ const styles = {
     overflow: 'hidden',
     backgroundColor: '#e0e7ff',
   },
-  cardImage: { width: '100%', height: '100%', objectFit: 'cover' },
+  cardImage: { 
+    width: '100%', 
+    height: '100%', 
+    objectFit: 'cover' 
+  },
   imageOverlay: {
     position: 'absolute',
-    top: 0, left: 0, right: 0, bottom: 0,
+    top: 0, 
+    left: 0, 
+    right: 0, 
+    bottom: 0,
     background: 'linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.3) 100%)',
   },
   placeholderContainer: {
     width: '100%',
     height: '100%',
-    display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+    display: 'flex', 
+    flexDirection: 'column', 
+    alignItems: 'center', 
+    justifyContent: 'center',
     background: 'linear-gradient(135deg, #a5b4fc 0%, #8b5cf6 100%)',
   },
-  placeholderIcon: { color: 'rgba(255, 255, 255, 0.6)', marginBottom: '6px' },
-  placeholderText: { color: 'rgba(255, 255, 255, 0.8)', fontSize: '13px', fontWeight: '600', margin: 0 },
-  cardContent: { padding: '15px', backgroundColor: '#ddd6fe' },
-  cardTitle: { fontSize: '18px', fontWeight: '800', color: '#1f2937', marginBottom: '12px', lineHeight: '1.3' },
-  infoRow: { display: 'flex', justifyContent: 'space-between', marginBottom: '8px', paddingBottom: '6px', borderBottom: '1px solid rgba(99, 102, 241, 0.15)' },
-  infoLabel: { fontSize: '13px', fontWeight: '600', color: '#4b5563' },
-  infoValue: { fontSize: '13px', fontWeight: '500', color: '#1f2937', textAlign: 'right' },
+  placeholderIcon: { 
+    color: 'rgba(255, 255, 255, 0.6)', 
+    marginBottom: '6px' 
+  },
+  placeholderText: { 
+    color: 'rgba(255, 255, 255, 0.8)', 
+    fontSize: '13px', 
+    fontWeight: '600', 
+    margin: 0 
+  },
+  cardContent: { 
+    padding: '15px', 
+    backgroundColor: '#ddd6fe' 
+  },
+  cardTitle: { 
+    fontSize: '18px', 
+    fontWeight: '800', 
+    color: '#1f2937', 
+    marginBottom: '12px', 
+    lineHeight: '1.3' 
+  },
+  infoRow: { 
+    display: 'flex', 
+    justifyContent: 'space-between', 
+    marginBottom: '8px', 
+    paddingBottom: '6px', 
+    borderBottom: '1px solid rgba(99, 102, 241, 0.15)' 
+  },
+  infoLabel: { 
+    fontSize: '13px', 
+    fontWeight: '600', 
+    color: '#4b5563' 
+  },
+  infoValue: { 
+    fontSize: '13px', 
+    fontWeight: '500', 
+    color: '#1f2937', 
+    textAlign: 'right' 
+  },
   viewMoreButton: {
     marginTop: '12px',
     width: '100%',
@@ -107,6 +149,5 @@ const styles = {
     transition: 'all 0.3s ease',
   },
 };
-
 
 export default EventCardModeratorMaterials;

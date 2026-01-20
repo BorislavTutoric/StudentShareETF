@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { AdvicePostComponent } from './AdvicePostComponent';
-import adviceService from '../services/adviceService'; 
 import { MessageSquare, ChevronLeft, Send, PenTool } from 'lucide-react'; 
+import { AdvicePostComponent } from './AdvicePostComponent';
 import Toast from './Toast';
+import adviceService from '../services/adviceService'; 
 
 const PRIMARY_ACCENT = '#60e016';
-const BACKGROUND_GRADIENT = "linear-gradient(180deg, #1a237e 0%, #283593 50%, #3949ab 100%)";
 
 const AdviceDisplay = ({ subjectId, subjectName, year, onBack }) => {
     const [advices, setAdvices] = useState([]);
@@ -154,7 +153,6 @@ const AdviceDisplay = ({ subjectId, subjectName, year, onBack }) => {
     };
 
     const handleDeleteComment = async (commentId, adviceId) => {
-        
         try {
             await adviceService.deleteComment(commentId);
             showToast('Komentar uspješno obrisan.', 'success');
@@ -275,7 +273,6 @@ const styles = {
     container: {
         width: '100%',
         minHeight: '100vh',
-        //background: BACKGROUND_GRADIENT,
         background: 'linear-gradient(135deg, #0a1457 0%, #1a2a5e 50%, #2a1f5e 100%)',
         padding: '25px 20px',
         fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',

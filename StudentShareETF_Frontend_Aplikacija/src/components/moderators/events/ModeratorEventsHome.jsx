@@ -1,15 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { getAllEvents } from "../../../services/eventService"
 import EventCardModerator from "./EventCardModerator";
 import EventModalModerator from "./EventModalModerator";
 import Toast from "../../Toast";
+import { getAllEvents } from "../../../services/eventService"
 
-export default function ModeratorEventsHome() {
+function ModeratorEventsHome() {
   const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [toast, setToast] = useState(null);
 
   const loadEvents = async () => {
     try {
@@ -23,11 +22,6 @@ export default function ModeratorEventsHome() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const showToast = (message, type = 'success', duration = 3000) => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), duration);
   };
 
   useEffect(() => {
@@ -67,8 +61,6 @@ export default function ModeratorEventsHome() {
 
   return (
     <div style={styles.container}>
-      {toast && <Toast message={toast.message} type={toast.type} />}
-
       <div style={styles.eventsGrid}>
         {events.map(event => (
           <EventCardModerator
@@ -78,7 +70,6 @@ export default function ModeratorEventsHome() {
           />
         ))}
       </div>
-
       {selectedEvent && (
         <EventModalModerator
           event={selectedEvent}
@@ -90,7 +81,6 @@ export default function ModeratorEventsHome() {
   );
 }
 
-
 const styles = {
   container: {
     width: "100%",
@@ -99,14 +89,12 @@ const styles = {
     minHeight: "auto",
     position: "relative",
   },
-
   eventsGrid: {
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))',
     gap: '25px',
     marginTop: '20px',
   },
-
   loadingContainer: {
     display: 'flex',
     flexDirection: 'column',
@@ -114,7 +102,6 @@ const styles = {
     justifyContent: 'center',
     minHeight: '400px',
   },
-
   spinner: {
     width: '50px',
     height: '50px',
@@ -123,14 +110,12 @@ const styles = {
     borderRadius: '50%',
     animation: 'spin 1s linear infinite',
   },
-
   loadingText: {
     marginTop: '20px',
     fontSize: '18px',
     color: 'white',
     fontWeight: '600',
   },
-
   errorContainer: {
     display: 'flex',
     alignItems: 'center',
@@ -138,7 +123,6 @@ const styles = {
     minHeight: '400px',
     padding: '20px',
   },
-
   errorText: {
     fontSize: '18px',
     color: '#ef4444',
@@ -147,20 +131,20 @@ const styles = {
     borderRadius: '12px',
     fontWeight: '600',
   },
-
   emptyContainer: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: '400px',
   },
-
   emptyText: {
     fontSize: '20px',
     color: 'white',
     fontWeight: '600',
   },
 };
+
+export default ModeratorEventsHome;
 
 const styleSheet = document.createElement("style");
 styleSheet.innerText = `

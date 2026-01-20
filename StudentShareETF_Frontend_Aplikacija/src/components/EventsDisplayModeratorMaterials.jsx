@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { getAllEvents } from "../services/eventService";
 import EventCardModeratorMaterials from "./moderators/materials/EventCardModeratorMaterials";
 import EventModalModeratorMaterials from "./moderators/materials/EventModalModeratorMaterials";
+import { getAllEvents } from "../services/eventService";
 
 function EventsDisplayModeratorMaterials() {
   const [events, setEvents] = useState([]);
@@ -155,7 +155,6 @@ const styles = {
 
 export default EventsDisplayModeratorMaterials;
 
-// Dodaj CSS animaciju za spinner
 const styleSheet = document.createElement("style");
 styleSheet.innerText = `
   @keyframes spin {

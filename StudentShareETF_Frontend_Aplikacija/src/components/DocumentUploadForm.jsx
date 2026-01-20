@@ -22,14 +22,12 @@ function DocumentUploadForm({ isOpen, onClose, subjectName, onUploadSuccess, onU
 
   const handleSubmit = async () => {
     const newErrors = {};
-
     if (!file) {
       newErrors.file = 'Fajl nije dodan';
     }
     if (!category) {
       newErrors.category = 'Kategorija nije unesena';
     }
-
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
       return;

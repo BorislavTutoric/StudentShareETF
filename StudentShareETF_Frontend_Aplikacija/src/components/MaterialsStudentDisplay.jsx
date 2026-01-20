@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { getComments, getMaterial, getReviews, saveMaterialApi } from '../services/materialsService';
 import DocumentUploadForm from './DocumentUploadForm';
 import CommentsSection from './CommentsSection';
 import Toast from './Toast';
 import ConfirmationModal from './ConfirmationModal';
+import { getComments, getMaterial, getReviews, saveMaterialApi } from '../services/materialsService';
 
 function MaterialsStudentDisplay({ materials, isOpen, onClose, subjectName, materialsAvgRatings }) {
   const [expandedSections, setExpandedSections] = useState({
@@ -21,7 +21,6 @@ function MaterialsStudentDisplay({ materials, isOpen, onClose, subjectName, mate
   const [allMaterialComments, setAllMaterialComments] = useState([]);
   const [avgRatings, setAvgRatings] = useState(materialsAvgRatings);
   const [infoModal, setInfoModal] = useState({ isOpen: false, description: "" });
-
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [onConfirm, setOnConfirm] = useState(null);
   const [message, setMessage] = useState("");

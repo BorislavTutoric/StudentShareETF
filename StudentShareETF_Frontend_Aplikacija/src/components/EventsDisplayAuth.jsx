@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { getAllEvents } from "../services/eventService"
 import EventCardAuth from "./EventCardAuth";
 import EventModalAuth from "./EventModalAuth";
 import EventCreateModal from "./EventCreateModal";
 import Toast from "./Toast";
+import { getAllEvents } from "../services/eventService"
 
-export default function EventsDisplayAuth() {
+function EventsDisplayAuth() {
   const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -246,6 +246,8 @@ const styles = {
     fontWeight: "600",
   },
 };
+
+export default EventsDisplayAuth; 
 
 const styleSheet = document.createElement("style");
 styleSheet.innerText = `

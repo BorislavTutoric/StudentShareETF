@@ -4,7 +4,6 @@ import { deleteCommentApi } from '../../../services/materialsService';
 
 function ModeratorCommentsSection({ isOpen, onClose, documentName, materialId, showToast, 
   allMaterialComments, setAllMaterialComments }) {
-
   const [materialComments, setMaterialComments] = useState(allMaterialComments);
   const [deletingCommentId, setDeletingCommentId] = useState(null);
   const [showDeleteCommentConfirm, setShowDeleteCommentConfirm] = useState(null);
@@ -58,7 +57,6 @@ function ModeratorCommentsSection({ isOpen, onClose, documentName, materialId, s
           </button>
         </div>
 
-        {/* SVI KOMENTARI */}
         <div style={styles.listSection}>
           <h3 style={styles.sectionTitle}>💬 Svi komentari ({materialComments.length})</h3>
           {materialComments.length === 0 ? (
@@ -117,7 +115,6 @@ function ModeratorCommentsSection({ isOpen, onClose, documentName, materialId, s
         </div>
       </div>
 
-      {/* Potvrda za brisanje komentara */}
       {showDeleteCommentConfirm && (
         <div style={styles.confirmOverlay} onClick={() => setShowDeleteCommentConfirm(null)}>
           <div style={styles.confirmDialog} onClick={(e) => e.stopPropagation()}>
@@ -317,7 +314,6 @@ const styles = {
     color: 'rgba(255, 255, 255, 0.5)',
   },
 
-  // Confirmation Dialog Styles
   confirmOverlay: {
     position: 'fixed',
     top: 0,

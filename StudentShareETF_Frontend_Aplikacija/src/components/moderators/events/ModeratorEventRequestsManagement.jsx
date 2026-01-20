@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Image } from "lucide-react";
-import moderatorActionService from "../../../services/moderatorActionsService";
 import Toast from "../../Toast";
+import moderatorActionService from "../../../services/moderatorActionsService";
 
-/* ================= SCROLLBAR CSS ================= */
 const scrollbarStyles = `
   .popup-body::-webkit-scrollbar {
     width: 8px;
@@ -25,18 +24,14 @@ function ModeratorEventRequestsManagement() {
   const [pendingEvents, setPendingEvents] = useState([]);
   const [pendingEventComments, setPendingEventComments] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const [selectedItem, setSelectedItem] = useState(null);
   const [showDetailsPopup, setShowDetailsPopup] = useState(false);
   const [showConfirmPopup, setShowConfirmPopup] = useState(false);
   const [confirmAction, setConfirmAction] = useState(null);
-
   const [studentSuspended, setStudentSuspended] = useState(null);
   const [showSuspendConfirm, setShowSuspendConfirm] = useState(null);
-
   const [toast, setToast] = useState(null);
 
-  /* ================= INIT ================= */
   useEffect(() => {
     loadAllRequests();
   }, []);
@@ -51,7 +46,6 @@ function ModeratorEventRequestsManagement() {
     }
   }, [selectedItem, showDetailsPopup]);
 
-  /* ================= HELPERS ================= */
   const showToast = (message, type = "success", duration = 3000) => {
     setToast({ message, type });
     setTimeout(() => setToast(null), duration);
@@ -64,7 +58,6 @@ function ModeratorEventRequestsManagement() {
         moderatorActionService.getPendingEventsForModerator(),
         moderatorActionService.getPendingEventCommentsForModerator()
       ]);
-
       setPendingEvents(Array.isArray(events) ? events : []);
       setPendingEventComments(Array.isArray(eventComments) ? eventComments : []);
     } catch (err) {
@@ -81,7 +74,6 @@ function ModeratorEventRequestsManagement() {
     return null;
   };
 
-  /* ================= ACTIONS ================= */
   const handleItemClick = (item, type) => {
     setSelectedItem({ ...item, type });
     setShowDetailsPopup(true);
@@ -94,10 +86,8 @@ function ModeratorEventRequestsManagement() {
 
   const executeAction = async () => {
     if (!confirmAction) return;
-
     const { item, type, isApproved } = confirmAction;
     const id = getItemId(item, type);
-
     try {
       if (type === "event") {
         if (isApproved) {
@@ -108,7 +98,6 @@ function ModeratorEventRequestsManagement() {
           showToast("Događaj je obrisan!");
         }
       }
-
       if (type === "eventComment") {
         await moderatorActionService.reviewEventComment(id, isApproved);
 
@@ -118,7 +107,6 @@ function ModeratorEventRequestsManagement() {
           showToast("Komentar je obrisan!");
         }
       }
-
       setShowConfirmPopup(false);
       setShowDetailsPopup(false);
       setConfirmAction(null);
@@ -149,11 +137,8 @@ function ModeratorEventRequestsManagement() {
     }
   };
 
-  /* ================= CARDS ================= */
   const EventCard = ({ event }) => (
     <div style={styles.card} onClick={() => handleItemClick(event, "event")}>
-
-      {/* ===== IMAGE ===== */}
       <div style={styles.imageContainer}>
         {event.slikaUrl ? (
           <>
@@ -172,7 +157,6 @@ function ModeratorEventRequestsManagement() {
         )}
       </div>
 
-      {/* ===== CONTENT ===== */}
       <div style={styles.cardContent}>
         <h3 style={styles.cardTitle}>{event.naziv}</h3>
 
@@ -244,7 +228,6 @@ const CommentCard = ({ comment }) => (
     </div>
   );
 
-  /* ================= POPUPS ================= */
   const DetailsPopup = () => {
     if (!selectedItem) return null;
 
@@ -533,7 +516,6 @@ const CommentCard = ({ comment }) => (
     );
   };
 
-  /* ================= RENDER ================= */
   if (loading) {
     return (
       <div style={styles.loadingContainer}>
@@ -583,7 +565,6 @@ const CommentCard = ({ comment }) => (
   );
 }
 
-/* ================= STYLES ================= */
 const styles = {
   container: {
     display: "grid",

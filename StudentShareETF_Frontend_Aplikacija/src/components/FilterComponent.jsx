@@ -6,8 +6,7 @@ function FilterComponent({ isOpen, onClose, setMySubjects, setAllSubjects, subje
 
   const handleViewChange = (view) => {
     setSelectedView(view);
-    if(view === "all")
-    {
+    if(view === "all"){
         setAllSubjects();
     }else{
         setMySubjects();

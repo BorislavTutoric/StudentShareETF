@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
+import { Trash2 } from 'lucide-react';
 import { getMaterial, getComments, deleteMaterial } from '../../../services/materialsService';
 import ModeratorMaterialsCommentsSection from './ModeratorMaterialsCommentsSection';
 import Toast from '../../Toast';
-import { Trash2 } from 'lucide-react';
 
 function ModeratorMaterialsHomeDisplay({ materials, isOpen, onClose, subjectName, materialsAvgRatings, onMaterialDeleted }) {
   const [expandedSections, setExpandedSections] = useState({
@@ -11,7 +11,6 @@ function ModeratorMaterialsHomeDisplay({ materials, isOpen, onClose, subjectName
     rokovi: true,
     ostalo: true
   });
-
   const [isCommentSectionOpen, setIsCommentSectionOpen] = useState(false);
   const [currentMaterial, setCurrentMaterial] = useState("");
   const [currentMaterialId, setCurrentMaterialId] = useState(null);
@@ -81,21 +80,18 @@ function ModeratorMaterialsHomeDisplay({ materials, isOpen, onClose, subjectName
     
     try {
       await deleteMaterial(showDeleteMaterialConfirm.id);
-      
-      // Ukloni materijal iz lokalne liste
+ 
       setLocalMaterials(prevMaterials => 
         prevMaterials.filter(mat => mat.materialId !== showDeleteMaterialConfirm.id)
       );
-      
-      // Ukloni prosečnu ocenu materijala
+
       setAvgRatings(prevRatings => 
         prevRatings.filter(rating => rating.materialId !== showDeleteMaterialConfirm.id)
       );
       
       showToast(`Materijal "${showDeleteMaterialConfirm.name}" je uspješno obrisan!`, 'success');
       setShowDeleteMaterialConfirm(null);
-      
-      // Opcionalno: pozovi callback nakon kratke pauze
+
       if (onMaterialDeleted) {
         setTimeout(() => {
           onMaterialDeleted();
@@ -221,7 +217,6 @@ function ModeratorMaterialsHomeDisplay({ materials, isOpen, onClose, subjectName
   return (
     <div style={styles.outerContainer}>
       {toast && <Toast message={toast.message} type={toast.type} />}
-
       <ModeratorMaterialsCommentsSection 
         isOpen={isCommentSectionOpen}
         onClose={handleCloseCommentSection}
@@ -301,7 +296,6 @@ function ModeratorMaterialsHomeDisplay({ materials, isOpen, onClose, subjectName
         </div>
       </div>
 
-      {/* Potvrda za brisanje materijala */}
       {showDeleteMaterialConfirm && (
         <div style={styles.confirmOverlay} onClick={() => setShowDeleteMaterialConfirm(null)}>
           <div style={styles.confirmDialog} onClick={(e) => e.stopPropagation()}>
@@ -540,7 +534,6 @@ const styles = {
     justifyContent: 'center',
   },
 
-  // Confirmation Dialog Styles
   confirmOverlay: {
     position: 'fixed',
     top: 0,

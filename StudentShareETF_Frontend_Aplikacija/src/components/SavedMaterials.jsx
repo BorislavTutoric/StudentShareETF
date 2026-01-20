@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { getFilteredSubjectsWithSavedMaterials, getSavedMaterials, getSubjectsWithSavedMaterials } from "../services/savedMaterialsService";
-import { Filter, Search, Bookmark, Loader } from 'lucide-react';
+import { Filter, Search, Bookmark } from 'lucide-react';
 import SearchInput from './SearchInput';
 import FilterComponent from './FilterComponent';
 import Toast from './Toast';
+import { getFilteredSubjectsWithSavedMaterials, getSavedMaterials, getSubjectsWithSavedMaterials } from "../services/savedMaterialsService";
 
 function SavedMaterials({ onOpenMaterials, startYear = 1, subjects = "all" }) {
   const [courses, setCourses] = useState([]);
@@ -14,20 +14,13 @@ function SavedMaterials({ onOpenMaterials, startYear = 1, subjects = "all" }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [isFilterOpen, setFilterOpen] = useState(false);
   const [isSearchButtonClicked, setIsClicked] = useState(false);
-  const [toast, setToast] = useState(null);
   const [subjectsView, setSubjectsView] = useState("all");
-
-  const showToast = (message, type = 'success', duration = 3000) => {
-    setToast({ message, type });
-    setTimeout(() => setToast(null), duration);
-  };
 
   const filterMySubjects = () => setSubjectsView("my");
   const setAllSubjects = () => setSubjectsView("all");
 
   const handleFilterClick = () => setFilterOpen(true);
   const handleFilterClose = () => setFilterOpen(false);
-
 
   const fetchSubjects = async (year) => {
     try {
@@ -111,8 +104,6 @@ function SavedMaterials({ onOpenMaterials, startYear = 1, subjects = "all" }) {
 
   return (
     <div style={styles.container}>
-      {toast && <Toast message={toast.message} type={toast.type} />}
-
       <FilterComponent 
         isOpen={isFilterOpen}
         onClose={handleFilterClose}
@@ -245,13 +236,9 @@ const styles = {
   filterSearchContainer: {
     background: 'linear-gradient(90deg, #0f1643 0%, #1a2a5e 100%)',
     padding: '25px 40px',
-    //width: '100%',
     boxShadow: '0 4px 15px rgba(0, 0, 0, 0.3)',
   },
   filterSearchContent: {
-    //maxWidth: '1200px',
-    //margin: '0 auto',
-    //width: '100%',
   },
   inlineWrapper: {
     display: 'flex',
@@ -330,9 +317,6 @@ const styles = {
   contentContainer: {
     flex: 1,
     padding: '40px 35px',
-    //maxWidth: '1200px',
-    //width: '100%',
-    //margin: '0 auto',
   },
   yearButtonsContainer: {
     display: 'flex',
@@ -453,6 +437,8 @@ const styles = {
   },
 };
 
+export default SavedMaterials;
+
 const styleSheet = document.createElement("style");
 styleSheet.textContent = `
   @keyframes spin {
@@ -461,5 +447,3 @@ styleSheet.textContent = `
   }
 `;
 document.head.appendChild(styleSheet);
-
-export default SavedMaterials;

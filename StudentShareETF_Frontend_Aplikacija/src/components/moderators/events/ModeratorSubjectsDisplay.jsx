@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { getSubjects, getMaterials } from '../../../services/materialsService';
-import { Filter, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 import SearchInput from '../../SearchInput';
+import { getSubjects, getMaterials } from '../../../services/materialsService';
 
 function ModeratorSubjectsDisplay({ onOpenMaterials, startYear = 1 }) {
   const [courses, setCourses] = useState([]);
@@ -11,7 +11,6 @@ function ModeratorSubjectsDisplay({ onOpenMaterials, startYear = 1 }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [isSearchButtonClicked, setIsClicked] = useState(false);
 
-  // Dodaj webkit scrollbar stilove
   React.useEffect(() => {
     const style = document.createElement('style');
     style.textContent = `
@@ -37,10 +36,10 @@ function ModeratorSubjectsDisplay({ onOpenMaterials, startYear = 1 }) {
 
   const fetchSubjects = async (year) => {
     try {
-        const data = await getSubjects(year);
-        setCourses(data);
+      const data = await getSubjects(year);
+      setCourses(data);
     }catch (error) {
-        console.error('Greška pri učitavanju predmeta:', error);
+      console.error('Greška pri učitavanju predmeta:', error);
     }
   };
 
@@ -54,32 +53,30 @@ function ModeratorSubjectsDisplay({ onOpenMaterials, startYear = 1 }) {
   };
 
   const filterSubjectsFirstSemester = (course) => {
-    if(course.semester === 1)
-    {
-        if(isSearchButtonClicked){
-          if(course.name.toLowerCase().includes(searchTerm.toLowerCase())){
-            return true;
-          }else{
-            return false;
-          }
+    if(course.semester === 1){
+      if(isSearchButtonClicked){
+        if(course.name.toLowerCase().includes(searchTerm.toLowerCase())){
+          return true;
+        }else{
+          return false;
         }
-        return true;
+      }
+      return true;
     }else{
       return false;
     }
   }
 
   const filterSubjectsSecondSemester = (course) => {
-    if(course.semester === 2)
-    {
-        if(isSearchButtonClicked){
-          if(course.name.toLowerCase().includes(searchTerm.toLowerCase())){
-            return true;
-          }else{
-            return false;
-          }
+    if(course.semester === 2){
+      if(isSearchButtonClicked){
+        if(course.name.toLowerCase().includes(searchTerm.toLowerCase())){
+          return true;
+        }else{
+          return false;
         }
-        return true;
+      }
+      return true;
     }else{
       return false;
     }
