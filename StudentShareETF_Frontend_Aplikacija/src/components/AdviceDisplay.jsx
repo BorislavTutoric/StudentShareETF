@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { MessageSquare, ChevronLeft, Send, PenTool } from 'lucide-react'; 
-import { AdvicePostComponent } from './AdvicePostComponent';
+import AdvicePostComponent from './AdvicePostComponent';
 import Toast from './Toast';
 import adviceService from '../services/adviceService'; 
 

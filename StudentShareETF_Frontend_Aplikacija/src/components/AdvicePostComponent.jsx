@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ThumbsUp, MessageSquare, AlertTriangle, Send, Trash2 } from 'lucide-react';
 import ConfirmationModal from './ConfirmationModal';
-import { CommentItemComponent } from './CommentItemComponent'; 
+import CommentItemComponent from './CommentItemComponent'; 
 
 const PRIMARY_ACCENT = '#60e016';
 const SECONDARY_ACCENT = '#5c6bc0';
