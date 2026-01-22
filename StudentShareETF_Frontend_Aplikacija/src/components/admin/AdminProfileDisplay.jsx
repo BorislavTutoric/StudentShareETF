@@ -146,7 +146,7 @@ function AdminProfileDisplay() {
       return;
     }
     try {
-      await passwordChange(passwordData.newPassword);
+      await passwordChange(passwordData.currentPassword, passwordData.newPassword);
       setIsModalOpen(false);
       setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
       showToast("Lozinka uspješno izmijenjena!", 'success');

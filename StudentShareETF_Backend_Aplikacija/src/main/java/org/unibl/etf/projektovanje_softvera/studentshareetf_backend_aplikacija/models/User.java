@@ -13,26 +13,26 @@ import java.util.List;
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "KorisnikId")
+    @Column(name = "KorisnikId", nullable = false)
     private Integer userId;
 
-    @Column(name = "Ime")
+    @Column(name = "Ime", nullable = false)
     private String name;
 
-    @Column(name = "Prezime")
+    @Column(name = "Prezime", nullable = false)
     private String surname;
 
-    @Column(name = "KorisnickoIme")
+    @Column(name = "KorisnickoIme", nullable = false)
     private String username;
 
-    @Column(name = "Lozinka")
+    @Column(name = "Lozinka", nullable = false)
     private String password;
 
-    @Column(name = "Uloga")
+    @Column(name = "Uloga", nullable = false)
     private String role;
 
-    @Column(name = "Aktivan")
-    private boolean active;
+    @Column(name = "Aktivan", nullable = false)
+    private boolean active = true;
 
     public User(){
 
