@@ -11,7 +11,7 @@ public class Major {
     @Column(name = "SmjerId")
     private Integer majorId;
 
-    @Column(name = "Naziv")
+    @Column(name = "Naziv", nullable = false)
     private String name;
 
     @ManyToOne

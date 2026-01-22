@@ -11,16 +11,16 @@ public class StudyProgram {
     @Column(name = "StudijskiProgramId")
     private Integer studyProgramId;
 
-    @Column(name = "Naziv")
+    @Column(name = "Naziv", nullable = false)
     private String name;
 
-    @Column(name = "NazivFakulteta")
+    @Column(name = "NazivFakulteta", nullable = false)
     private String facultyName;
 
-    @Column(name = "Opis")
+    @Column(name = "Opis", nullable = false)
     private String description;
 
-    @Column(name = "Status")
+    @Column(name = "Status", nullable = false)
     private String status;
 
     public StudyProgram() {}

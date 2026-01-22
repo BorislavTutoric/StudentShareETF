@@ -51,6 +51,7 @@ function EventsDisplayModeratorMaterials() {
   return (
     <div style={styles.container}>
       <div style={styles.eventsGrid}>
+        {events.length === 0 ? <p style={styles.emptyText}>Nema aktivnih dogadjaja!</p>: ""}
         {events.map(event => (
           <EventCardModeratorMaterials
             key={event.dogadjajId}
@@ -144,6 +145,12 @@ const styles = {
     alignItems: 'center',
     justifyContent: 'center',
     minHeight: '400px',
+  },
+
+  emptyText: {
+    fontSize: '20px',
+    color: 'white',
+    fontWeight: '600',
   },
 
   emptyText: {

@@ -71,7 +71,7 @@ function ModeratorProfileDisplay() {
   const handlePasswordSave = async () => {
     if (passwordData.newPassword === passwordData.confirmPassword) {
       try{
-        const response = await passwordChange(passwordData.newPassword)
+        const response = await passwordChange(passwordData.currentPassword, passwordData.newPassword)
         setIsModalOpen(false);
         setPasswordData({ currentPassword: '', newPassword: '', confirmPassword: '' });
         showToast("Lozinka uspješno izmijenjena!", 'success');

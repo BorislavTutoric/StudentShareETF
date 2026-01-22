@@ -60,6 +60,7 @@ function EventsDisplayAuth() {
   if (events.length === 0) {
     return (
       <div style={styles.container}>
+        {toast && <Toast message={toast.message} type={toast.type} />}
         <div style={styles.headerSection}>
           <div style={styles.headerContent}>
             <h1 style={styles.headerTitle}>📅 Događaji</h1>
@@ -78,6 +79,7 @@ function EventsDisplayAuth() {
           <EventCreateModal
             onClose={() => setShowCreateModal(false)}
             onCreated={loadEvents}
+            showToast={showToast}
           />
         )}
       </div>
@@ -119,7 +121,7 @@ function EventsDisplayAuth() {
         <EventCreateModal
           onClose={() => setShowCreateModal(false)}
           onCreated={loadEvents}
-          showToast={showToast}
+          showToast={() => showToast()}
         />
       )}
     </div>

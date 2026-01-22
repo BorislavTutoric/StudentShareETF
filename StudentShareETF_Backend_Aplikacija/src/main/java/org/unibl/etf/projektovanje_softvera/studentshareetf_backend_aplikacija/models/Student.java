@@ -15,19 +15,19 @@ public class Student {
     @JoinColumn(name = "KorisnikId")
     private User user;
 
-    @Column(name = "Verifikovan")
+    @Column(name = "Verifikovan", nullable = false)
     private boolean verified = false;
 
     @Column(name = "VerifikacioniToken")
     private String verificationToken;
 
-    @Column(name = "Email")
+    @Column(name = "Email", nullable = false)
     private String email;
 
-    @Column(name = "StudijskiProgram")
+    @Column(name = "StudijskiProgram", nullable = false)
     private String studyProgram;
 
-    @Column(name = "Smjer")
+    @Column(name = "Smjer", nullable = false)
     private String major;
 
     @Column(name = "PendingEmail")
@@ -60,6 +60,14 @@ public class Student {
 
     public String getMajor() {
         return major;
+    }
+
+    public String getVerificationToken() {
+        return verificationToken;
+    }
+
+    public boolean isVerified() {
+        return verified;
     }
 
     public void setUserId(Integer userId) {
