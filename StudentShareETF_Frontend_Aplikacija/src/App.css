@@ -8,8 +8,8 @@ html, body {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  overflow-x: hidden; /* sprečava horizontalni scroll globalno */
-  width: 100vw;       /* osigurava da body ne prelazi viewport */
+  overflow-x: hidden; 
+  width: 100vw;      
   max-width: 100vw;
 }
 
@@ -18,10 +18,9 @@ html, body {
   height: 100%;
   margin: 0;
   padding: 0;
-  overflow-x: hidden; /* još dodatna zaštita */
+  overflow-x: hidden; 
 }
 
-/* Ostali postojeći stilovi */
 .logo {
   height: 6em;
   padding: 1.5em;

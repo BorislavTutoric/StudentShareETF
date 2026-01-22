@@ -10,8 +10,6 @@ import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.d
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.AlreadySavedException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.EntityNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.UserNotFoundException;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.generics.UserHolder;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories.MaterialRepository;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.MaterialCommentService;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.MaterialReviewService;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.MaterialService;
@@ -31,13 +29,13 @@ public class MaterialAuthController {
     private final MaterialService materialService;
 
     @GetMapping("/{materialId}/comments")
-    public List<MaterialCommentResponse> getKomentariPoMaterijalId(@PathVariable Integer materialId){
+    public List<MaterialCommentResponse> getCommentsByMaterialId(@PathVariable Integer materialId){
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return materialCommentService.getCommentsByMaterialId(materialId, username);
     }
 
     @GetMapping("/{materialId}/reviews")
-    public List<MaterialReviewResponse> getRecenzijePoMaterijalId(@PathVariable Integer materialId){
+    public List<MaterialReviewResponse> getReviewsByMaterialId(@PathVariable Integer materialId){
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return materialReviewService.getReviewsByMaterialId(materialId, username);
     }
@@ -81,7 +79,7 @@ public class MaterialAuthController {
             materialReviewService.reviewDelete(username, materialId);
             return ResponseEntity.ok().build();
         } catch (UserNotFoundException | EntityNotFoundException ex){
-            return ResponseEntity.badRequest().body("Greška pri dodavanju recenzije!");
+            return ResponseEntity.badRequest().body("Greška pri brisanju recenzije!");
         }
     }
 

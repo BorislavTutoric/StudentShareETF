@@ -42,15 +42,8 @@ public class AcademicCalendar {
     public void setNaziv(String naziv) {
         this.naziv = naziv;
     }
-    public LocalDateTime getDatumPostavljanja() {
-        return datumPostavljanja;
-    }
-
     public void setDatumPostavljanja(LocalDateTime datumPostavljanja) {
         this.datumPostavljanja = datumPostavljanja;
-    }
-    public boolean isAktivan() {
-        return aktivan;
     }
     public void setAktivan(boolean aktivan) {
         this.aktivan = aktivan;

@@ -12,6 +12,16 @@ public class EventReview {
     @EmbeddedId
     private EventReviewKey id;
 
+    @MapsId("studentId")
+    @ManyToOne
+    @JoinColumn(name = "KorisnikId", nullable = false)
+    private User user;
+
+    @MapsId("eventId")
+    @ManyToOne
+    @JoinColumn(name = "DogadjajId", nullable = false)
+    private Event event;
+
     @Column(name = "Ocjena", nullable = false)
     private Integer rating;
 
@@ -29,9 +39,18 @@ public class EventReview {
     public EventReviewKey getId() { return id; }
     public void setId(EventReviewKey id) { this.id = id; }
 
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
+
     public Integer getRating() { return rating; }
     public void setRating(Integer rating) { this.rating = rating; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public void setEvent(Event event) {
+        this.event = event;
+    }
+
+    public Event getEvent() { return event; }
 }

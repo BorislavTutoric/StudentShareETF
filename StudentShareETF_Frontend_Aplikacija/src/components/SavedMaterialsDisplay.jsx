@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
-import { getMaterial } from '../services/materialsService';
-import DocumentUploadForm from './DocumentUploadForm';
-import CommentsSection from './CommentsSection';
 import Toast from './Toast';
+import ConfirmationModal from './ConfirmationModal';
+import { getMaterial } from '../services/materialsService';
 import { removeSavedMaterial } from '../services/savedMaterialsService';
 
 function SavedMaterialsDisplay({ materials, setMaterials, isOpen, onClose, subjectName }) {
@@ -13,8 +12,15 @@ function SavedMaterialsDisplay({ materials, setMaterials, isOpen, onClose, subje
     ostalo: true
   });
   const [toast, setToast] = useState(null);
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+  const [onConfirm, setOnConfirm] = useState(null);
+  const [message, setMessage] = useState("");
+  
+  const handleCloseConfirmModal = () => {
+    setConfirmModalOpen(false);
+  }
 
-  const showToast = (message, type = 'success', duration = 10000) => {
+  const showToast = (message, type = 'success', duration = 3000) => {
     setToast({ message, type });
     setTimeout(() => setToast(null), duration);
   };
@@ -35,13 +41,13 @@ function SavedMaterialsDisplay({ materials, setMaterials, isOpen, onClose, subje
     }
   };
 
-  const handleUnsaveMaterial = async (materialId) => {
+  const handleUnsaveMaterial = async (materialId, name) => {
     try{
-        const response = await removeSavedMaterial(materialId);
-        setMaterials(prev => prev.filter(material => Number(material.materialId) !== Number(materialId)));
-        showToast("Uklonili ste materijal iz sekcije sačuvano", 'info');
+      const response = await removeSavedMaterial(materialId);
+      setMaterials(prev => prev.filter(material => Number(material.materialId) !== Number(materialId)));
+      showToast(`Uklonili ste materijal: ${name} iz sekcije sačuvano`, 'success');
     }catch(err){
-        showToast("Greška pri uklanjanju sačuvanog materijala", 'error');
+      showToast("Greška pri uklanjanju sačuvanog materijala", 'error');
     }
   }
 
@@ -72,18 +78,14 @@ function SavedMaterialsDisplay({ materials, setMaterials, isOpen, onClose, subje
                   title="Ukloni iz sačuvanih"
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleUnsaveMaterial(mat.materialId)
+                    setMessage(`ukloniti material: ${mat.name} iz sekcije sačuvano?`);
+                    setOnConfirm(() => () => handleUnsaveMaterial(mat.materialId, mat.name));
+                    setConfirmModalOpen(true)
                   }}
-                  onMouseEnter={(e) => {
-                    e.target.style.backgroundColor = 'rgba(96, 224, 22, 0.15)';
-                    e.target.textContent = '❌';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.backgroundColor = 'transparent';
-                    e.target.textContent = '📑';
-                  }}
+                  onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(96, 224, 22, 0.15)'}
+                  onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
                 >
-                  📑
+                  ❌
                 </button>
               
               <div style={styles.actionsContainer}>
@@ -108,14 +110,20 @@ function SavedMaterialsDisplay({ materials, setMaterials, isOpen, onClose, subje
   };
 
   const categories = {
-    predavanja: materials.filter(m => m.category === 'predavanja'),
-    vjezbe: materials.filter(m => m.category === 'vjezbe'),
-    rokovi: materials.filter(m => m.category === 'rokovi'),
-    ostalo: materials.filter(m => m.category === 'ostalo')
+    predavanja: materials.filter(m => m.category === 'Predavanja'),
+    vjezbe: materials.filter(m => m.category === 'Vježbe'),
+    rokovi: materials.filter(m => m.category === 'Rokovi'),
+    ostalo: materials.filter(m => m.category === 'Ostalo')
   };
 
   return (
     <div style={styles.container}>
+      <ConfirmationModal 
+          isOpen={confirmModalOpen}
+          onConfirm={onConfirm}
+          message={message}
+          onCancel={handleCloseConfirmModal}
+        />
       {toast && <Toast message={toast.message} type={toast.type} />}
       
       <div style={styles.headerRow}>

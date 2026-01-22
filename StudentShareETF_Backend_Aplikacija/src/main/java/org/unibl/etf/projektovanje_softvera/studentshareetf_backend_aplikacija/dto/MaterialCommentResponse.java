@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Material;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.MaterialComments;
 
 import java.time.LocalDateTime;
 
@@ -13,13 +11,13 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MaterialCommentResponse {
-    private Integer commentId;
-    private String sadrzaj;
+    protected Integer commentId;
+    protected String sadrzaj;
 
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
-    private LocalDateTime datum;
+    protected LocalDateTime datum;
     
-    private String name;
-    private String surname;
-    private boolean isMyComment;
+    protected String name;
+    protected String surname;
+    protected boolean isMyComment;
 }

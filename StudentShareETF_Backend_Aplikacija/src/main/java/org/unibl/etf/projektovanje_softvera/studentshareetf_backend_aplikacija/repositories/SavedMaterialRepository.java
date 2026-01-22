@@ -13,15 +13,12 @@ import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.m
 @Repository
 public interface SavedMaterialRepository extends JpaRepository<SavedMaterial, SavedMaterialId> {
 
-    List<SavedMaterial> findByStudent_UserId(Integer studentId);
-
     @Query("SELECT sm FROM SavedMaterial sm " +
             "JOIN FETCH sm.material m " +
             "JOIN FETCH m.subject " +
             "WHERE sm.student.userId = :studentId")
     List<SavedMaterial> findByStudentWithMaterialAndSubject(@Param("studentId") Integer studentId);
 
-    boolean existsByMaterial_MaterialIdAndStudent_UserId(Integer materialId, Integer studentId);
     void deleteByMaterial_MaterialIdAndStudent_UserId(Integer materialId, Integer studentId);
 
     boolean existsByMaterialAndStudent(Material material, Student student);

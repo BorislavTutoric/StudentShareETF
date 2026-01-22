@@ -15,6 +15,11 @@ export const addEventComment = async (eventId, content) => {
   return res.data;
 };
 
+export const getComments = async (eventId) => {
+  const res = await api.get(`/api/events/${eventId}/comments/moderator`);
+  return res.data;
+};
+
 export const getEventReviews = async (eventId) => {
   const res = await api.get(`/api/events/${eventId}/reviews`);
   return res.data;
@@ -82,3 +87,14 @@ export const deleteEventReview = async (eventId) => {
     throw err;
   }
 };
+
+export const deleteEventCommentById = async (commentId) => {
+  const response = await api.delete(`/api/moderator/events/comments/${commentId}`);
+  return response.data;
+};
+
+export const deleteEvent = async (eventId) => {
+  const response = await api.delete(`/api/moderator/events/${eventId}`);
+  return response.data;
+};
+

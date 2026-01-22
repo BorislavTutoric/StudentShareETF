@@ -14,7 +14,6 @@ public class MaterialReviewId implements Serializable {
         this.studentId = studentId;
     }
 
-    // equals i hashCode su obavezni
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -29,7 +28,6 @@ public class MaterialReviewId implements Serializable {
         return Objects.hash(materijalId, studentId);
     }
 
-    // getters i setters
     public Integer getMaterijalId() { return materijalId; }
     public void setMaterijalId(Integer materijalId) { this.materijalId = materijalId; }
     public Integer getStudentId() { return studentId; }

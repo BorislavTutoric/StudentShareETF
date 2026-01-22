@@ -1,6 +1,5 @@
 package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models;
 
-
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 

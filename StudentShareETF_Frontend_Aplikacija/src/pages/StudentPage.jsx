@@ -9,10 +9,10 @@ import EventsDisplayAuth from "../components/EventsDisplayAuth";
 import SavedMaterials from "../components/SavedMaterials";
 import SavedMaterialsDisplay from "../components/SavedMaterialsDisplay";
 import Notifications from "../components/Notifications";
-import { getNotificationsApi } from "../services/notificationsService";
 import AcademicCalendar from "../components/AcademicCalendar";
-import { getAcademicCalendarApi } from "../services/calendarService,";
 import Toast from "../components/Toast";
+import { getNotificationsApi, getNumOfUnreadNotificationsApi } from "../services/notificationsService";
+import { getAcademicCalendarApi } from "../services/calendarService,";
 import { getFacultyMonthTasksApi, getMyMonthTasksApi } from "../services/taskService";
 
 function StudentPage() {
@@ -33,6 +33,7 @@ function StudentPage() {
   const [myMonthTasks, setMyMonthTasks] = useState(null);
   const [toast, setToast] = useState(null);
   const [averageRatings, setAverageRatings] = useState([]);
+  const [numOfUnreadNotifications, setNumOfUnreadNotifications] = useState(0)
 
   const handleSubjectsClick = () => { 
     setActiveComponent("subjects");
@@ -60,7 +61,6 @@ function StudentPage() {
     setSubjectsSM(subs);
   }
 
-
   const handleNotificationsClick = async () => {
     try{
       const response = await getNotificationsApi();
@@ -73,6 +73,8 @@ function StudentPage() {
   const handleLogoutClick = () => {
     window.location.href = "/";
     localStorage.removeItem("jwtToken");
+    localStorage.removeItem("username");
+    localStorage.removeItem("name");
   };
 
   const handleCloseMaterials = () => {setActiveComponent("subjects")}
@@ -109,6 +111,15 @@ function StudentPage() {
     }
   }
 
+  const getNumOfUnreadNotifications = async () => {
+    try{
+      const response = await getNumOfUnreadNotificationsApi();
+      setNumOfUnreadNotifications(response);
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
   const renderContent = () => {
     switch (activeSection) {
       case "Profil":
@@ -134,7 +145,7 @@ function StudentPage() {
         );
 
       case "Obavještenja":
-        return <Notifications studentNotifications={notifications}/>;
+        return <Notifications studentNotifications={notifications} setUnreadNotifications={setNumOfUnreadNotifications}/>;
 
       case "Sačuvano":
         return (
@@ -172,7 +183,18 @@ function StudentPage() {
       default:
         return <h2>Dobrodošli!</h2>;
     }
-};
+  }
+
+  useEffect(() => {
+    getNumOfUnreadNotifications();
+
+    const interval = setInterval(() => {
+      getNumOfUnreadNotifications();
+    }, 15000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div style={styles.mainLayout}>
       {toast && <Toast message={toast.message} type={toast.type} />}
@@ -183,6 +205,7 @@ function StudentPage() {
           onHomeCLick={handleSubjectsClick}
           onNotificationsClick={handleNotificationsClick}
           onCalendarClick={handleCalendarClick}
+          unreadNotifications={numOfUnreadNotifications}
         />
       </div>
 
@@ -202,8 +225,6 @@ const styles = {
     display: "flex",
     height: "100vh",
     backgroundColor: "#64aaf1ff",
-    //background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%)",
-    //backgroundColor: "white",
   },
 
   leftMenu: {
@@ -221,9 +242,6 @@ const styles = {
 
   contentBox: {
     flex: 1,
-    //backgroundColor: "linear-gradient(135deg, #1E3A8A 0%, #6793f2ff 100%)",
-    //background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%)",
-    //backgroundColor: "#071686ff",
     background: 'linear-gradient(180deg, #0a1457 0%, #1a1f6b 100%)',
     borderRadius: "16px",
     padding: "0px 0",

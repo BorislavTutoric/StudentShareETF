@@ -15,4 +15,5 @@ public class NotificationsResponse {
     private String message;
     private boolean read;
     private LocalDateTime dateTime;
+    private LocalDateTime activeFrom;
 }

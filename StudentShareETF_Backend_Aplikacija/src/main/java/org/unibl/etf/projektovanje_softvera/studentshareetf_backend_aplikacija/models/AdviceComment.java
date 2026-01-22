@@ -26,7 +26,6 @@ public class AdviceComment {
     @JoinColumn(name = "PostId", nullable = false)
     private Advice advice;
 
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "StudentId", nullable = false)
     private Student student;
@@ -38,6 +37,9 @@ public class AdviceComment {
     @OneToMany(mappedBy = "parentComment", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<AdviceComment> replies;
 
+    @Version
+    @Column(name = "Version", nullable = false)
+    private Long version = 0L;
 
     public AdviceComment() {}
 
@@ -111,5 +113,13 @@ public class AdviceComment {
 
     public void setReplies(List<AdviceComment> replies) {
         this.replies = replies;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
+    }
+
+    public Long getVersion() {
+        return version;
     }
 }

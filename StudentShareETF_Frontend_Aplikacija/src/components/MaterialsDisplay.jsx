@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { getMaterial } from '../services/materialsService';
 
-function MaterialsDisplay({ materials, isOpen, subjectName }) {
+function MaterialsDisplay({ materials, isOpen, subjectName, back }) {
   const [expandedSections, setExpandedSections] = useState({
     predavanja: true,
     vjezbe: true,
@@ -14,6 +14,10 @@ function MaterialsDisplay({ materials, isOpen, subjectName }) {
   const toggleSection = (section) => {
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
   };
+
+  const handleBackButton = () => {
+    back();
+  }
 
   const handleMaterialClick = async (id) => {
     try {
@@ -46,15 +50,18 @@ function MaterialsDisplay({ materials, isOpen, subjectName }) {
   };
 
   const categories = {
-    predavanja: materials.filter(m => m.category === 'predavanja'),
-    vjezbe: materials.filter(m => m.category === 'vjezbe'),
-    rokovi: materials.filter(m => m.category === 'rokovi'),
-    ostalo: materials.filter(m => m.category === 'ostalo')
+    predavanja: materials.filter(m => m.category === 'Predavanja'),
+    vjezbe: materials.filter(m => m.category === 'Vježbe'),
+    rokovi: materials.filter(m => m.category === 'Rokovi'),
+    ostalo: materials.filter(m => m.category === 'Ostalo')
   };
 
   return (
     <div style={styles.container}>
-      <h2 style={styles.title}>{subjectName || 'Odaberi predmet'}</h2>
+      <div style={styles.headerWrapper}>
+        <button style={styles.backButton} onClick={handleBackButton}>← Nazad na predmete</button>
+        <h2 style={styles.title}>{subjectName || 'Odaberi predmet'}</h2>
+      </div>
       {Object.keys(categories).map(cat => (
         <div key={cat} style={styles.section}>
           <div style={styles.sectionHeader} onClick={() => toggleSection(cat)}>
@@ -77,18 +84,38 @@ const styles = {
     boxSizing: 'border-box',
     background: "linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e22ce 100%)"
   },
-  title: {
-    fontSize: '30px',
-    fontWeight: '700',
-    marginLeft: '20px',
-    marginBottom: '25px',
+  headerWrapper: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '20px',
+    marginBottom: '25px'
+  },
+  backButton: {
+    padding: '8px 12px',
+    fontSize: '13px',
+    fontWeight: '500',
     color: '#fff',
-    wordBreak: 'break-word'
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    border: '2px solid #fff',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    transition: 'all 0.3s',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    minWidth: '50px',
+    height: '45px'
+  },
+  title: {
+    fontSize: '35px',
+    fontWeight: '900',
+    color: '#fff',
+    wordBreak: 'break-word',
+    margin: 0
   },
   section: {
     width: '95%',
     maxWidth: '100vw',
-    //padding: '10px 15px',
     marginBottom: '25px',
     marginLeft: '20px',
     backgroundColor: '#d4f6daff',

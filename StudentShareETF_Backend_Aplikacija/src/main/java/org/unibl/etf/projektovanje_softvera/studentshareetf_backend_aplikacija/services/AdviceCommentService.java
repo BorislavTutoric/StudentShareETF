@@ -5,13 +5,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.AdviceCommentRequest;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.AdviceCommentResponse;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.AdviceForModeratorResponse;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.EntityNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.UserNotFoundException;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Advice;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.AdviceComment;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Student;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.User; // Dodano
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.*;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories.AdviceCommentRepository;
+
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -24,8 +24,10 @@ public class AdviceCommentService {
     private final AdviceCommentRepository adviceCommentRepository;
     private final StudentService studentService;
     private final UserService userService;
+    private final ModeratorAuditService moderatorAuditService;
+    private final NotificationsService notificationsService;
 
-    private Student getStudentByUsername(String username) throws UserNotFoundException, EntityNotFoundException {
+    private Student getStudentByUsername(String username) throws UserNotFoundException {
         User user = userService.getUserByUsername(username);
         return studentService.getStudentByUser(user);
     }
@@ -127,5 +129,50 @@ public class AdviceCommentService {
         adviceCommentRepository.deleteByAdvice(advice);
     }
 
+    @Transactional(readOnly = true)
+    public List<AdviceForModeratorResponse> getPendingAdvicesForModerator() {
 
+        List<AdviceComment> pendingAdviceComments = adviceCommentRepository.findByReportedTrue();
+
+        return pendingAdviceComments.stream().map(advice -> {
+            AdviceForModeratorResponse response = new AdviceForModeratorResponse();
+            response.setAdviceId(advice.getId());
+            response.setStudentId(advice.getStudent().getUserId());
+            response.setContent(advice.getContent());
+            response.setDate(advice.getDateTime().toString());
+            String name = advice.getStudent().getUser().getName() + " " + advice.getStudent().getUser().getSurname() + " (" + advice.getStudent().getUser().getUsername() + ")";
+            response.setStudentName(name);
+            Subject subject = advice.getAdvice().getSubject();
+            response.setSubject(subject.getName());
+            return response;
+        }).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void reviewAdvice(Integer adviceId, boolean approved, String username) throws EntityNotFoundException {
+
+        User moderator = userService.getUserByUsername(username);
+
+        AdviceComment adviceComment = adviceCommentRepository.findById(adviceId)
+                .orElseThrow(() -> new EntityNotFoundException("Post ne postoji"));
+
+        if(approved) {
+            adviceComment.setReported(false);
+            adviceCommentRepository.save(adviceComment);
+
+            String description = "Moderator: " + moderator.getUsername() + " je odbio zahtjev za uklanjanje komentara na post \"" + adviceComment.getContent() + "\".";
+            moderatorAuditService.logAction(moderator,description);
+        }
+        else
+        {
+            adviceCommentRepository.delete(adviceComment);
+
+            String description = "Moderator: " + moderator.getUsername() + " je obrisao komentar na post korisnika: " + adviceComment.getStudent().getUser().getUsername() + " čiji je sadržaj \"" + adviceComment.getContent() + "\".";
+            moderatorAuditService.logAction(moderator,description);
+
+            String title = "Obavještenje o uklanjanju komentara na savjet";
+            String message = "Vaš komentar na savjet \"" +  adviceComment.getContent() + "\" je uklonjen.";
+            notificationsService.createNotification(title, message,adviceComment.getStudent(), LocalDateTime.now(),LocalDateTime.now());
+        }
+    }
 }

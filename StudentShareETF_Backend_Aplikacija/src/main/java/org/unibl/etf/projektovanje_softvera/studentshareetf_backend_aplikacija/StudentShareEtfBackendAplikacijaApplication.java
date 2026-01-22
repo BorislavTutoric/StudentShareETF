@@ -2,7 +2,7 @@ package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.ProfileService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @SpringBootApplication
 public class StudentShareEtfBackendAplikacijaApplication {

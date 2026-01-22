@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { getAllEvents } from "../services/eventService"
 import EventCard from "./EventCard";
 import EventModal from "./EventModal";
+import { getAllEvents } from "../services/eventService"
 
-export default function EventsDisplay() {
+function EventsDisplay() {
   const [events, setEvents] = useState([]);
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -141,3 +141,5 @@ const styles = {
     fontWeight: '600',
   },
 };
+
+export default EventsDisplay;

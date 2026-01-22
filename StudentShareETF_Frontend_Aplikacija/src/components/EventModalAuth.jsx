@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { X, Trash2, Flag } from 'lucide-react';
+import Toast from './Toast';
+import ConfirmationModal from './ConfirmationModal';
 import { getEventComments, getEventReviews, addEventComment, addEventReview, deleteEventReview,
   reportEventComment,deleteEventComment } from '../services/eventService';
-import Toast from './Toast';
 
 function EventModalAuth({ event, onClose }) {
   const [allComments, setAllComments] = useState([]);
@@ -17,6 +18,9 @@ function EventModalAuth({ event, onClose }) {
   const [submittingReview, setSubmittingReview] = useState(false);
   const [averageRating, setAverageRating] = useState(0);
   const [toast, setToast] = useState(null);
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+  const [onConfirm, setOnConfirm] = useState(null);
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -61,10 +65,14 @@ function EventModalAuth({ event, onClose }) {
     }
   }, [otherReviews, myReview]);
 
-  const showToast = (message, type = 'success', duration = 10000) => {
+  const showToast = (message, type = 'success', duration = 3000) => {
     setToast({ message, type });
     setTimeout(() => setToast(null), duration);
   };
+
+  const handleCloseConfirmModal = () => {
+      setConfirmModalOpen(false);
+  }
 
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) onClose();
@@ -74,7 +82,7 @@ function EventModalAuth({ event, onClose }) {
     try {
       await deleteEventComment(commentId);
       setAllComments(prev => prev.filter(c => c.id !== commentId));
-      showToast('Uspješno ste obrisali komentar!', 'success');
+      showToast('Uspješno ste obrisali vaš komentar!', 'success');
     } catch (err) {
       console.error(err);
       showToast('Greška pri brisanju komentara!','error');
@@ -90,7 +98,6 @@ function EventModalAuth({ event, onClose }) {
       showToast("Greška pri prijavljivanju komentara!",'error');
     }
   };
-
 
   const handleAddComment = async () => {
     if (!newComment.trim()) return;
@@ -116,10 +123,9 @@ function EventModalAuth({ event, onClose }) {
         ...savedReview,
         isMyRating: true,
       };
-      
       setAllReviews(prev => [...prev, newReview]);
       setMyReview(newReview);
-      showToast(`Uspješno ste dodali recenziju sa ${rating} zvjezdica!`,'success');
+      showToast(`Ocjenili ste događaj: ${event.naziv} sa ${rating} ${rating === 1 ? "zvjezdicom!" : "zvjezdica!"}`,'success');
     } catch (err) {
       console.error(err);
       showToast('Greška pri dodavanju recenzije','error');
@@ -128,19 +134,61 @@ function EventModalAuth({ event, onClose }) {
     }
   };
 
-
   const handleDeleteReview = async () => {
     try {
       await deleteEventReview(event.dogadjajId);
-      
       setMyReview(null);
       setAllReviews(otherReviews);
-      
-      showToast('Obrisali ste vašu recenziju!','success');
+      showToast(`Obrisali ste vašu recenziju za događaj: ${event.naziv}!`,'success');
     } catch (err) {
       console.error(err);
       showToast('Greška pri brisanju recenzije','error');
     }
+  };
+
+  const renderAverageStars = (rating) => {
+    const ratingValue = parseFloat(rating);
+    const fullStars = Math.floor(ratingValue);
+    const decimal = ratingValue - fullStars;
+    const stars = [];
+  
+    for (let i = 0; i < fullStars; i++) {
+      stars.push(<span key={`full-${i}`}>★</span>);
+    }
+  
+    if (decimal > 0) {
+      const fillPercentage = Math.round(decimal * 100);
+      stars.push(
+        <span 
+          key="partial" 
+          style={{ 
+            position: 'relative', 
+            display: 'inline-block',
+          }}
+        >
+          <span style={{ color: '#d1d5db' }}>★</span>
+          <span 
+            style={{ 
+              position: 'absolute', 
+              left: 0, 
+              top: 0, 
+              color: '#facc15',
+              overflow: 'hidden',
+              width: `${fillPercentage}%`,
+            }}
+          >
+            ★
+          </span>
+        </span>
+      );
+    }
+  
+    const emptyStars = 5 - fullStars - (decimal > 0 ? 1 : 0);
+    for (let i = 0; i < emptyStars; i++) {
+      stars.push(<span key={`empty-${i}`}>☆</span>);
+    }
+  
+    return stars;
   };
 
   if (loading) {
@@ -159,6 +207,12 @@ function EventModalAuth({ event, onClose }) {
   return (
     <div style={styles.modalBackdrop} onClick={handleBackdropClick}>
       {toast && <Toast message={toast.message} type={toast.type} />}
+      <ConfirmationModal 
+        isOpen={confirmModalOpen}
+        onConfirm={onConfirm}
+        message={message}
+        onCancel={handleCloseConfirmModal}
+      />
       <div style={styles.modal}>
         <button style={styles.closeButton} onClick={onClose}>
           <X size={24} color="white" strokeWidth={2} />
@@ -284,7 +338,12 @@ function EventModalAuth({ event, onClose }) {
                             {com.isMyComment ? (
                               <button 
                                 style={styles.deleteButton}
-                                onClick={() => handleDeleteComment(com.id)}
+                                onClick={() => {
+                                    setMessage("obrisati komentar?");
+                                    setOnConfirm(() => () => handleDeleteComment(com.id))
+                                    setConfirmModalOpen(true)
+                                  }
+                                }
                                 onMouseEnter={(e) => e.currentTarget.style.color = '#ef4444'}
                                 onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(239, 68, 68, 0.7)'}
                                 title="Obriši komentar"
@@ -294,7 +353,12 @@ function EventModalAuth({ event, onClose }) {
                             ) : (
                               <button 
                                 style={styles.reportButton}
-                                onClick={() => handleReportComment(com.id)}
+                                onClick={() => {
+                                    setMessage(`prijaviti komentar korisnika ${com.name} ${com.surname}?`);
+                                    setOnConfirm(() => () => handleReportComment(com.id))
+                                    setConfirmModalOpen(true)
+                                  }
+                                }
                                 onMouseEnter={(e) => e.currentTarget.style.color = '#f59e0b'}
                                 onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(245, 158, 11, 0.7)'}
                                 title="Prijavi komentar"
@@ -322,22 +386,7 @@ function EventModalAuth({ event, onClose }) {
                       <div style={styles.averageRatingNumber}>{averageRating}</div>
                       <div style={styles.averageRatingStarsWrapper}>
                         <div style={styles.averageRatingStars}>
-                          {[1, 2, 3, 4, 5].map((star) => {
-                            const fill = Math.min(Math.max(averageRating - star + 1, 0), 1);
-                            return (
-                              <span
-                                key={star}
-                                style={{
-                                  background: `linear-gradient(90deg, #facc15 ${fill * 100}%, #d1d5db ${fill * 100}%)`,
-                                  WebkitBackgroundClip: 'text',
-                                  WebkitTextFillColor: 'transparent',
-                                  backgroundClip: 'text',
-                                }}
-                              >
-                                ★
-                              </span>
-                            );
-                          })}
+                          {renderAverageStars(averageRating)}
                         </div>
                         <p style={styles.averageRatingText}>
                           na osnovu {otherReviews.length + (myReview ? 1 : 0)} {otherReviews.length + (myReview ? 1 : 0) < 5 ? 'ocjene' : 'ocjena'}
@@ -371,7 +420,12 @@ function EventModalAuth({ event, onClose }) {
                           </div>
                           <button 
                             style={styles.deleteButton}
-                            onClick={handleDeleteReview}
+                            onClick={() => {
+                                setMessage("obrisati recenziju?");
+                                setOnConfirm(() => () => handleDeleteReview())
+                                setConfirmModalOpen(true)
+                              }
+                            }
                             onMouseEnter={(e) => e.currentTarget.style.color = '#ef4444'}
                             onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(239, 68, 68, 0.7)'}
                           >
@@ -922,6 +976,8 @@ const styles = {
   },
 };
 
+export default EventModalAuth;
+
 const styleSheet = document.createElement("style");
 styleSheet.innerText = `
   @keyframes spin {
@@ -930,5 +986,3 @@ styleSheet.innerText = `
   }
 `;
 document.head.appendChild(styleSheet);
-
-export default EventModalAuth;

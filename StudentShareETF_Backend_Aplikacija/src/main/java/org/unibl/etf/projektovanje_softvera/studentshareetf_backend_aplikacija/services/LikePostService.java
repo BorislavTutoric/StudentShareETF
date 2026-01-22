@@ -10,7 +10,6 @@ import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.m
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.LikePost;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Student;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.User;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.compositeKeys.LikePostId;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories.LikePostRepository;
 
 import java.util.Optional;

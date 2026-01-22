@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import SearchInput from './SearchInput';
 import { getSubjects, getMaterials } from "../services/materialsService";
 
 function SubjectsDisplay({ onOpenMaterials }) {
   const [courses, setCourses] = useState([]);
   const [selectedYear, setSelectedYear] = useState(1);
   const [hoverId, setHoverId] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const fetchSubjects = async (year) => {
     try {
@@ -33,24 +35,39 @@ function SubjectsDisplay({ onOpenMaterials }) {
     fetchSubjects(1);
   }, []);
 
-  const firstSemester = courses.filter(course => course.semester === 1);
-  const secondSemester = courses.filter(course => course.semester === 2);
+  const filteredCourses = courses.filter(course => 
+    course.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const firstSemester = filteredCourses.filter(course => course.semester === 1);
+  const secondSemester = filteredCourses.filter(course => course.semester === 2);
 
   return (
     <div style={styles.container}>
-      <div style={styles.yearButtonsContainer}>
-        {[1,2,3,4].map(year => (
-          <button
-            key={year}
-            onClick={() => handleYearChange(year)}
-            style={{
-              ...styles.yearButton,
-              ...(selectedYear === year ? styles.yearButtonActive : {})
-            }}
-          >
-            {year}. godina
-          </button>
-        ))}
+      <div style={styles.topSection}>
+        <div style={styles.searchSection}>
+          <span style={styles.searchLabel}>Pretraži predmete</span>
+          <SearchInput 
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            clearFunction={() => setSearchTerm('')}
+          />
+        </div>
+        
+        <div style={styles.yearButtonsContainer}>
+          {[1,2,3,4].map(year => (
+            <button
+              key={year}
+              onClick={() => handleYearChange(year)}
+              style={{
+                ...styles.yearButton,
+                ...(selectedYear === year ? styles.yearButtonActive : {})
+              }}
+            >
+              {year}. godina
+            </button>
+          ))}
+        </div>
       </div>
 
       <div style={styles.semesterHeaders}>
@@ -109,12 +126,35 @@ const styles = {
     boxSizing: 'border-box',
     padding: '20px 10px',
   },
+  topSection: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'flex-end',
+    marginBottom: '30px',
+    paddingLeft: '30px',
+    paddingRight: '30px',
+    position: 'relative',
+  },
+  searchSection: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '10px',
+    alignItems: 'flex-start',
+  },
+  searchLabel: {
+    color: '#ffffff',
+    fontSize: '16px',
+    fontWeight: '600',
+    letterSpacing: '0.5px',
+  },
   yearButtonsContainer: {
     display: 'flex',
     justifyContent: 'center',
     gap: '20px',
-    marginBottom: '30px',
-    flexWrap: 'wrap'
+    flexWrap: 'wrap',
+    position: 'absolute',
+    left: '50%',
+    transform: 'translateX(-50%)',
   },
   yearButton: {
     padding: '12px 30px',

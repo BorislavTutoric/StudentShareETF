@@ -7,21 +7,15 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.*;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.EventReview;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.generics.UserHolder;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.User;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.EventCommentService;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.EventService;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.EventReviewService;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.EventCommentResponse;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Event;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.StorageService;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 
 @RestController
@@ -31,7 +25,6 @@ public class EventAuthController {
     private final EventService eventService;
     private final EventReviewService reviewService;
     private final EventCommentService commentService;
-    private final StorageService storageService;
 
     @GetMapping
     public ResponseEntity<?> getAllActiveEvents() {
@@ -99,6 +92,16 @@ public class EventAuthController {
         }
     }
 
+    @GetMapping("/{eventId}/comments/moderator")
+    public ResponseEntity<?> getComments(@PathVariable Integer eventId) {
+        try {
+            List<EventCommentResponse> comments = commentService.getComments(eventId);
+            return ResponseEntity.ok(comments);
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(404).body(Map.of("error", ex.getMessage()));
+        }
+    }
+
     @PostMapping("/{eventId}/comments")
     public ResponseEntity<?> createCommentForEvent(@PathVariable Integer eventId, @RequestBody EventCommentRequest request) {
         try {
@@ -143,6 +146,7 @@ public class EventAuthController {
             return ResponseEntity.badRequest().body(Map.of("error", ex.getMessage()));
         }
     }
+
 }
 
 

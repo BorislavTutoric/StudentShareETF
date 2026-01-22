@@ -18,7 +18,7 @@ public class MaterialComments {
     @Column(name = "DatumVrijeme", nullable = false)
     private LocalDateTime datumVrijeme;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MaterijalId", nullable = false)
     private Material materijal;
 
@@ -26,8 +26,13 @@ public class MaterialComments {
     @JoinColumn(name = "KorisnikId", nullable = false)
     private User korisnik;
 
+
     @Column(name = "Prijavljen", nullable = false)
     private Boolean prijavljen = false;
+
+    @Version
+    @Column(name = "Version")
+    private Long version;
 
     public MaterialComments() {}
 
@@ -38,7 +43,7 @@ public class MaterialComments {
         this.korisnik = user;
     }
 
-    public Integer getId() { return id; }
+    public Integer getId() { return this.id; }
     public void setId(Integer id) { this.id = id; }
 
     public String getSadrzaj() { return sadrzaj; }
@@ -55,4 +60,7 @@ public class MaterialComments {
 
     public Boolean getPrijavljen() { return prijavljen; }
     public void setPrijavljen(Boolean prijavljen) { this.prijavljen = prijavljen; }
+
+    public Long getVersion() { return version; }
+    public void setVersion(Long version) { this.version = version; }
 }

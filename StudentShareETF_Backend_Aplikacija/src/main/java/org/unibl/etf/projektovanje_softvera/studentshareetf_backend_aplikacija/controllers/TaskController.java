@@ -1,13 +1,10 @@
 package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.controllers;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.CreateTaskRequest;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.DateTaskRequest;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.ExamResponse;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.ExamScheduleService;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.ExamService;
@@ -22,7 +19,6 @@ import java.util.List;
 public class TaskController {
 
     private final TaskService taskService;
-    private final ExamScheduleService examScheduleService;
     private final ExamService examService;
 
     @GetMapping("/my-tasks")
@@ -60,11 +56,4 @@ public class TaskController {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return examService.getExamsForMajor(username,month,year);
     }
-
-    @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<?> addFaculcyTasks(@RequestParam("file") MultipartFile file)
-    {
-        return examScheduleService.createExamsFromPdf(file);
-    }
-
 }

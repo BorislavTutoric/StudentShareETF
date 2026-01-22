@@ -5,6 +5,7 @@ import SubjectsDisplay from "../components/SubjectsDisplay";
 import MaterialsDisplay from "../components/MaterialsDisplay";
 import Initial from "../components/Initial";
 import EventsDisplay from "../components/EventsDisplay"; 
+import { loginCheck } from "../services/authService";
 
 function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -14,7 +15,31 @@ function Home() {
   const [selectedSubject, setSelectedSubject] = useState("");
   const [materials, setMaterials] = useState([]);
 
-  const handleLoginClick = () => setIsModalOpen(true);
+  const handleLoginClick = async () => {
+    const token = localStorage.getItem("jwtToken");
+    if (!token) {
+      setIsModalOpen(true);
+    }else{
+      try {
+        const response = await loginCheck(); 
+        if(response.role === "STUDENT"){
+          window.location.href = "/student";
+        }else if(response.role === "ADMIN"){
+          window.location.href = "/admin";
+        }else if(response.role = "MODERATOR_ZA_DOGAĐAJE"){
+          window.location.href = "/moderator/dogadjaji"
+        }else if(response.role = "MODERATOR_ZA_MATERIJALE"){
+          window.location.href = "/moderator/materijali"
+        }
+      } catch {
+        localStorage.removeItem("jwtToken");
+        localStorage.removeItem("name");
+        localStorage.removeItem("username");
+        setIsModalOpen(true);
+      }
+    }
+  }
+
   const handleClose = () => setIsModalOpen(false);
   const handleLoginSuccess = (user) => setUsername(user);
 
@@ -34,6 +59,7 @@ function Home() {
       localStorage.removeItem("showLoginModal");
     }
   }, []);
+
 
   return (
     <div style={{ width: "100vw", minHeight: "100vh", overflowX: "hidden" }}>
@@ -55,6 +81,7 @@ function Home() {
             materials={materials}
             isOpen={true}
             subjectName={selectedSubject}
+            back={handleSubjectsClick}
           />
         )}
 

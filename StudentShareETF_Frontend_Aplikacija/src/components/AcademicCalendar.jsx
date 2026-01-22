@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { ChevronLeft, ChevronRight, Plus, Trash2, GraduationCap } from 'lucide-react';
-import { openAcademicCalendar } from '../services/calendarService,';
-import { addTaskApi, deleteTask, getMyMonthTasksApi } from '../services/taskService';
 import Toast from './Toast';
 import FlipPicker from './FlipPicker';
+import ConfirmationModal from './ConfirmationModal';
+import { openAcademicCalendar } from '../services/calendarService,';
+import { addTaskApi, deleteTask } from '../services/taskService';
 
-function AkademskiKalendar({ calendarFile, facultyTasks = [], myTasks = [], handleMonthTasks}) {
+function AcademicCalendar({ calendarFile, facultyTasks = [], myTasks = [], handleMonthTasks}) {
   const currentDate = new Date();
   const currentYear = currentDate.getFullYear();
   const currentMonthIndex = currentDate.getMonth();
@@ -13,14 +14,12 @@ function AkademskiKalendar({ calendarFile, facultyTasks = [], myTasks = [], hand
   const [displayYear, setDisplayYear] = useState(currentYear);
   const [currentMonth, setCurrentMonth] = useState(currentMonthIndex);
   const [selectedDate, setSelectedDate] = useState(null);
-  const [tasks, setTasks] = useState({});
   const [newTask, setNewTask] = useState('');
   const [newTaskDescription, setNewTaskDescription] = useState('');
   const [newTaskHour, setNewTaskHour] = useState(9);
   const [newTaskMinute, setNewTaskMinute] = useState(0);
   const [includeTime, setIncludeTime] = useState(false);
   const [hoveredTaskButton, setHoveredTaskButton] = useState(false);
-  const [personalizedEvents, setPersonalizedEvents] = useState({});
   const [showFacultyEvents, setShowFacultyEvents] = useState(false);
   const [showTaskForm, setShowTaskForm] = useState(false);
   const [toast, setToast] = useState(null);
@@ -31,15 +30,22 @@ function AkademskiKalendar({ calendarFile, facultyTasks = [], myTasks = [], hand
   const [isTaskAdded, setIsTaskAdded] = useState([]);
   const [selectedTask, setSelectedTask] = useState(null);
   const [showTaskDetails, setShowTaskDetails] = useState(false);
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+  const [onConfirm, setOnConfirm] = useState(null);
+  const [message, setMessage] = useState("");
 
   const monthNames = ['Januar', 'Februar', 'Mart', 'April', 'Maj', 'Jun', 'Jul', 'August', 'Septembar', 'Oktobar', 'Novembar', 'Decembar'];
   const months = monthNames.map((name, index) => ({ name, year: displayYear }));
   const daysOfWeek = ['Ponedeljak', 'Utorak', 'Srijeda', 'Četvrtak', 'Petak', 'Subota', 'Nedjelja'];
 
-  const showToast = (message, type = 'success', duration = 5000) => {
+  const showToast = (message, type = 'success', duration = 3000) => {
     setToast({ message, type });
     setTimeout(() => setToast(null), duration);
   };
+
+  const handleCloseConfirmModal = () => {
+      setConfirmModalOpen(false);
+  }
 
   const scrollToModal = () => {
     setTimeout(() => {
@@ -78,8 +84,6 @@ function AkademskiKalendar({ calendarFile, facultyTasks = [], myTasks = [], hand
     return days;
   };
 
-  const getTaskKey = () => `${currentMonth}-${selectedDate}`;
-
   const handlePrevMonth = () => { 
     let month = currentMonth;
     let year = displayYear;
@@ -115,14 +119,8 @@ function AkademskiKalendar({ calendarFile, facultyTasks = [], myTasks = [], hand
 
   const handleDateClick = (day) => {
     if (day) {
-      const year = months[currentMonth].year;
-      const month = currentMonth + 1; 
-      const dayString = day;
-
       setSelectedDate(day)
-      
       handleFacultyEvents(day);
-
       getMyDayTasks(day);
     }
   };
@@ -156,7 +154,7 @@ function AkademskiKalendar({ calendarFile, facultyTasks = [], myTasks = [], hand
   const addTask = async () => {
     if (newTask.trim() && selectedDate) {
       let timeString = '';
-      
+
       if (includeTime) {
         timeString = `${String(newTaskHour).padStart(2, '0')}:${String(newTaskMinute).padStart(2, '0')}`;
       }
@@ -226,8 +224,6 @@ function AkademskiKalendar({ calendarFile, facultyTasks = [], myTasks = [], hand
   };
 
   const isFacultyTaskAdded = (title) => {
-    //console.log(title);
-    //console.log("PROMJENA → myTasksOnDate:", myTasksOnDate);
     return myTasksOnDate.some(task => { 
       return task.title ===`Ispit: ${title}` && task.faculcy;
     });
@@ -283,7 +279,6 @@ function AkademskiKalendar({ calendarFile, facultyTasks = [], myTasks = [], hand
       }));
       try{
         const response = await deleteTask(taskId);
-        //showToast(response, "success");
       }catch(err){
         console.error(err);
         showToast(`${err}`, 'error');
@@ -318,6 +313,12 @@ function AkademskiKalendar({ calendarFile, facultyTasks = [], myTasks = [], hand
   return (
     <div style={styles.container}>
       {toast && <Toast message={toast.message} type={toast.type} />}
+      <ConfirmationModal 
+        isOpen={confirmModalOpen}
+        onConfirm={onConfirm}
+        message={message}
+        onCancel={handleCloseConfirmModal}
+      />
 
       <div style={styles.header}>
         <div style={styles.headerLeft}>
@@ -332,7 +333,6 @@ function AkademskiKalendar({ calendarFile, facultyTasks = [], myTasks = [], hand
       </div>
 
       <div style={styles.mainContent}>
-        {/* KALENDAR */}
         <div style={styles.calendarContainer}>
           <div style={styles.monthHeader}>
             <button style={styles.navButton} onClick={handlePrevMonth}>
@@ -396,7 +396,6 @@ function AkademskiKalendar({ calendarFile, facultyTasks = [], myTasks = [], hand
           </div>
         </div>
 
-        {/* OBAVEZE */}
         <div style={styles.tasksContainer}>
           <h3 style={styles.tasksTitle}>Planiraj Sopstvene Obaveze</h3>
           
@@ -409,7 +408,6 @@ function AkademskiKalendar({ calendarFile, facultyTasks = [], myTasks = [], hand
                 </span>
               </div>
 
-              {/* DUGME ZA DODAJ OBAVEZU */}
               <button
                 style={{
                   ...styles.addObavezuBtn,
@@ -421,7 +419,6 @@ function AkademskiKalendar({ calendarFile, facultyTasks = [], myTasks = [], hand
                 <span>Dodaj Obavezu</span>
               </button>
 
-              {/* FORMA ZA DODAVANJE OBAVEZE */}
               {showTaskForm && (
                 <div style={styles.taskFormContainer}>
                   <div style={styles.formGroup}>
@@ -446,7 +443,6 @@ function AkademskiKalendar({ calendarFile, facultyTasks = [], myTasks = [], hand
                     />
                   </div>
 
-                  {/* CHECKBOX ZA VRIJEME */}
                   <div style={styles.timeCheckboxGroup}>
                     <input
                       type="checkbox"
@@ -460,7 +456,6 @@ function AkademskiKalendar({ calendarFile, facultyTasks = [], myTasks = [], hand
                     </label>
                   </div>
 
-                  {/* VRIJEME - VIDLJIVO SAMO AKO JE CHECKED */}
                   {includeTime && (
                     <div style={styles.formGroup}>
                       <label style={styles.formLabel}>Vrijeme</label>
@@ -505,7 +500,6 @@ function AkademskiKalendar({ calendarFile, facultyTasks = [], myTasks = [], hand
                 </div>
               )}
 
-              {/* DUGME ZA FAKULTETSKE OBAVEZE */}
               {(hasFacultyEventsOnDate(selectedDate)) && (
                 <button 
                   style={styles.facultyToggleBtn}
@@ -523,7 +517,6 @@ function AkademskiKalendar({ calendarFile, facultyTasks = [], myTasks = [], hand
                 </button>
               )}
 
-              {/* FAKULTETSKI DOGAĐAJI */}
               {showFacultyEvents && facultyTasksOnDate.length > 0 && (
                 <div style={styles.facultySection}>
                   <h4 style={styles.facultyTitle}>📚 Ispiti</h4>
@@ -554,7 +547,6 @@ function AkademskiKalendar({ calendarFile, facultyTasks = [], myTasks = [], hand
                 </div>
               )}
 
-              {/* MOJE OBAVEZE */}
               <h4 style={styles.personalTasksTitle}>✓ Moje Obaveze</h4>
               <div style={styles.tasksList}>
                 {myTasksOnDate.length > 0 ? (
@@ -583,7 +575,9 @@ function AkademskiKalendar({ calendarFile, facultyTasks = [], myTasks = [], hand
                         style={styles.deleteTaskBtn}
                         onClick={(e) => {
                           e.stopPropagation();
-                          removeTask(index, task.id)
+                          setMessage(`obrisati obavezu: ${task.title}?`)
+                          setOnConfirm(() => () => removeTask(index, task.id));
+                          setConfirmModalOpen(true);
                         }}
                       >
                         <Trash2 size={16} />
@@ -1371,4 +1365,4 @@ container: {
   },
 };
 
-export default AkademskiKalendar;
+export default AcademicCalendar;

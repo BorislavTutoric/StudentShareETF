@@ -13,7 +13,7 @@ public class EmailService {
 
     public void sendVerificationEmail(String toEmail, String token) {
         String subject = "Potvrda registracije";
-        String verificationUrl = "http://localhost:5173/verify?token=" + token; // link ka frontend-u
+        String verificationUrl = "http://localhost:5173/verify?token=" + token;
         String message = "Hvala što ste se registrovali. Kliknite na link da potvrdite vaš email:\n" + verificationUrl;
 
         SimpleMailMessage mailMessage = new SimpleMailMessage();

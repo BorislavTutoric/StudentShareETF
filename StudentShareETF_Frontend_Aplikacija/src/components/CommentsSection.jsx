@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Star, X, Trash2,  Flag } from 'lucide-react';
-import { addCommentApi, addReview, deleteCommentApi, deleteReview, getReviews, reportCommentApi } from '../services/materialsService';
+import { X, Trash2,  Flag } from 'lucide-react';
+import ConfirmationModal from './ConfirmationModal';
+import { addCommentApi, addReview, deleteCommentApi, deleteReview, reportCommentApi } from '../services/materialsService';
 
 function CommentsSection({ isOpen, onClose, documentName, materialId, showToast, 
   allReviews, setAllReviews, setNewRating, allMaterialComments, setAllMaterialComments }) {
 
   const [otherReviews, setOtherReviews] = useState([]);
   const [myReview, setMyReview] = useState(null);
-
   const [newComment, setNewComment] = useState("");
   const [hoveredStar, setHoveredStar] = useState(0);
   const [activeTab, setActiveTab] = useState('comments');
@@ -15,7 +15,13 @@ function CommentsSection({ isOpen, onClose, documentName, materialId, showToast,
   const [submittingReview, setSubmittingReview] = useState(false);
   const [averageRating, setAverageRating] = useState(0);
   const [materialComments, setMaterialComments] = useState(allMaterialComments);
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+  const [onConfirm, setOnConfirm] = useState(null);
+  const [message, setMessage] = useState("");
 
+  const handleCloseConfirmModal = () => {
+    setConfirmModalOpen(false);
+  }
 
   useEffect(() => {
     const newAverageRating = otherReviews.length > 0 || myReview
@@ -63,7 +69,7 @@ function CommentsSection({ isOpen, onClose, documentName, materialId, showToast,
     try{
       const response = await deleteCommentApi(commentId);
       setAllMaterialComments(allMaterialComments.filter(comment => comment.commentId !== commentId));
-      showToast('Uspješno ste obrisali komentar!', 'success');
+      showToast('Uspješno ste obrisali vaš komentar!', 'success');
     }catch(err){
       console.error(err);
       showToast('Greška pri brisanju komentara', 'error');
@@ -73,7 +79,7 @@ function CommentsSection({ isOpen, onClose, documentName, materialId, showToast,
   const handleCommentReport = async (commentId) => {
     try{
       const response = await reportCommentApi(commentId);
-      showToast('Prijavili ste komentar!', 'success');
+      showToast('Komentar je uspješno prijavljen!', 'success');
     }catch(err){
       console.error(err);
       showToast('Greška pri brisanju komentara', 'error');
@@ -84,14 +90,13 @@ function CommentsSection({ isOpen, onClose, documentName, materialId, showToast,
     try {
       setSubmittingReview(true);
       const response = await addReview(materialId, rating);
-
       const newReview = {
         ...response,
         isMyReview: response.myReview,
       };
       setAllReviews(prev => [...prev, newReview]);
       setMyReview(newReview);
-      showToast(`Ocjenili ste materijal: ${documentName}`, 'success')
+      showToast(`Ocjenili ste materijal: ${documentName} sa ${rating} ${rating === 1 ? "zvjedicom!" : "zvjezdice!"}`, 'success')
     } catch (err) {
       console.error(err);
       showToast(`Greška: ${err}`, 'error');
@@ -130,11 +135,62 @@ function CommentsSection({ isOpen, onClose, documentName, materialId, showToast,
     }
   };
 
+  const renderAverageStars = (rating) => {
+    const ratingValue = parseFloat(rating);
+    const fullStars = Math.floor(ratingValue);
+    const decimal = ratingValue - fullStars;
+    const stars = [];
+  
+    for (let i = 0; i < fullStars; i++) {
+      stars.push(<span key={`full-${i}`}>★</span>);
+    }
+  
+    if (decimal > 0) {
+      const fillPercentage = Math.round(decimal * 100);
+      stars.push(
+        <span 
+          key="partial" 
+          style={{ 
+            position: 'relative', 
+            display: 'inline-block',
+          }}
+        >
+          <span style={{ color: '#d1d5db' }}>★</span>
+          <span 
+            style={{ 
+              position: 'absolute', 
+              left: 0, 
+              top: 0, 
+              color: '#facc15',
+              overflow: 'hidden',
+              width: `${fillPercentage}%`,
+            }}
+          >
+            ★
+          </span>
+        </span>
+      );
+    }
+  
+    const emptyStars = 5 - fullStars - (decimal > 0 ? 1 : 0);
+    for (let i = 0; i < emptyStars; i++) {
+      stars.push(<span key={`empty-${i}`}>☆</span>);
+    }
+  
+    return stars;
+  };
+
   if (!isOpen) return null;
 
   return (
     <div style={styles.modalOverlay} onClick={onClose}>
       <div style={styles.modalCard} onClick={(e) => e.stopPropagation()}>
+        <ConfirmationModal 
+          isOpen={confirmModalOpen}
+          onConfirm={onConfirm}
+          message={message}
+          onCancel={handleCloseConfirmModal}
+        />
       
         <div style={styles.modalHeader}>
           <h1 style={styles.modalTitle}>💬 {documentName}</h1>
@@ -154,7 +210,6 @@ function CommentsSection({ isOpen, onClose, documentName, materialId, showToast,
           </button>
         </div>
 
-        {/* TABOVI */}
         <div style={styles.tabsContainer}>
           <button
             onClick={() => setActiveTab('comments')}
@@ -180,10 +235,8 @@ function CommentsSection({ isOpen, onClose, documentName, materialId, showToast,
           </button>
         </div>
 
-        {/* KOMENTARI TAB */}
         {activeTab === 'comments' && (
           <div style={styles.tabContent}>
-            {/* Forma za dodavanje komentara - UVIJEK VIDLJIVA */}
             <div style={styles.addCommentSection}>
               <h3 style={styles.sectionTitle}>✍️ Dodaj komentar</h3>
               <textarea
@@ -216,7 +269,6 @@ function CommentsSection({ isOpen, onClose, documentName, materialId, showToast,
               </button>
             </div>
 
-            {/* SVI KOMENTARI - uključujući i moje */}
             <div style={styles.listSection}>
               <h3 style={styles.sectionTitle}>💬 Svi komentari</h3>
               {materialComments.length === 0 ? (
@@ -253,7 +305,12 @@ function CommentsSection({ isOpen, onClose, documentName, materialId, showToast,
                         {comment.myComment ? (
                           <button 
                             style={styles.deleteButton}
-                            onClick={() => handleDeleteComment(comment.commentId)}
+                            onClick={() => {
+                                setMessage("obrisati komentar?");
+                                setOnConfirm(() => () => handleDeleteComment(comment.commentId))
+                                setConfirmModalOpen(true)
+                              }
+                            }
                             onMouseEnter={(e) => e.currentTarget.style.color = '#ef4444'}
                             onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(239, 68, 68, 0.7)'}
                           >
@@ -262,7 +319,12 @@ function CommentsSection({ isOpen, onClose, documentName, materialId, showToast,
                         ) : (
                           <button 
                             style={styles.reportButton}
-                            onClick={() => handleCommentReport(comment.commentId)}
+                            onClick={() => {
+                                setMessage(`prijaviti komentar korisnika ${comment.name} ${comment.surname}?`);
+                                setOnConfirm(() => () => handleCommentReport(comment.commentId))
+                                setConfirmModalOpen(true)
+                              }
+                            }
                             onMouseEnter={(e) => e.currentTarget.style.color = '#f59e0b'}
                             onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(245, 158, 11, 0.7)'}
                             title="Prijavi komentar"
@@ -280,26 +342,21 @@ function CommentsSection({ isOpen, onClose, documentName, materialId, showToast,
           </div>
         )}
 
-        {/* RECENZIJE TAB */}
         {activeTab === 'reviews' && (
           <div style={styles.tabContent}>
-            
-            {/* PROSJEČNA RECENZIJA */}
             {otherReviews.length > 0 && (
               <div style={styles.averageRatingSection}>
                 <h3 style={styles.averageRatingTitle}>Prosječna ocjena</h3>
                 <div style={styles.averageRatingContent}>
                   <div style={styles.averageRatingNumber}>{averageRating}</div>
                   <div style={styles.averageRatingStars}>
-                    {'★'.repeat(Math.round(averageRating))}
-                    {'☆'.repeat(5 - Math.round(averageRating))}
+                     {renderAverageStars(averageRating)}
                   </div>
                   <p style={styles.averageRatingText}>na osnovu {otherReviews.length + (myReview ? 1 : 0)} {otherReviews.length + (myReview ? 1 : 0) < 5 ? 'ocjene' : 'ocjena'}</p>
                 </div>
               </div>
             )}
 
-            {/* Forma za dodavanje recenzije */}
             {!myReview ? (
               <div style={styles.addReviewSection}>
                 <h3 style={styles.sectionTitle}>⭐ Ocijenite materijal</h3>
@@ -334,7 +391,6 @@ function CommentsSection({ isOpen, onClose, documentName, materialId, showToast,
               </div>
             ) : null}
 
-            {/* MOJA RECENZIJA */}
             {myReview && (
               <div style={styles.listSection}>
                 <h3 style={styles.sectionTitle}>Moja ocjena</h3>
@@ -367,7 +423,11 @@ function CommentsSection({ isOpen, onClose, documentName, materialId, showToast,
                       </div>
                       <button 
                         style={styles.deleteButton}
-                        onClick={() => handleDeleteReview(materialId)}
+                        onClick={() => {
+                          setMessage("obrisati recenziju?")
+                          setOnConfirm(() => () => handleDeleteReview(materialId))
+                          setConfirmModalOpen(true);
+                        }}
                         onMouseEnter={(e) => e.currentTarget.style.color = '#ef4444'}
                         onMouseLeave={(e) => e.currentTarget.style.color = 'rgba(239, 68, 68, 0.7)'}
                       >
@@ -381,7 +441,7 @@ function CommentsSection({ isOpen, onClose, documentName, materialId, showToast,
 
             <div style={styles.listSection}>
               <h3 style={styles.sectionTitle}>⭐ Sve recenzije</h3>
-              {otherReviews.length === 0 ? (
+              {otherReviews.length === 0 && myReview === null? (
                 <div style={styles.emptyState}>
                   <p>Još uvijek nema recenzija.</p>
                   <p style={styles.emptyStateSubtext}>Budite prvi koji će ocijeniti!</p>
@@ -591,7 +651,7 @@ const styles = {
     letterSpacing: '4px',
     textShadow: '0 3px 8px rgba(250, 204, 21, 0.25)',
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: 'row',
     alignItems: 'center',
     gap: '8px',
     filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1))',

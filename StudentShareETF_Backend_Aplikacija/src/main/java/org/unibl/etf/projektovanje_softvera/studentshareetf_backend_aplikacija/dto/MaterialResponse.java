@@ -3,7 +3,6 @@ package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Material;
 
 @Data
 @NoArgsConstructor
@@ -13,4 +12,5 @@ public class MaterialResponse {
     private String name;
     private String category;
     private String subjectName;
+    private String description;
 }

@@ -1,14 +1,14 @@
 import { useState } from 'react';
 import { LogOut, Home, Bell, Bookmark, Calendar, Lightbulb, Users } from 'lucide-react';
 
-function StudentMenuBar({ onLogoutClick, onMenuClick, onHomeCLick, onCalendarClick, onNotificationsClick}) {
+function StudentMenuBar({ onLogoutClick, onMenuClick, onHomeCLick, onCalendarClick, onNotificationsClick, unreadNotifications}) {
   const [hoveredItem, setHoveredItem] = useState(null);
   const [activeItem, setActiveItem] = useState('Početna');
 
   const menuItems = [
     { name: 'Profil', icon: '👤' },
     { name: 'Početna', icon: Home },
-    { name: 'Obavještenja', icon: Bell },
+    { name: 'Obavještenja', icon: Bell, badge: unreadNotifications },
     { name: 'Sačuvano', icon: Bookmark },
     { name: 'Akademski kalendar', icon: Calendar },
     { name: 'Savjeti', icon: Lightbulb },
@@ -59,8 +59,14 @@ function StudentMenuBar({ onLogoutClick, onMenuClick, onHomeCLick, onCalendarCli
             } 
           >
             <div style={styles.menuItemContainer}>
-              <span style={styles.menuIcon}>
+              <span style={{
+                ...styles.menuIcon,
+                position: 'relative'
+              }}>
                 {renderIcon(item.icon)}
+                {item.badge !== undefined && item.badge > 0 && (
+                  <span style={styles.notificationDot}></span>
+                )}
               </span>
               <span
                 style={{
@@ -190,6 +196,19 @@ const styles = {
     transition: 'all 0.3s ease',
   },
 
+  notificationDot: {
+    position: 'absolute',
+    top: '-6px',
+    right: '-6px',
+    width: '12px',
+    height: '12px',
+    backgroundColor: '#ef4444',
+    borderRadius: '50%',
+    border: '2px solid #0a1457',
+    boxShadow: '0 0 8px rgba(239, 68, 68, 0.8)',
+    animation: 'pulse 2s infinite',
+  },
+
   menuItem: {
     color: 'white',
     fontWeight: '600',
@@ -236,3 +255,22 @@ const styles = {
 };
 
 export default StudentMenuBar;
+
+const styleSheet = document.createElement("style");
+styleSheet.textContent = `
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 8px rgba(239, 68, 68, 0.8);
+      transform: scale(1);
+    }
+    50% {
+      box-shadow: 0 0 12px rgba(239, 68, 68, 1);
+      transform: scale(1.1);
+    }
+    100% {
+      box-shadow: 0 0 8px rgba(239, 68, 68, 0.8);
+      transform: scale(1);
+    }
+  }
+`;
+document.head.appendChild(styleSheet);

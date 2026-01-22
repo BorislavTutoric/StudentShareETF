@@ -51,7 +51,7 @@ public class SecurityConfig {
                         //.requestMatchers("/api/admin/**").hasRole("ADMIN")
                         //.requestMatchers("/api/student/**").hasRole("STUDENT")
                         //.requestMatchers("/api/moderator/dogadjaji/**").hasRole("MODERATOR_DOGADJAJA")
-                        //.requestMatchers("/api/moderator/materijali/**").hasRole("MODERATOR_MATERIJALA")
+                        //.requestMatchers("/api/moderator/materials/**").hasRole("MODERATOR_MATERIJALA")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

@@ -12,9 +12,9 @@ public class StudentResponse extends UserResponse{
     private String studyProgram;
     private String major;
 
-    public StudentResponse(String name, String surname, String username, String role,
+    public StudentResponse(Integer id, String name, String surname, String username, String role, boolean active,
                            String email, String studyProgram, String major) {
-        super(name, surname, username, role);
+        super(id, name, surname, username, role, active);
         this.email = email;
         this.studyProgram = studyProgram;
         this.major = major;

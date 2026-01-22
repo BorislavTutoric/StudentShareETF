@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { getComments, getMaterial, getReviews, saveMaterialApi } from '../services/materialsService';
 import DocumentUploadForm from './DocumentUploadForm';
 import CommentsSection from './CommentsSection';
 import Toast from './Toast';
+import ConfirmationModal from './ConfirmationModal';
+import { getComments, getMaterial, getReviews, saveMaterialApi } from '../services/materialsService';
 
 function MaterialsStudentDisplay({ materials, isOpen, onClose, subjectName, materialsAvgRatings }) {
   const [expandedSections, setExpandedSections] = useState({
@@ -19,8 +20,16 @@ function MaterialsStudentDisplay({ materials, isOpen, onClose, subjectName, mate
   const [allReviews, setAllReviews] = useState([]);
   const [allMaterialComments, setAllMaterialComments] = useState([]);
   const [avgRatings, setAvgRatings] = useState(materialsAvgRatings);
+  const [infoModal, setInfoModal] = useState({ isOpen: false, description: "" });
+  const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+  const [onConfirm, setOnConfirm] = useState(null);
+  const [message, setMessage] = useState("");
+  
+  const handleCloseConfirmModal = () => {
+    setConfirmModalOpen(false);
+  }
 
-  const showToast = (message, type = 'success', duration = 10000) => {
+  const showToast = (message, type = 'success', duration = 3000) => {
     setToast({ message, type });
     setTimeout(() => setToast(null), duration);
   };
@@ -48,6 +57,14 @@ function MaterialsStudentDisplay({ materials, isOpen, onClose, subjectName, mate
     setIsCommentSectionOpen(true);
   }
   const handleCloseCommentSection = () => setIsCommentSectionOpen(false);
+
+  const handleOpenInfo = (description) => {
+    setInfoModal({ isOpen: true, description });
+  }
+
+  const handleCloseInfo = () => {
+    setInfoModal({ isOpen: false, description: "" });
+  }
 
   if (!isOpen) return null;
 
@@ -84,8 +101,8 @@ function MaterialsStudentDisplay({ materials, isOpen, onClose, subjectName, mate
       const response = await saveMaterialApi(materialId);
       showToast(`Uspješno ste sačuvali materijal: ${name}`, 'success');
     }catch(err){
-      console.error(err);
-      showToast(`Greška: ${err}`, 'error');
+      console.error(err.response.data);
+      showToast(`${err.response.data}`, 'info');
     }
   }
 
@@ -94,39 +111,71 @@ function MaterialsStudentDisplay({ materials, isOpen, onClose, subjectName, mate
     if (!avgRating) return null;
 
     const rating = parseFloat(avgRating);
-    
+    const fullStars = Math.floor(rating);
+    const decimal = rating - fullStars;
+  
     return (
       <div style={styles.ratingContainer}>
         {[1, 2, 3, 4, 5].map((star) => {
-          let starDisplay = '☆';
-          let starColor = '#6b7280';
-          let starShadow = 'none';
-
-          if (star <= Math.floor(rating)) {
-            starDisplay = '★';
-            starColor = '#facc15';
-            starShadow = '0 2px 6px rgba(250, 204, 21, 0.3)';
-          } else if (star === Math.ceil(rating) && rating % 1 !== 0) {
-            starDisplay = '⯨';
-            starColor = '#facc15';
-            starShadow = '0 2px 6px rgba(250, 204, 21, 0.3)';
+          if (star <= fullStars) {
+            return (
+              <button
+                key={star}
+                style={{
+                  ...styles.starButton,
+                  color: '#facc15',
+                  textShadow: '0 2px 6px rgba(250, 204, 21, 0.3)',
+                }}
+                onClick={(e) => e.stopPropagation()}
+                onMouseEnter={(e) => e.target.style.transform = 'scale(1.2)'}
+                onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+              >
+              ★
+              </button>
+            );
           }
-
+        
+          if (star === fullStars + 1 && decimal > 0) {
+            const fillPercentage = Math.round(decimal * 100);
+            return (
+              <span 
+                key={star} 
+                style={{ 
+                  position: 'relative', 
+                  display: 'inline-block',
+                  fontSize: '30px',
+                }}
+              >
+                <span style={{ color: '#6b7280' }}>★</span>
+                <span 
+                  style={{ 
+                    position: 'absolute', 
+                    left: 0, 
+                    top: 0, 
+                    color: '#facc15',
+                    overflow: 'hidden',
+                    width: `${fillPercentage}%`,
+                    textShadow: '0 2px 6px rgba(250, 204, 21, 0.3)',
+                  }}
+                >
+                ★
+                </span>
+              </span>
+            );
+          }
+        
           return (
             <button
               key={star}
               style={{
                 ...styles.starButton,
-                color: starColor,
-                textShadow: starShadow,
+                color: '#6b7280',
               }}
-              onClick={(e) => {
-                e.stopPropagation();
-              }}
+              onClick={(e) => e.stopPropagation()}
               onMouseEnter={(e) => e.target.style.transform = 'scale(1.2)'}
               onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
             >
-              {starDisplay}
+              ★
             </button>
           );
         })}
@@ -158,6 +207,21 @@ function MaterialsStudentDisplay({ materials, isOpen, onClose, subjectName, mate
               </span>
               
               <div style={styles.actionsContainer}>
+                {mat.description && (
+                  <button
+                    style={styles.actionButton}
+                    title="Opis"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleOpenInfo(mat.description);
+                    }}
+                    onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(96, 224, 22, 0.15)'}
+                    onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                  >
+                    ℹ️
+                  </button>
+                )}
+
                 <button
                   style={styles.actionButton}
                   title="Komentari"
@@ -189,7 +253,9 @@ function MaterialsStudentDisplay({ materials, isOpen, onClose, subjectName, mate
                   title="Sačuvaj"
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleSaveMaterial(mat.materialId, mat.name);
+                    setMessage(`sačuvati materijal: ${mat.name}`);
+                    setOnConfirm(() => () => handleSaveMaterial(mat.materialId, mat.name));
+                    setConfirmModalOpen(true)
                   }}
                   onMouseEnter={(e) => {
                     e.target.style.backgroundColor = 'rgba(96, 224, 22, 0.15)';
@@ -213,21 +279,47 @@ function MaterialsStudentDisplay({ materials, isOpen, onClose, subjectName, mate
   };
 
   const categories = {
-    predavanja: materials.filter(m => m.category === 'predavanja'),
-    vjezbe: materials.filter(m => m.category === 'vjezbe'),
-    rokovi: materials.filter(m => m.category === 'rokovi'),
-    ostalo: materials.filter(m => m.category === 'ostalo')
+    predavanja: materials.filter(m => m.category === 'Predavanja'),
+    vjezbe: materials.filter(m => m.category === 'Vježbe'),
+    rokovi: materials.filter(m => m.category === 'Rokovi'),
+    ostalo: materials.filter(m => m.category === 'Ostalo')
   };
 
   return (
     <div style={styles.container}>
       {toast && <Toast message={toast.message} type={toast.type} />}
 
+      {infoModal.isOpen && (
+        <div style={styles.infoModalOverlay} onClick={handleCloseInfo}>
+          <div style={styles.infoModalContent} onClick={(e) => e.stopPropagation()}>
+            <div style={styles.infoModalHeader}>
+              <h3 style={styles.infoModalTitle}>Opis materijala</h3>
+              <button 
+                style={styles.infoModalCloseBtn}
+                onClick={handleCloseInfo}
+              >
+                ✕
+              </button>
+            </div>
+            <div style={styles.infoModalBody}>
+              <p style={styles.infoModalText}>{infoModal.description}</p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <ConfirmationModal 
+          isOpen={confirmModalOpen}
+          onConfirm={onConfirm}
+          message={message}
+          onCancel={handleCloseConfirmModal}
+      />
+      
       <DocumentUploadForm 
         isOpen={isUploadFormOpen}
         onClose={handleCloseForm}
         subjectName={subjectName}
-        onUploadSuccess={() => showToast('Zahtjev za upload materijal uspješno poslat!', 'success')}
+        onUploadSuccess={() => showToast('Zahtjev za upload materijala uspješno poslat!', 'success')}
         onUploadError={(err) => showToast(`Greška: ${err}`, 'error')}
       />
 
@@ -544,7 +636,65 @@ const styles = {
     fontStyle: 'italic',
     color: 'rgba(255, 255, 255, 0.5)',
     fontSize: '15px',
-  }
+  },
+  infoModalOverlay: {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 2000,
+  },
+  infoModalContent: {
+    backgroundColor: 'linear-gradient(135deg, #2a3f7e 0%, #1a2d5f 100%)',
+    borderRadius: '16px',
+    border: '2px solid rgba(96, 224, 22, 0.3)',
+    boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)',
+    maxWidth: '600px',
+    width: '90%',
+    maxHeight: '80vh',
+    overflow: 'auto',
+    background: 'linear-gradient(135deg, #2a3f7e 0%, #1a2d5f 100%)',
+  },
+  infoModalHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '24px',
+    borderBottom: '1px solid rgba(96, 224, 22, 0.2)',
+    backgroundColor: 'rgba(96, 224, 22, 0.1)',
+  },
+  infoModalTitle: {
+    fontSize: '20px',
+    fontWeight: '700',
+    color: '#60e016',
+    margin: 0,
+    letterSpacing: '0.5px',
+  },
+  infoModalCloseBtn: {
+    background: 'transparent',
+    border: 'none',
+    fontSize: '24px',
+    cursor: 'pointer',
+    color: '#60e016',
+    fontWeight: 'bold',
+    transition: 'all 0.2s ease',
+  },
+  infoModalBody: {
+    padding: '24px',
+  },
+  infoModalText: {
+    fontSize: '15px',
+    color: 'rgba(255, 255, 255, 0.8)',
+    lineHeight: '1.6',
+    margin: 0,
+    wordWrap: 'break-word',
+    whiteSpace: 'pre-wrap',
+  },
 };
 
 export default MaterialsStudentDisplay;

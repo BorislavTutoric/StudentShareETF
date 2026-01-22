@@ -1,7 +1,6 @@
 package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models;
 
 import jakarta.persistence.*;
-// Ažuriran import
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.compositeKeys.LikePostId;
 
 @Entity
@@ -26,10 +25,8 @@ public class LikePost {
     public LikePost(Advice advice, Student student) {
         this.advice = advice;
         this.student = student;
-        this.id = new LikePostId(advice.getId(), student.getUserId()); // Koristimo userId iz studenta
+        this.id = new LikePostId(advice.getId(), student.getUserId());
     }
-
-    // Getteri i Setteri (ostaju isti)
 
     public LikePostId getId() {
         return id;

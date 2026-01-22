@@ -2,13 +2,15 @@ package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.DeleteExamsRequest;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.ExamResponse;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Exam;
-import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Major;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Student;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.User;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories.ExamRepository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -22,16 +24,8 @@ public class ExamService {
     private final StudentService studentService;
     private final MajorService majorService;
 
-    public Exam addExam(Exam exam) {
-        return examRepository.save(exam);
-    }
-
     public List<Exam> addExams(List<Exam> exams) {
         return examRepository.saveAll(exams);
-    }
-
-    public List<Exam> getAllExams() {
-        return examRepository.findAll();
     }
 
     public List<ExamResponse> getExamsForMajor(String username, Integer month, Integer year) {
@@ -52,5 +46,17 @@ public class ExamService {
                         exam.getRoom()
                 ))
                 .collect(Collectors.toList());
+    }
+
+    public boolean deleteExams(DeleteExamsRequest request) {
+
+        int year = Integer.parseInt(request.getYear());
+        int month = Integer.parseInt(request.getMonth());
+
+        LocalDateTime start = LocalDate.of(year, month, 1).atStartOfDay();
+        LocalDateTime end = start.plusMonths(1);
+
+        int result = examRepository.deleteByMonthAndYear(start, end);
+        return result > 0;
     }
 }

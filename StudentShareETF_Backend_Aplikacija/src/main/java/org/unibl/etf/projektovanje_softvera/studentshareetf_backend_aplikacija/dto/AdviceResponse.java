@@ -10,17 +10,17 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class AdviceResponse {
 
-    private Integer id;
-    private String content;
-    private LocalDateTime dateTime;
-    private boolean reported;
+    protected Integer id;
+    protected String content;
+    protected LocalDateTime dateTime;
+    protected boolean reported;
 
-    private String username;
-    private String name;
-    private String surname;
+    protected String username;
+    protected String name;
+    protected String surname;
 
-    private Integer likesCount;
-    private Integer commentsCount;
-    private boolean likedByMe;
-    private boolean myAdvice;
+    protected Integer likesCount;
+    protected Integer commentsCount;
+    protected boolean likedByMe;
+    protected boolean myAdvice;
 }

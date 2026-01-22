@@ -5,7 +5,7 @@ function WelcomeHeader() {
   const [studentName, setStudentName] = useState('');
 
   useEffect(() => {
-    const name = localStorage.getItem("studentName");
+    const name = localStorage.getItem("name");
     setStudentName(name || 'Studente');
   }, []);
 

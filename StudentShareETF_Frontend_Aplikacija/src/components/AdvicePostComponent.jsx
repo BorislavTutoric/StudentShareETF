@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { ThumbsUp, MessageSquare, AlertTriangle, Send, Trash2 } from 'lucide-react';
-import { CommentItemComponent } from './CommentItemComponent'; 
+import ConfirmationModal from './ConfirmationModal';
+import CommentItemComponent from './CommentItemComponent'; 
 
 const PRIMARY_ACCENT = '#60e016';
 const SECONDARY_ACCENT = '#5c6bc0';
 
-export const AdvicePostComponent = ({ 
+const AdvicePostComponent = ({ 
     advice, 
     isMineStyle, 
     expandedComments, 
@@ -15,13 +16,21 @@ export const AdvicePostComponent = ({
     handleReportAdvice,
     handleDeleteAdvice, 
     handlePostComment,
-    handleReportComment
+    handleReportComment,
+    handleDeleteComment
 }) => {
     
     const [newComment, setNewComment] = useState('');
     const [isCommenting, setIsCommenting] = useState(false);
+    const [confirmModalOpen, setConfirmModalOpen] = useState(false);
+    const [onConfirm, setOnConfirm] = useState(null);
+    const [message, setMessage] = useState("");
+
+    const handleCloseConfirmModal = () => {
+      setConfirmModalOpen(false);
+    }
     
-    const authorName = `${advice.name || 'Anonimni'} ${advice.surname || 'Korisnik'}`;
+    const authorName = `${advice.name} ${advice.surname }`;
     const initials = (advice.name ? advice.name.charAt(0) : '') + (advice.surname ? advice.surname.charAt(0) : '');
     
     const date = new Date(advice.dateTime).toLocaleString('sr-RS', {
@@ -47,6 +56,13 @@ export const AdvicePostComponent = ({
 
     return (
         <div style={{ ...styles.postContainer, ...isMineStyle }}> 
+
+            <ConfirmationModal 
+                isOpen={confirmModalOpen}
+                onConfirm={onConfirm}
+                message={message}
+                onCancel={handleCloseConfirmModal}
+            />
             
             {advice.reported && <span style={styles.reportedBadge}>PRIJAVLJENO</span>}
 
@@ -93,7 +109,12 @@ export const AdvicePostComponent = ({
                 {!advice.reported && (
                     isMine ? (
                         <button 
-                            onClick={() => handleDeleteAdvice(advice.id)}
+                            onClick={() => {
+                                    setMessage("obrisati savjet?");
+                                    setOnConfirm(() => () => handleDeleteAdvice(advice.id))
+                                    setConfirmModalOpen(true)
+                                }
+                            }
                             style={{...styles.actionButton, ...styles.deleteButton}} 
                             title="Obriši savjet"
                         >
@@ -101,7 +122,12 @@ export const AdvicePostComponent = ({
                         </button>
                     ) : (
                         <button 
-                            onClick={handleReportAdvice}
+                            onClick={() => {
+                                    setMessage("obrisati savjet?");
+                                    setOnConfirm(() => () => handleReportAdvice())
+                                    setConfirmModalOpen(true)
+                                }
+                            }
                             style={{...styles.actionButton, ...styles.reportButton}}
                             title="Prijavi ovaj savjet kao neprikladan"
                         >
@@ -119,6 +145,7 @@ export const AdvicePostComponent = ({
                             adviceId={advice.id}
                             comment={comment}
                             handleReportComment={handleReportComment}
+                            handleDeleteComment={handleDeleteComment}
                         />
                     ))}
 
@@ -284,3 +311,5 @@ const styles = {
         justifyContent: 'center',
     }
 };
+
+export default AdvicePostComponent;
