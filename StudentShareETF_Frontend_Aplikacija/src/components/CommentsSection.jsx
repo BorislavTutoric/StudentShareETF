@@ -273,7 +273,7 @@ function CommentsSection({ isOpen, onClose, documentName, materialId, showToast,
               <h3 style={styles.sectionTitle}>💬 Svi komentari</h3>
               {materialComments.length === 0 ? (
                 <div style={styles.emptyState}>
-                  <p>Još uvijek nema komentara.{materialComments.length}</p>
+                  <p>Još uvijek nema komentara.</p>
                   <p style={styles.emptyStateSubtext}>Budite prvi koji će komentarisati!</p>
                 </div>
               ) : (
@@ -474,7 +474,6 @@ function CommentsSection({ isOpen, onClose, documentName, materialId, showToast,
             </div>
           </div>
         )}
-
       </div>
     </div>
   );

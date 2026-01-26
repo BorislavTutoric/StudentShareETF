@@ -164,7 +164,13 @@ function NotificationsPanel({ studentNotifications, setUnreadNotifications }) {
             <div style={styles.modalBody}>
               <p style={styles.modalMessage}>{selectedNotification.message}</p>
               <div style={styles.divider}></div>
-              <p style={styles.modalDescription}>Vrijeme: {selectedNotification.activeFrom}</p>
+              <p style={styles.modalDescription}>{new Date(selectedNotification.activeFrom).toLocaleString('sr-RS', {
+                  year: 'numeric',
+                  month: '2-digit',
+                  day: '2-digit',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}</p>
             </div>
           </div>
         </div>
@@ -183,7 +189,7 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     maxWidth: '100%',
-    height: '100%'
+    minHeight: '100vh',
   },
 
   header: {
