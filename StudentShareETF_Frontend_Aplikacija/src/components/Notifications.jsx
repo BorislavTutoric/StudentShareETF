@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react';
 import { Bell, X, Trash2 } from 'lucide-react';
 import Toast from './Toast';
 import ConfirmationModal from './ConfirmationModal';
-import { deleteNotificationApi, setReadNotification } from '../services/notificationsService';;
+import { deleteNotificationApi, setReadNotification, getNotificationsPageApi } from '../services/notificationsService';
 
-function NotificationsPanel({ studentNotifications, setUnreadNotifications }) {
+const PAGE_SIZE = 10;
+
+function NotificationsPanel({ setUnreadNotifications }) {
   const [hoveredIndex, setHoveredIndex] = useState(null);
   const [selectedNotification, setSelectedNotification] = useState(null);
   const [toast, setToast] = useState(null);
@@ -12,7 +14,13 @@ function NotificationsPanel({ studentNotifications, setUnreadNotifications }) {
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [onConfirm, setOnConfirm] = useState(null);
   const [message, setMessage] = useState("");
-  
+  const [cursor, setCursor] = useState(null);
+  const [hasNext, setHasNext] = useState(false);
+  const [totalElements, setTotalElements] = useState(0);
+  const [unreadTotal, setUnreadTotal] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [loaded, setLoaded] = useState(false);
+
   const handleCloseConfirmModal = () => {
     setConfirmModalOpen(false);
   }
@@ -22,23 +30,55 @@ function NotificationsPanel({ studentNotifications, setUnreadNotifications }) {
     setTimeout(() => setToast(null), duration);
   };
 
-  const unreadCount = () => {
-    const count = notifications.filter(n => !n.read).length;
+  const updateUnreadTotal = (count) => {
+    setUnreadTotal(count);
     setUnreadNotifications(count);
-    return count;
+  };
+
+  const loadNotifications = async (pageCursor) => {
+    setLoading(true);
+    try {
+      const response = await getNotificationsPageApi(PAGE_SIZE, pageCursor);
+      const newItems = response.content;
+      setNotifications(prev => {
+        const base = pageCursor ? prev : [];
+        const existingIds = new Set(base.map(n => n.notificationId));
+        return [...base, ...newItems.filter(n => !existingIds.has(n.notificationId))];
+      });
+      if (newItems.length > 0) {
+        setCursor(newItems[newItems.length - 1]);
+      }
+      setHasNext(response.hasNext);
+      setTotalElements(response.totalElements);
+      updateUnreadTotal(response.unreadCount);
+      setLoaded(true);
+    } catch (err) {
+      console.log(err);
+      showToast("Greška pri učitavanju obavještenja", 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLoadMore = () => {
+    if (loading || !hasNext) return;
+    loadNotifications(cursor);
   };
 
   const handleNotificationClick = async (notification) => {
     setSelectedNotification(notification);
     try{
-        const response = await setReadNotification(notification.notificationId);
+        await setReadNotification(notification.notificationId);
         setNotifications(prevNotifications =>
             prevNotifications.map(n =>
                 n.notificationId === notification.notificationId
-                ? { ...n, read: true } 
-                : n 
+                ? { ...n, read: true }
+                : n
             )
         );
+        if (!notification.read) {
+          updateUnreadTotal(Math.max(unreadTotal - 1, 0));
+        }
     } catch (err){
         console.log(err);
         showToast(`${err}`, 'error');
@@ -49,6 +89,10 @@ function NotificationsPanel({ studentNotifications, setUnreadNotifications }) {
     try{
       const response = await deleteNotificationApi(notification.notificationId);
       setNotifications(prevNotifications => prevNotifications.filter(notificationPrev => notificationPrev.notificationId !== notification.notificationId));
+      setTotalElements(prev => Math.max(prev - 1, 0));
+      if (!notification.read) {
+        updateUnreadTotal(Math.max(unreadTotal - 1, 0));
+      }
       showToast(response, "success");
     } catch (err){
       console.log(err);
@@ -68,15 +112,15 @@ function NotificationsPanel({ studentNotifications, setUnreadNotifications }) {
         return aIsRead ? 1 : -1;
     }
 
-    const aDate = new Date(a.dateTime);
-    const bDate = new Date(b.dateTime);
+    const aDate = new Date(a.activeFrom);
+    const bDate = new Date(b.activeFrom);
 
-    return bDate - aDate; 
+    return bDate - aDate;
   });
 
   useEffect(() => {
-      setNotifications(studentNotifications ?? []);
-  }, [studentNotifications]);
+      loadNotifications(null);
+  }, []);
 
   return (
     <>
@@ -93,11 +137,15 @@ function NotificationsPanel({ studentNotifications, setUnreadNotifications }) {
             <Bell size={24} color="#60e016" />
             <h2 style={styles.title}>Obavještenja</h2>
           </div>
-          <div style={styles.badge}>{unreadCount()}</div>
+          <div style={styles.badge}>{unreadTotal}</div>
         </div>
 
         <div style={styles.notificationsList}>
-        {sortedNotifications.length === 0 ? (
+        {!loaded && loading ? (
+          <div style={styles.emptyState}>
+              <p style={styles.emptyStateText}>Učitavanje...</p>
+          </div>
+        ) : sortedNotifications.length === 0 ? (
           <div style={styles.emptyState}>
               <Bell size={48} color="rgba(96, 224, 22, 0.3)" />
               <p style={styles.emptyStateText}>Nema novih notifikacija</p>
@@ -108,7 +156,7 @@ function NotificationsPanel({ studentNotifications, setUnreadNotifications }) {
             const isHovered = hoveredIndex === index;
             return (
               <div
-                key={notification.id}
+                key={notification.notificationId}
                 style={{
                   ...styles.notificationItem,
                   ...(isHovered ? styles.notificationItemHover : {}),
@@ -145,6 +193,24 @@ function NotificationsPanel({ studentNotifications, setUnreadNotifications }) {
               </div>
             );
           })
+        )}
+        {loaded && sortedNotifications.length > 0 && (
+          <div style={styles.loadMoreRow}>
+            <span style={styles.loadMoreInfo}>
+              Prikazano {sortedNotifications.length} od {totalElements}
+            </span>
+            {hasNext && (
+              <button
+                style={styles.loadMoreButton}
+                disabled={loading}
+                onClick={handleLoadMore}
+                onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(96, 224, 22, 0.25)'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(96, 224, 22, 0.1)'}
+              >
+                {loading ? 'Učitavanje...' : 'Učitaj još'}
+              </button>
+            )}
+          </div>
         )}
         </div>
       </div>
@@ -183,7 +249,8 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     maxWidth: '100%',
-    height: '100%'
+    minHeight: '100%',
+    boxSizing: 'border-box'
   },
 
   header: {
@@ -225,6 +292,31 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     gap: '12px',
+  },
+
+  loadMoreRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '8px 4px',
+    gap: '12px',
+  },
+
+  loadMoreInfo: {
+    color: 'rgba(255, 255, 255, 0.6)',
+    fontSize: '14px',
+  },
+
+  loadMoreButton: {
+    background: 'rgba(96, 224, 22, 0.1)',
+    color: '#60e016',
+    border: '2px solid rgba(96, 224, 22, 0.3)',
+    padding: '8px 18px',
+    borderRadius: '12px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    fontSize: '14px',
+    transition: 'all 0.3s ease',
   },
 
   notificationItem: {

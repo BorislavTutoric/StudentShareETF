@@ -27,6 +27,16 @@ export const getMaterials = async (name) => {
   }
 };
 
+export const getMaterialsPageApi = async (subjectName, category, page, size) => {
+  const response = await api.get("api/materials/paged", { params: { subjectName, category, page, size } });
+  return response.data;
+};
+
+export const getMaterialCategoryCountsApi = async (subjectName) => {
+  const response = await api.get("api/materials/category-counts", { params: { subjectName } });
+  return response.data;
+};
+
 export const getMaterial = async (id) => {
   try {
     const response = await api.get(`all/subject/${id}/url`);

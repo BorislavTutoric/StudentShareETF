@@ -22,6 +22,12 @@ public interface MaterialReviewRepository extends JpaRepository<MaterialReview, 
             "GROUP BY r.materijalId")
     List<AverageReview> findAvgRatingsBySubjectName(@Param("subjectName") String subjectName);
 
+    @Query("SELECT new org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.AverageReview(r.materijalId, AVG(r.ocjena)) " +
+            "FROM MaterialReview r " +
+            "WHERE r.materijalId IN :materialIds " +
+            "GROUP BY r.materijalId")
+    List<AverageReview> findAvgRatingsByMaterialIds(@Param("materialIds") List<Integer> materialIds);
+
     @Query("""
         SELECT m
         FROM MaterialReview m

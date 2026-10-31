@@ -2,6 +2,9 @@ package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.NotificationsPageResponse;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.NotificationsResponse;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.EntityNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.UserNotFoundException;
@@ -31,6 +34,28 @@ public class NotificationsService {
                 notificationsResponses.add(new NotificationsResponse(notification1.getId(), notification1.getTitle(), notification1.getMessage(), notification1.getRead(), notification1.getDateTime(), notification1.getActiveFrom()));
         }
         return  notificationsResponses;
+    }
+
+    private static final int MAX_PAGE_SIZE = 50;
+
+    public NotificationsPageResponse getNotificationsPage(String username, int size, LocalDateTime cursorActiveFrom, Integer cursorId) throws UserNotFoundException {
+        User user = userService.getUserByUsername(username);
+        Student student = studentService.getStudentByUser(user);
+        LocalDateTime now = LocalDateTime.now();
+        PageRequest pageRequest = PageRequest.of(0, Math.min(Math.max(size, 1), MAX_PAGE_SIZE));
+
+        Slice<Notification> slice = (cursorActiveFrom == null || cursorId == null)
+                ? notificationsRepository.findActiveNotificationsFirstPage(student, now, pageRequest)
+                : notificationsRepository.findActiveNotificationsAfterCursor(student, now, cursorActiveFrom, cursorId, pageRequest);
+
+        List<NotificationsResponse> content = slice.getContent()
+                .stream()
+                .map(n -> new NotificationsResponse(n.getId(), n.getTitle(), n.getMessage(), n.getRead(), n.getDateTime(), n.getActiveFrom()))
+                .toList();
+
+        return new NotificationsPageResponse(content, slice.hasNext(),
+                notificationsRepository.countActiveNotifications(student, now),
+                notificationsRepository.countActiveUnreadNotifications(student, now));
     }
 
     public void notificationDelete(Integer id) throws EntityNotFoundException {

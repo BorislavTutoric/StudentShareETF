@@ -121,6 +121,27 @@ public class MaterialAuthController {
         }
     }
 
+    @GetMapping("/paged")
+    public ResponseEntity<?> getMaterialsPage(@RequestParam String subjectName,
+                                              @RequestParam String category,
+                                              @RequestParam(defaultValue = "0") int page,
+                                              @RequestParam(defaultValue = "10") int size){
+        try {
+            return ResponseEntity.ok(materialService.getMaterialsPage(subjectName, category, page, size));
+        } catch (EntityNotFoundException ex){
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        }
+    }
+
+    @GetMapping("/category-counts")
+    public ResponseEntity<?> getMaterialCountsByCategory(@RequestParam String subjectName){
+        try {
+            return ResponseEntity.ok(materialService.getApprovedMaterialCountsByCategory(subjectName));
+        } catch (EntityNotFoundException ex){
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        }
+    }
+
     @GetMapping("/reviews-average")
     public List<AverageReview> getReviewsAverage(@RequestParam String subjectName){
         return materialReviewService.getAverageRatings(subjectName);

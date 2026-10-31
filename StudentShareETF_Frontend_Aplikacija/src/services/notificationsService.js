@@ -9,6 +9,16 @@ export const getNotificationsApi = async () => {
   }
 };
 
+export const getNotificationsPageApi = async (size, cursor) => {
+  const params = { size };
+  if (cursor) {
+    params.beforeActiveFrom = cursor.activeFrom;
+    params.beforeId = cursor.notificationId;
+  }
+  const res = await api.get("api/notifications/paged", { params });
+  return res.data;
+};
+
 export const deleteNotificationApi = async (id) => {
   try {
     const res = await api.delete(`api/notifications/delete/${id}`); 

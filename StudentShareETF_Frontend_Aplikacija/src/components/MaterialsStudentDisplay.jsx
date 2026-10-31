@@ -1,11 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import DocumentUploadForm from './DocumentUploadForm';
 import CommentsSection from './CommentsSection';
 import Toast from './Toast';
 import ConfirmationModal from './ConfirmationModal';
-import { getComments, getMaterial, getReviews, saveMaterialApi } from '../services/materialsService';
+import { getComments, getMaterial, getReviews, saveMaterialApi, getMaterialsPageApi, getMaterialCategoryCountsApi } from '../services/materialsService';
 
-function MaterialsStudentDisplay({ materials, isOpen, onClose, subjectName, materialsAvgRatings }) {
+const PAGE_SIZE = 10;
+
+const CATEGORY_CONFIG = {
+  predavanja: { value: 'Predavanja', label: 'Predavanja' },
+  vjezbe: { value: 'Vježbe', label: 'Vježbe' },
+  rokovi: { value: 'Rokovi', label: 'Rokovi' },
+  ostalo: { value: 'Ostalo', label: 'Ostalo' }
+};
+
+const createEmptySection = () => ({ items: [], page: -1, hasNext: true, totalElements: 0, loading: false, loaded: false });
+
+const createEmptySections = () =>
+  Object.keys(CATEGORY_CONFIG).reduce((acc, cat) => ({ ...acc, [cat]: createEmptySection() }), {});
+
+function MaterialsStudentDisplay({ isOpen, onClose, subjectName }) {
   const [expandedSections, setExpandedSections] = useState({
     predavanja: true,
     vjezbe: true,
@@ -19,20 +33,66 @@ function MaterialsStudentDisplay({ materials, isOpen, onClose, subjectName, mate
   const [currentMaterialId, setCurrentMaterialId] = useState(null);
   const [allReviews, setAllReviews] = useState([]);
   const [allMaterialComments, setAllMaterialComments] = useState([]);
-  const [avgRatings, setAvgRatings] = useState(materialsAvgRatings);
+  const [avgRatings, setAvgRatings] = useState([]);
   const [infoModal, setInfoModal] = useState({ isOpen: false, description: "" });
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [onConfirm, setOnConfirm] = useState(null);
   const [message, setMessage] = useState("");
-  
-  const handleCloseConfirmModal = () => {
-    setConfirmModalOpen(false);
-  }
+  const [sections, setSections] = useState(createEmptySections);
+  const [categoryCounts, setCategoryCounts] = useState({});
 
   const showToast = (message, type = 'success', duration = 3000) => {
     setToast({ message, type });
     setTimeout(() => setToast(null), duration);
   };
+
+  const loadSectionPage = async (cat, page) => {
+    setSections(prev => ({ ...prev, [cat]: { ...prev[cat], loading: true } }));
+    try {
+      const response = await getMaterialsPageApi(subjectName, CATEGORY_CONFIG[cat].value, page, PAGE_SIZE);
+      const newItems = response.content;
+      const newIds = newItems.map(m => m.materialId);
+
+      setAvgRatings(prev => [
+        ...prev.filter(r => !newIds.includes(r.materialId)),
+        ...newItems
+          .filter(m => m.averageRating !== null)
+          .map(m => ({ materialId: m.materialId, averageRating: m.averageRating }))
+      ]);
+
+      setSections(prev => ({
+        ...prev,
+        [cat]: {
+          items: page === 0 ? newItems : [...prev[cat].items, ...newItems],
+          page: response.page,
+          hasNext: response.hasNext,
+          totalElements: response.totalElements,
+          loading: false,
+          loaded: true
+        }
+      }));
+    } catch (err) {
+      console.error(err);
+      setSections(prev => ({ ...prev, [cat]: { ...prev[cat], loading: false } }));
+      showToast("Greška pri učitavanju materijala", 'error');
+    }
+  };
+
+  useEffect(() => {
+    if (!isOpen || !subjectName) return;
+
+    getMaterialCategoryCountsApi(subjectName)
+      .then(setCategoryCounts)
+      .catch(err => console.error(err));
+
+    Object.keys(CATEGORY_CONFIG)
+      .filter(cat => expandedSections[cat])
+      .forEach(cat => loadSectionPage(cat, 0));
+  }, [isOpen, subjectName]);
+
+  const handleCloseConfirmModal = () => {
+    setConfirmModalOpen(false);
+  }
 
   const getMaterialAvgRating = (materialId) => {
     const rating = avgRatings.find(avg => avg.materialId === materialId);
@@ -69,7 +129,45 @@ function MaterialsStudentDisplay({ materials, isOpen, onClose, subjectName, mate
   if (!isOpen) return null;
 
   const toggleSection = (section) => {
+    const willExpand = !expandedSections[section];
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
+    if (willExpand && !sections[section].loaded && !sections[section].loading) {
+      loadSectionPage(section, 0);
+    }
+  };
+
+  const handleLoadMore = (cat) => {
+    const section = sections[cat];
+    if (section.loading || !section.hasNext) return;
+    loadSectionPage(cat, section.page + 1);
+  };
+
+  const getSectionTitle = (cat) => {
+    const count = categoryCounts[CATEGORY_CONFIG[cat].value] ?? sections[cat].totalElements;
+    return `${CATEGORY_CONFIG[cat].label} (${count || 0})`;
+  };
+
+  const renderLoadMore = (cat) => {
+    const section = sections[cat];
+    if (!section.loaded || section.items.length === 0) return null;
+    return (
+      <div style={styles.loadMoreRow}>
+        <span style={styles.loadMoreInfo}>
+          Prikazano {section.items.length} od {section.totalElements}
+        </span>
+        {section.hasNext && (
+          <button
+            style={styles.loadMoreButton}
+            disabled={section.loading}
+            onClick={() => handleLoadMore(cat)}
+            onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(96, 224, 22, 0.25)'}
+            onMouseLeave={(e) => e.target.style.backgroundColor = 'rgba(96, 224, 22, 0.1)'}
+          >
+            {section.loading ? 'Učitavanje...' : 'Učitaj još'}
+          </button>
+        )}
+      </div>
+    );
   };
 
   const handleMaterialClick = async (id) => {
@@ -278,13 +376,6 @@ function MaterialsStudentDisplay({ materials, isOpen, onClose, subjectName, mate
     );
   };
 
-  const categories = {
-    predavanja: materials.filter(m => m.category === 'Predavanja'),
-    vjezbe: materials.filter(m => m.category === 'Vježbe'),
-    rokovi: materials.filter(m => m.category === 'Rokovi'),
-    ostalo: materials.filter(m => m.category === 'Ostalo')
-  };
-
   return (
     <div style={styles.container}>
       {toast && <Toast message={toast.message} type={toast.type} />}
@@ -378,7 +469,7 @@ function MaterialsStudentDisplay({ materials, isOpen, onClose, subjectName, mate
         </button>
       </div>
 
-      {Object.keys(categories).map(cat => (
+      {Object.keys(CATEGORY_CONFIG).map(cat => (
         <div key={cat} style={styles.section}>
           <div 
             style={styles.sectionHeader} 
@@ -391,7 +482,7 @@ function MaterialsStudentDisplay({ materials, isOpen, onClose, subjectName, mate
             }}
           >
             <h3 style={styles.sectionTitle}>
-              {cat.charAt(0).toUpperCase() + cat.slice(1)}
+              {getSectionTitle(cat)}
             </h3>
             <button 
               style={styles.toggleButton}
@@ -409,7 +500,10 @@ function MaterialsStudentDisplay({ materials, isOpen, onClose, subjectName, mate
           </div>
           {expandedSections[cat] && (
             <div style={styles.contentWrapper}>
-              {renderMaterialsList(categories[cat])}
+              {!sections[cat].loaded && sections[cat].loading
+                ? <p style={styles.emptyMessage}>Učitavanje...</p>
+                : renderMaterialsList(sections[cat].items)}
+              {renderLoadMore(cat)}
             </div>
           )}
         </div>
@@ -636,6 +730,28 @@ const styles = {
     fontStyle: 'italic',
     color: 'rgba(255, 255, 255, 0.5)',
     fontSize: '15px',
+  },
+  loadMoreRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '12px 24px 16px',
+    gap: '12px',
+  },
+  loadMoreInfo: {
+    color: 'rgba(255, 255, 255, 0.6)',
+    fontSize: '14px',
+  },
+  loadMoreButton: {
+    backgroundColor: 'rgba(96, 224, 22, 0.1)',
+    color: '#60e016',
+    border: '2px solid rgba(96, 224, 22, 0.3)',
+    padding: '8px 18px',
+    borderRadius: '12px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    fontSize: '14px',
+    transition: 'all 0.3s ease',
   },
   infoModalOverlay: {
     position: 'fixed',

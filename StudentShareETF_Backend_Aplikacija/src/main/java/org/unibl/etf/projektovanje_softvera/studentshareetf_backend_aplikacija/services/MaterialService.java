@@ -4,10 +4,17 @@ import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.AverageReview;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.MaterialListItemResponse;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.MaterialResponse;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.MaterialResponseForModerator;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.PagedResponse;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.*;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories.MaterialRepository;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories.MaterialReviewRepository;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories.SubjectRepository;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.UserNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.EntityNotFoundException;
@@ -15,7 +22,9 @@ import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.e
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -30,6 +39,45 @@ public class MaterialService {
     private final UserService userService;
     private final ModeratorAuditService moderatorAuditService;
     private final NotificationsService notificationsService;
+    private final MaterialReviewRepository materialReviewRepository;
+
+    private static final int MAX_PAGE_SIZE = 50;
+
+    @Transactional(readOnly = true)
+    public PagedResponse<MaterialListItemResponse> getMaterialsPage(String subjectName, String category, int page, int size) throws EntityNotFoundException {
+        Subject subject = subjectService.getSubjectByName(subjectName);
+        int safePage = Math.max(page, 0);
+        int safeSize = Math.min(Math.max(size, 1), MAX_PAGE_SIZE);
+        PageRequest pageRequest = PageRequest.of(safePage, safeSize, Sort.by(Sort.Direction.DESC, "materialId"));
+
+        Page<Material> materialsPage = materialRepository.findBySubjectAndApprovedTrueAndCategory(subject, category, pageRequest);
+
+        List<Integer> ids = materialsPage.getContent().stream().map(Material::getMaterialId).toList();
+        Map<Integer, Double> averages = ids.isEmpty()
+                ? Map.of()
+                : materialReviewRepository.findAvgRatingsByMaterialIds(ids)
+                    .stream()
+                    .collect(Collectors.toMap(AverageReview::getMaterialId, AverageReview::getAverageRating));
+
+        List<MaterialListItemResponse> content = materialsPage.getContent()
+                .stream()
+                .map(m -> new MaterialListItemResponse(m.getMaterialId(), m.getName(), m.getCategory(),
+                        subject.getName(), m.getDescription(), averages.get(m.getMaterialId())))
+                .toList();
+
+        return new PagedResponse<>(content, materialsPage.getNumber(), materialsPage.getSize(),
+                materialsPage.getTotalElements(), materialsPage.getTotalPages(), materialsPage.hasNext());
+    }
+
+    @Transactional(readOnly = true)
+    public Map<String, Long> getApprovedMaterialCountsByCategory(String subjectName) throws EntityNotFoundException {
+        Subject subject = subjectService.getSubjectByName(subjectName);
+        Map<String, Long> counts = new LinkedHashMap<>();
+        for (Object[] row : materialRepository.countApprovedBySubjectGroupByCategory(subject)) {
+            counts.put((String) row[0], (Long) row[1]);
+        }
+        return counts;
+    }
 
     public List<MaterialResponse> getMaterials(String name) {
         Optional<Subject> subject = subjectRepository.findByName(name);
