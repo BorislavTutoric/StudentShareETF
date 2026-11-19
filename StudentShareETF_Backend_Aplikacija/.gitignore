@@ -1,3 +1,7 @@
+# Lokalne lozinke i tajne
+.env
+application-local.properties
+
 HELP.md
 target/
 .mvn/wrapper/maven-wrapper.jar

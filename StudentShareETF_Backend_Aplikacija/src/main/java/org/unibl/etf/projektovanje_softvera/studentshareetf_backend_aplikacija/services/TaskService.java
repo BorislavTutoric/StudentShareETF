@@ -7,6 +7,8 @@ import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.d
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Student;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Task;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.User;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.enums.Modul;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.enums.TipAkcije;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories.TaskRepository;
 
 import java.time.LocalDate;
@@ -23,6 +25,7 @@ public class TaskService {
     private final UserService userService;
     private final StudentService studentService;
     private final NotificationsService notificationsService;
+    private final AuditLogService auditLogService;
 
     public List<TaskResponse> getTasksForDate(String month, String year, String username) {
 
@@ -79,6 +82,10 @@ public class TaskService {
         task.setFakultetska(!"personal".equals(way));
 
         taskRepository.save(task);
+
+        auditLogService.log(user, TipAkcije.KREIRANJE_OBAVEZE, Modul.KALENDAR_OBAVEZE, "OBAVEZA", task.getId(),
+                "Korisnik \"" + user.getUsername() + "\" je kreirao " + (task.isFakultetska() ? "fakultetsku" : "ličnu")
+                        + " obavezu \"" + title + "\" za " + dateTime.toLocalDate() + ".");
 
         LocalDateTime now = LocalDateTime.now();
 
@@ -138,6 +145,9 @@ public class TaskService {
         taskRepository.delete(task);
 
         notificationsService.deleteTaskNotification(taskId, student);
+
+        auditLogService.log(user, TipAkcije.BRISANJE_OBAVEZE, Modul.KALENDAR_OBAVEZE, "OBAVEZA", taskId,
+                "Korisnik \"" + user.getUsername() + "\" je obrisao obavezu \"" + task.getNaslov() + "\".");
     }
 
 

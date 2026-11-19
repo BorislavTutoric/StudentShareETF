@@ -7,6 +7,7 @@ import EventsDisplayModeratorMaterials from "../components/EventsDisplayModerato
 import ModeratorStudentsManagement from "../components/moderators/ModeratorStudentsManagement";
 import ModeratorRequestsManagement from "../components/moderators/materials/ModeratorRequestsManagement";
 import ModeratorProfileDisplay from "../components/moderators/ModeratorProfileDisplay";
+import { logoutApi } from "../services/authService";
 
 function ModeratorMaterials() {
   const [activeTab, setActiveTab] = useState("Početna");
@@ -16,7 +17,8 @@ function ModeratorMaterials() {
   const [activeComponent, setActiveComponent] = useState("subjects");
   const [year, setYear] = useState(1);
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await logoutApi();
     localStorage.clear();
     window.location.href = "/";
   };

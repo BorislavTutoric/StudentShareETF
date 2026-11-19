@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Filter, Search } from 'lucide-react';
 import SearchInput from './SearchInput';
 import FilterComponent from './FilterComponent';
-import { getSubjects, getMaterials, getFilteredSubjects, getAvgRatings } from "../services/materialsService";
+import { getSubjects, getFilteredSubjects } from "../services/materialsService";
 
 function StudentHome({ onOpenMaterials, startYear = 1, subjectsView = "all" }) {
   const [courses, setCourses] = useState([]);
@@ -36,16 +36,8 @@ function StudentHome({ onOpenMaterials, startYear = 1, subjectsView = "all" }) {
     }
   };
 
-  const fetchMaterials = async (name) => {
-    try {
-      const [materialsResponse, avgRatingsResponse] = await Promise.all([
-        getMaterials(name),
-        getAvgRatings(name)
-      ]);
-      onOpenMaterials(name, materialsResponse, avgRatingsResponse, selectedYear, subjects);
-    } catch (err) {
-      console.error(err);
-    }
+  const fetchMaterials = (name) => {
+    onOpenMaterials(name, selectedYear, subjects);
   };
 
   const filterSubjectsFirstSemester = (course) => {

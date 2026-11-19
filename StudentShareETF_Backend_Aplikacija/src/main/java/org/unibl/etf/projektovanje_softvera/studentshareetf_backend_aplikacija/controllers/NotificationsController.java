@@ -1,6 +1,7 @@
 package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.controllers;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
@@ -9,6 +10,7 @@ import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.e
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.UserNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.NotificationsService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -25,6 +27,18 @@ public class NotificationsController {
             List<NotificationsResponse> notificationsResponses = notificationsService.getNotificationsByUsername(username);
             return ResponseEntity.ok(notificationsResponses);
         }catch (UserNotFoundException | EntityNotFoundException ex){
+            return ResponseEntity.badRequest().body("Greška pri učitavanju obavještenja!");
+        }
+    }
+
+    @GetMapping("/paged")
+    public ResponseEntity<?> getNotificationsPage(@RequestParam(defaultValue = "10") int size,
+                                                  @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime beforeActiveFrom,
+                                                  @RequestParam(required = false) Integer beforeId) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        try {
+            return ResponseEntity.ok(notificationsService.getNotificationsPage(username, size, beforeActiveFrom, beforeId));
+        } catch (UserNotFoundException ex){
             return ResponseEntity.badRequest().body("Greška pri učitavanju obavještenja!");
         }
     }

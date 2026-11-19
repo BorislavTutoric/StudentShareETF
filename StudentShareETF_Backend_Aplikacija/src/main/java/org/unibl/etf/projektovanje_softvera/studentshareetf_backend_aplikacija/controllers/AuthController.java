@@ -17,6 +17,9 @@ import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.e
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.UnverifiedException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.UserNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Student;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.User;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.enums.Modul;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.enums.TipAkcije;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories.StudentRepository;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.security.JwtService;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.*;
@@ -38,6 +41,7 @@ public class AuthController {
     private final StudentService studentService;
     private final ChangePasswordService changePasswordService;
     private final UserService userService;
+    private final AuditLogService auditLogService;
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
@@ -57,18 +61,31 @@ public class AuthController {
 
             String name = userService.getNameByUsername(user.getUsername());
 
+            String opisPrijave = "Korisnik \"" + user.getUsername() + "\" se prijavio.";
+            if (user instanceof User korisnik) {
+                auditLogService.log(korisnik, TipAkcije.PRIJAVA, Modul.AUTENTIFIKACIJA,
+                        "KORISNIK", korisnik.getUserId(), opisPrijave);
+            } else {
+                auditLogService.log(user.getUsername(), TipAkcije.PRIJAVA, Modul.AUTENTIFIKACIJA,
+                        "KORISNIK", null, opisPrijave);
+            }
+
             return ResponseEntity.ok(new LoginResponse(token, user.getAuthorities().iterator().next().getAuthority(), user.getUsername(), name));
         }
         catch (BadCredentialsException ex) {
+            auditLogService.logNeuspjesnaPrijava(request.getUsername(), "pogrešno korisničko ime ili lozinka");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Neispravno korisničko ime ili lozinka!"));
         }
         catch (DisabledException ex) {
+            auditLogService.logNeuspjesnaPrijava(request.getUsername(), "nalog je suspendovan");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Vaš nalog je suspendovan!"));
         }
         catch (UnverifiedException ex) {
+            auditLogService.logNeuspjesnaPrijava(request.getUsername(), "email nije verifikovan");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", ex.getMessage()));
         }
         catch (AuthenticationException ex) {
+            auditLogService.logNeuspjesnaPrijava(request.getUsername(), "autentifikacija nije uspjela");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Autentifikacija nije uspjela"));
         }
     }
@@ -120,7 +137,8 @@ public class AuthController {
             Student student = studentRepository.findByVerificationToken(token)
                     .orElseThrow(() -> new RuntimeException("Nevažeći token"));
 
-            if (student.getPendingEmail() != null) {
+            boolean promjenaEmaila = student.getPendingEmail() != null;
+            if (promjenaEmaila) {
                 student.setEmail(student.getPendingEmail());
                 student.setPendingEmail(null);
             }
@@ -131,6 +149,12 @@ public class AuthController {
 
             student.setVerificationToken(null);
             studentRepository.save(student);
+
+            User verifikovani = student.getUser();
+            auditLogService.log(verifikovani, TipAkcije.VERIFIKACIJA_EMAILA, Modul.AUTENTIFIKACIJA, "KORISNIK",
+                    student.getUserId(),
+                    "Korisnik \"" + (verifikovani != null ? verifikovani.getUsername() : "nepoznat") + "\" je potvrdio "
+                            + (promjenaEmaila ? "novu email adresu." : "email adresu nakon registracije."));
 
             return ResponseEntity.ok(Map.of("message", "Email potvrđen."));
         }

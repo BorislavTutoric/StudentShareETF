@@ -1,5 +1,8 @@
 package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services;
 
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.enums.Modul;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.enums.TipAkcije;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +25,7 @@ public class LikePostService {
     private final StudentService studentService;
     private final AdviceService adviceService;
     private final UserService userService;
+    private final AuditLogService auditLogService;
 
     private Student getStudentByUsername(String username) throws UserNotFoundException, EntityNotFoundException {
 
@@ -66,6 +70,13 @@ public class LikePostService {
         }
 
         long totalLikes = likePostRepository.countByAdvice(advice);
+
+        User korisnik = student.getUser();
+        auditLogService.log(korisnik,
+                currentlyLiked ? TipAkcije.SVIDJANJE : TipAkcije.UKLANJANJE_SVIDJANJA,
+                Modul.SAVJETI, "SAVJET", advice.getId(),
+                "Korisnik \"" + korisnik.getUsername() + "\" je " + (currentlyLiked ? "označio da mu se sviđa" : "uklonio sviđanje sa")
+                        + " savjet: " + AuditLogService.isjecak(advice.getContent()));
 
         return new LikePostResponse(totalLikes, currentlyLiked);
     }

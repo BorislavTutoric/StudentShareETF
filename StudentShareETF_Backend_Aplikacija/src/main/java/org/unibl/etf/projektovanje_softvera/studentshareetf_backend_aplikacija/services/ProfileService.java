@@ -1,5 +1,8 @@
 package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services;
 
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.enums.Modul;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.enums.TipAkcije;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +31,7 @@ public class ProfileService {
     private final EmailService emailService;
     private final PasswordEncoder passwordEncoder;
     private final UserService userService;
+    private final AuditLogService auditLogService;
 
     public UserHolder<?> getProfile(String username) throws UserNotFoundException{
         Optional<User> u = userRepository.findByUsername(username);
@@ -63,6 +67,7 @@ public class ProfileService {
         Student student = studentRepository.findById(user.getUserId())
                 .orElseThrow(() -> new RuntimeException("Student not found"));
 
+        String staroIme = user.getUsername();
         user.setUsername(request.getUsername());
 
         student.setStudyProgram(request.getStudyProgram());
@@ -70,6 +75,11 @@ public class ProfileService {
 
         userRepository.save(user);
         studentRepository.save(student);
+
+        auditLogService.log(user, TipAkcije.IZMJENA_PROFILA, Modul.PROFIL, "KORISNIK", user.getUserId(),
+                "Korisnik \"" + staroIme + "\" je izmijenio profil"
+                        + (staroIme.equals(user.getUsername()) ? "" : " (novo korisničko ime: \"" + user.getUsername() + "\")")
+                        + "; studijski program: " + request.getStudyProgram() + ", smjer: " + request.getMajor() + ".");
 
         return user;
     }
@@ -93,6 +103,10 @@ public class ProfileService {
         studentRepository.save(student);
         emailService.sendChangeEmail(newEmail, token);
 
+        // Adresa se namjerno ne upisuje u log; promjena važi tek nakon potvrde (VERIFIKACIJA_EMAILA).
+        auditLogService.log(user, TipAkcije.IZMJENA_PROFILA, Modul.PROFIL, "KORISNIK", user.getUserId(),
+                "Korisnik \"" + user.getUsername() + "\" je zatražio promjenu email adrese (čeka potvrdu na novoj adresi).");
+
         return token;
     }
 
@@ -104,6 +118,8 @@ public class ProfileService {
         if(passwordEncoder.matches(oldPassword, user.getPassword())){
             user.setPassword(passwordEncoder.encode(newPassword));
             userRepository.save(user);
+            auditLogService.log(user, TipAkcije.PROMJENA_LOZINKE, Modul.PROFIL, "KORISNIK", user.getUserId(),
+                    "Korisnik \"" + user.getUsername() + "\" je promijenio lozinku na profilu.");
         }else{
             throw new PasswordNotFoundException();
         }
@@ -112,6 +128,7 @@ public class ProfileService {
     @Transactional
     public User updatePersonalInfo(String username, UpdateProfileInfoRequest request) throws UserNotFoundException {
         User user = userService.getUserByUsername(username);
+        String staroIme = user.getUsername();
         if(!(user.getUsername().equals(request.getUsername()))){
             user.setUsername(request.getUsername());
         }
@@ -122,6 +139,9 @@ public class ProfileService {
             user.setSurname(request.getLastName());
         }
         userRepository.save(user);
+        auditLogService.log(user, TipAkcije.IZMJENA_PROFILA, Modul.PROFIL, "KORISNIK", user.getUserId(),
+                "Korisnik \"" + staroIme + "\" je izmijenio lične podatke"
+                        + (staroIme.equals(user.getUsername()) ? "" : " (novo korisničko ime: \"" + user.getUsername() + "\")") + ".");
         return user;
     }
 }

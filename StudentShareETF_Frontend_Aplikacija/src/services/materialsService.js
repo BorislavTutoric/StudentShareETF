@@ -27,6 +27,28 @@ export const getMaterials = async (name) => {
   }
 };
 
+export const getMaterialsPageApi = async (subjectName, category, page, size) => {
+  const response = await api.get("api/materials/paged", { params: { subjectName, category, page, size } });
+  return response.data;
+};
+
+export const getMaterialCategoryCountsApi = async (subjectName) => {
+  const response = await api.get("api/materials/category-counts", { params: { subjectName } });
+  return response.data;
+};
+
+// Link za prijavljenog korisnika; server upisuje akciju u audit log.
+// akcija: "PREGLED" (otvaranje materijala) ili "PREUZIMANJE" (dugme "Preuzmi").
+export const getMaterialUrlApi = async (id, akcija = "PREGLED") => {
+  try {
+    const response = await api.get(`api/materials/${id}/url`, { params: { akcija } });
+    return response.data;
+  } catch (err) {
+    throw err.response?.data?.error || "Greška pri učitavanju";
+  }
+};
+
+// Javni link bez tokena — samo za goste (MaterialsDisplay na početnoj stranici), ne loguje se.
 export const getMaterial = async (id) => {
   try {
     const response = await api.get(`all/subject/${id}/url`);

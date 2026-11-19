@@ -11,15 +11,16 @@ import SavedMaterialsDisplay from "../components/SavedMaterialsDisplay";
 import Notifications from "../components/Notifications";
 import AcademicCalendar from "../components/AcademicCalendar";
 import Toast from "../components/Toast";
-import { getNotificationsApi, getNumOfUnreadNotificationsApi } from "../services/notificationsService";
+import { getNumOfUnreadNotificationsApi } from "../services/notificationsService";
 import { getAcademicCalendarApi } from "../services/calendarService,";
 import { getFacultyMonthTasksApi, getMyMonthTasksApi } from "../services/taskService";
+import useActivityTracker from "../services/useActivityTracker";
+import { logoutApi } from "../services/authService";
 
 function StudentPage() {
   const [activeSection, setActiveSection] = useState("Početna");
   const [activeComponent, setActiveComponent] = useState("subjects");
   const [selectedSubject, setSelectedSubject] = useState("");
-  const [materials, setMaterials] = useState([]);
   const [year, setYear] = useState();
   const [subjects, setSubjects] = useState("all");
   const [savedMaterials, setSavedMaterials] = useState([]);
@@ -27,13 +28,15 @@ function StudentPage() {
   const [activeComponentSavedMaterials, setActiveComponentSavedMaterials] = useState("subjects");
   const [yearSM, setYearSM] = useState();
   const [subjectsSM, setSubjectsSM] = useState("all");
-  const [notifications, setNotifications] = useState(null);
+  const [notificationsRefreshKey, setNotificationsRefreshKey] = useState(0);
   const [calendarFile, setCalendarFile] = useState(null);
   const [facultyMonthTasks, setFacultyMonthTasks] = useState(null);
   const [myMonthTasks, setMyMonthTasks] = useState(null);
   const [toast, setToast] = useState(null);
-  const [averageRatings, setAverageRatings] = useState([]);
   const [numOfUnreadNotifications, setNumOfUnreadNotifications] = useState(0)
+
+  useActivityTracker(activeSection);
+
 
   const handleSubjectsClick = () => { 
     setActiveComponent("subjects");
@@ -44,10 +47,8 @@ function StudentPage() {
     setTimeout(() => setToast(null), duration);
   };
   
-  const handleOpenMaterials = (subjectName, materialsData, averages, selectedYear, subs) => {
+  const handleOpenMaterials = (subjectName, selectedYear, subs) => {
     setSelectedSubject(subjectName);
-    setMaterials(materialsData);
-    setAverageRatings(averages);
     setYear(selectedYear);
     setActiveComponent("materials");
     setSubjects(subs);
@@ -61,20 +62,16 @@ function StudentPage() {
     setSubjectsSM(subs);
   }
 
-  const handleNotificationsClick = async () => {
-    try{
-      const response = await getNotificationsApi();
-      setNotifications(response);
-    } catch(err){
-      console.log(err);
-    }
+  const handleNotificationsClick = () => {
+    setNotificationsRefreshKey(prev => prev + 1);
   }
 
-  const handleLogoutClick = () => {
-    window.location.href = "/";
+  const handleLogoutClick = async () => {
+    await logoutApi();
     localStorage.removeItem("jwtToken");
     localStorage.removeItem("username");
     localStorage.removeItem("name");
+    window.location.href = "/";
   };
 
   const handleCloseMaterials = () => {setActiveComponent("subjects")}
@@ -134,18 +131,17 @@ function StudentPage() {
 
             {activeComponent === "materials" && (
               <MaterialsStudentDisplay
-                materials={materials}
+                key={selectedSubject}
                 isOpen={true}
                 onClose={handleCloseMaterials}
                 subjectName={selectedSubject}
-                materialsAvgRatings={averageRatings}
               />
             )}
           </>
         );
 
       case "Obavještenja":
-        return <Notifications studentNotifications={notifications} setUnreadNotifications={setNumOfUnreadNotifications}/>;
+        return <Notifications key={notificationsRefreshKey} setUnreadNotifications={setNumOfUnreadNotifications}/>;
 
       case "Sačuvano":
         return (

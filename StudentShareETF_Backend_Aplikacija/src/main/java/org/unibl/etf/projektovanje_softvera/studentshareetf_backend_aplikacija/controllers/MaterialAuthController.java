@@ -10,6 +10,10 @@ import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.d
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.AlreadySavedException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.EntityNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.UserNotFoundException;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Material;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.enums.Modul;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.enums.TipAkcije;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.AuditLogService;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.MaterialCommentService;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.MaterialReviewService;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.MaterialService;
@@ -17,6 +21,7 @@ import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.s
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/materials")
@@ -27,6 +32,7 @@ public class MaterialAuthController {
     private final MaterialReviewService materialReviewService;
     private final SavedMaterialService savedMaterialService;
     private final MaterialService materialService;
+    private final AuditLogService auditLogService;
 
     @GetMapping("/{materialId}/comments")
     public List<MaterialCommentResponse> getCommentsByMaterialId(@PathVariable Integer materialId){
@@ -118,6 +124,63 @@ public class MaterialAuthController {
             return ResponseEntity.ok().build();
         } catch (IOException | EntityNotFoundException | UserNotFoundException ex) {
             return ResponseEntity.badRequest().body("Greška pri upload-u fajla!");
+        }
+    }
+
+    /**
+     * Link za materijal za prijavljenog korisnika, uz upis u audit log.
+     * GET /api/materials/{id}/url?akcija=PREGLED|PREUZIMANJE  (podrazumijevano PREGLED)
+     *
+     * Gosti (bez tokena) i dalje koriste javnu rutu /all/subject/{id}/url, koja se ne loguje.
+     */
+    @GetMapping("/{materialId}/url")
+    public ResponseEntity<?> getMaterialUrl(@PathVariable Integer materialId,
+                                            @RequestParam(defaultValue = "PREGLED") String akcija) {
+        TipAkcije tip;
+        if ("PREGLED".equalsIgnoreCase(akcija)) {
+            tip = TipAkcije.PREGLED_MATERIJALA;
+        } else if ("PREUZIMANJE".equalsIgnoreCase(akcija)) {
+            tip = TipAkcije.PREUZIMANJE_MATERIJALA;
+        } else {
+            return ResponseEntity.badRequest().body("Nepoznata akcija: dozvoljeno je PREGLED ili PREUZIMANJE.");
+        }
+
+        try {
+            Material material = materialService.getMaterialById(materialId);
+            Optional<String> url = materialService.getMaterialUrl(materialId);
+            if (url.isEmpty()) {
+                return ResponseEntity.notFound().build();
+            }
+
+            String username = SecurityContextHolder.getContext().getAuthentication().getName();
+            String radnja = tip == TipAkcije.PREGLED_MATERIJALA ? "otvorio" : "preuzeo";
+            auditLogService.log(username, tip, Modul.MATERIJALI, "MATERIJAL", material.getMaterialId(),
+                    "Korisnik \"" + username + "\" je " + radnja + " materijal \"" + material.getName() + "\".");
+
+            return ResponseEntity.ok(url.get());
+        } catch (EntityNotFoundException ex) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/paged")
+    public ResponseEntity<?> getMaterialsPage(@RequestParam String subjectName,
+                                              @RequestParam String category,
+                                              @RequestParam(defaultValue = "0") int page,
+                                              @RequestParam(defaultValue = "10") int size){
+        try {
+            return ResponseEntity.ok(materialService.getMaterialsPage(subjectName, category, page, size));
+        } catch (EntityNotFoundException ex){
+            return ResponseEntity.badRequest().body(ex.getMessage());
+        }
+    }
+
+    @GetMapping("/category-counts")
+    public ResponseEntity<?> getMaterialCountsByCategory(@RequestParam String subjectName){
+        try {
+            return ResponseEntity.ok(materialService.getApprovedMaterialCountsByCategory(subjectName));
+        } catch (EntityNotFoundException ex){
+            return ResponseEntity.badRequest().body(ex.getMessage());
         }
     }
 

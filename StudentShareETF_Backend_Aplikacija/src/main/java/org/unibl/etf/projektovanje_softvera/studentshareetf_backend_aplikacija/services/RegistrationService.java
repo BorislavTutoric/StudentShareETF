@@ -6,6 +6,8 @@ import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.r
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories.StudentRepository;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.User;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Student;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.enums.Modul;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.enums.TipAkcije;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.RegistrationRequest;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -18,6 +20,7 @@ public class RegistrationService {
     private final StudentRepository studentRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final AuditLogService auditLogService;
 
     public User register(RegistrationRequest req) {
 
@@ -47,6 +50,10 @@ public class RegistrationService {
         student.setVerified(false);
 
         studentRepository.save(student);
+
+        auditLogService.log(user, TipAkcije.KREIRANJE_NALOGA, Modul.AUTENTIFIKACIJA, "KORISNIK", user.getUserId(),
+                "Student \"" + user.getUsername() + "\" se registrovao (" + req.getStudyProgram() + ", "
+                        + req.getMajor() + ").");
 
         emailService.sendVerificationEmail(student.getEmail(), token);
 

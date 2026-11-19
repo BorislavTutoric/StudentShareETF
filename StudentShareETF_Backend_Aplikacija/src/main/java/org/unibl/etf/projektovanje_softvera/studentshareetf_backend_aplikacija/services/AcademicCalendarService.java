@@ -1,5 +1,8 @@
 package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services;
 
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.enums.Modul;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.enums.TipAkcije;
+
 import org.springframework.web.multipart.MultipartFile;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,6 +25,7 @@ public class AcademicCalendarService {
     private final AcademicCalendarRepository academicCalendarRepository;
     private final StorageService storageService;
     private final UserService userService;
+    private final AuditLogService auditLogService;
 
     public AcademicCalendarResponse getActiveCalendar() throws EntityNotFoundException {
         AcademicCalendarResponse response = new AcademicCalendarResponse();
@@ -62,6 +66,10 @@ public class AcademicCalendarService {
         academicCalendar.setAktivan(true);
         academicCalendar.setUser(user);
         academicCalendarRepository.save(academicCalendar);
+
+        auditLogService.log(user, TipAkcije.POSTAVLJANJE_KALENDARA, Modul.ADMINISTRACIJA, "AKADEMSKI_KALENDAR",
+                academicCalendar.getId(),
+                "Korisnik \"" + user.getUsername() + "\" je postavio akademski kalendar \"" + academicCalendar.getNaziv() + "\".");
 
         return new AcademicCalendarResponse(academicCalendar.getNaziv(), academicCalendar.getId());
     }

@@ -54,6 +54,16 @@ export const mailVerification = async (token) => {
   }
 };
 
+// Upisuje ODJAVA u audit log. Nikad ne baca grešku: odjava na frontendu
+// (brisanje tokena) mora se desiti i ako server ne odgovori ili je token istekao.
+export const logoutApi = async () => {
+  try {
+    await api.post("api/auth/logout");
+  } catch (err) {
+    console.warn("Odjava nije upisana na serveru", err);
+  }
+};
+
 export const loginCheck = async () => {
   try {
     const res = await api.get("api/auth-check"); 

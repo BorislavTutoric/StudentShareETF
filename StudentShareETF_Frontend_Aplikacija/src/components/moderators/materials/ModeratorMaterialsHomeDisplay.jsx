@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Trash2 } from 'lucide-react';
-import { getMaterial, getComments, deleteMaterial } from '../../../services/materialsService';
+import { getMaterialUrlApi, getComments, deleteMaterial } from '../../../services/materialsService';
 import ModeratorMaterialsCommentsSection from './ModeratorMaterialsCommentsSection';
 import Toast from '../../Toast';
 
@@ -110,9 +110,9 @@ function ModeratorMaterialsHomeDisplay({ materials, isOpen, onClose, subjectName
     setExpandedSections(prev => ({ ...prev, [section]: !prev[section] }));
   };
 
-  const handleMaterialClick = async (id) => {
+  const handleMaterialClick = async (id, akcija = "PREGLED") => {
     try {
-      const url = await getMaterial(id);
+      const url = await getMaterialUrlApi(id, akcija);
       window.open(url, "_blank");
     } catch (err) {
       console.error(err);
@@ -165,7 +165,7 @@ function ModeratorMaterialsHomeDisplay({ materials, isOpen, onClose, subjectName
                     title="Preuzmi"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handleMaterialClick(mat.materialId);
+                      handleMaterialClick(mat.materialId, "PREUZIMANJE");
                     }}
                     onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(139, 92, 246, 0.15)'}
                     onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
