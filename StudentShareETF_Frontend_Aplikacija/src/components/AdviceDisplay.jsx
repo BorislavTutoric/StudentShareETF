@@ -78,9 +78,10 @@ const AdviceDisplay = ({ subjectId, subjectName, year, onBack }) => {
         try {
             await adviceService.createAdvice(subjectId, newPostContent); 
             setNewPostContent('');
+            showToast("Uspješno ste postavili savjet!", "success");
             await fetchAdvices(); 
         } catch (e) {
-            showToast("Greška pri objavljivanju savjeta!");
+            showToast("Greška pri objavljivanju savjeta!", "error");
             console.error(e);
         } finally {
             setIsPostSubmitting(false);

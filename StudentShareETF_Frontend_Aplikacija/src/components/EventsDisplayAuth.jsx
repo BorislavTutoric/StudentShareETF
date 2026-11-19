@@ -121,7 +121,7 @@ function EventsDisplayAuth() {
         <EventCreateModal
           onClose={() => setShowCreateModal(false)}
           onCreated={loadEvents}
-          showToast={() => showToast()}
+          showToast={showToast}
         />
       )}
     </div>

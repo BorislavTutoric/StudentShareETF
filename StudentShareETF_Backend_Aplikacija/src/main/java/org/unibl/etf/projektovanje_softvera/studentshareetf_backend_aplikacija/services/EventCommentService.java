@@ -190,14 +190,14 @@ public class EventCommentService {
             eventComment.setReported(false);
             commentRepo.save(eventComment);
 
-            String description = "Moderator :" + moderator.getUsername() + " je odbio zahtjev za uklanjanje komentara korisnika :" + eventComment.getUser().getUsername() + " čiji je sadržaj \"" + eventComment.getContent() + "\".";
+            String description = "Moderator: " + moderator.getUsername() + " je odbio zahtjev za uklanjanje komentara korisnika :" + eventComment.getUser().getUsername() + " čiji je sadržaj \"" + eventComment.getContent() + "\".";
             auditLogService.log(moderator, TipAkcije.ODBIJANJE, Modul.MODERACIJA, "KOMENTAR_DOGADJAJA", eventComment.getId(), description);
         }
         else
         {
             commentRepo.deleteById(commentId);
 
-            String description = "Moderator :" + moderator.getUsername() + " je obrisao komentar korisnika :" + eventComment.getUser().getUsername() + " čiji je sadržaj \"" + eventComment.getContent() + "\".";
+            String description = "Moderator: " + moderator.getUsername() + " je obrisao komentar korisnika :" + eventComment.getUser().getUsername() + " čiji je sadržaj \"" + eventComment.getContent() + "\".";
             auditLogService.log(moderator, TipAkcije.BRISANJE_SADRZAJA, Modul.MODERACIJA, "KOMENTAR_DOGADJAJA", eventComment.getId(), description);
 
             String title = "Obavještenje o uklanjanju komentara";
