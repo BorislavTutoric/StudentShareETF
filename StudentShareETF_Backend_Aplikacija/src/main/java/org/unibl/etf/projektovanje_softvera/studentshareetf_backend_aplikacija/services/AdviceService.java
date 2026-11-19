@@ -1,5 +1,8 @@
 package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services;
 
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.enums.Modul;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.enums.TipAkcije;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
@@ -30,7 +33,7 @@ public class AdviceService {
     private final UserService userService;
     private final StudentService studentService;
     private final AdviceCommentService adviceCommentService;
-    private final ModeratorAuditService moderatorAuditService;
+    private final AuditLogService auditLogService;
     private final NotificationsService notificationsService;
 
     private Student getStudentByUsername(String username) throws UserNotFoundException, EntityNotFoundException {
@@ -116,6 +119,11 @@ public class AdviceService {
 
         Advice advice = new Advice(content, subject, student);
         adviceRepository.save(advice);
+
+        User autor = student.getUser();
+        auditLogService.log(autor, TipAkcije.KREIRANJE_SAVJETA, Modul.SAVJETI, "SAVJET", advice.getId(),
+                "Korisnik \"" + autor.getUsername() + "\" je objavio savjet za predmet \"" + subject.getName()
+                        + "\": " + AuditLogService.isjecak(content));
     }
 
 
@@ -125,6 +133,11 @@ public class AdviceService {
                 .orElseThrow(() -> new EntityNotFoundException("Post nije pronađen."));
         advice.setReported(true);
         adviceRepository.save(advice);
+
+        User prijavio = auditLogService.trenutniKorisnik();
+        auditLogService.log(prijavio, TipAkcije.PRIJAVA_SADRZAJA, Modul.SAVJETI, "SAVJET", advice.getId(),
+                "Korisnik \"" + (prijavio != null ? prijavio.getUsername() : "nepoznat")
+                        + "\" je prijavio savjet moderatoru: " + AuditLogService.isjecak(advice.getContent()));
     }
 
     @Transactional
@@ -139,6 +152,10 @@ public class AdviceService {
         }
         adviceCommentService.deleteComments(advice);
         adviceRepository.delete(advice);
+
+        User autor = advice.getStudent().getUser();
+        auditLogService.log(autor, TipAkcije.BRISANJE_SAVJETA, Modul.SAVJETI, "SAVJET", advice.getId(),
+                "Korisnik \"" + autor.getUsername() + "\" je obrisao svoj savjet: " + AuditLogService.isjecak(advice.getContent()));
     }
 
     @Transactional(readOnly = true)
@@ -173,14 +190,14 @@ public class AdviceService {
             adviceRepository.save(advice);
 
             String description = "Moderator: " + moderator.getUsername() + " je odbio zahtjev za uklanjanje posta \"" + advice.getContent() + "\".";
-            moderatorAuditService.logAction(moderator,description);
+            auditLogService.log(moderator, TipAkcije.ODBIJANJE, Modul.MODERACIJA, "SAVJET", advice.getId(), description);
         }
         else
         {
             adviceRepository.delete(advice);
 
             String description = "Moderator: " + moderator.getUsername() + " je obrisao post korisnika: " + advice.getStudent().getUser().getUsername() + " čiji je sadržaj \"" + advice.getContent() + "\".";
-            moderatorAuditService.logAction(moderator,description);
+            auditLogService.log(moderator, TipAkcije.BRISANJE_SADRZAJA, Modul.MODERACIJA, "SAVJET", advice.getId(), description);
 
             String title = "Obavještenje o uklanjanju savjeta";
             String message = "Vaš savjet \"" +  advice.getContent() + "\" je uklonjen.";

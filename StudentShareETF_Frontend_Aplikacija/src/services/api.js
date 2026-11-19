@@ -19,7 +19,9 @@ api.interceptors.response.use(
         if (error.response?.status === 401) {
             const requestUrl = error.config.url;
 
-            if(requestUrl.endsWith("/login")){
+            // login: greška se prikazuje u formi; logout: istekao token ne smije
+            // otvoriti login modal usred odjave (stranica sama briše token i ide na "/")
+            if(requestUrl.endsWith("/login") || requestUrl.endsWith("/logout")){
                 return Promise.reject(error);
             }
             localStorage.removeItem("jwtToken");

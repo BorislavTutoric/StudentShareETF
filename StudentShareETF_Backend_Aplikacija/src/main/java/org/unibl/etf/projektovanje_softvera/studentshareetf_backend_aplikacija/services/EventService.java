@@ -1,5 +1,8 @@
 package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services;
 
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.enums.Modul;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.enums.TipAkcije;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +27,7 @@ public class EventService {
     private final StorageService storageService;
     private final UserService  userService;
     private final StudentService  studentService;
-    private final ModeratorAuditService moderatorAuditService;
+    private final AuditLogService auditLogService;
     private final NotificationsService notificationsService;
 
     public List<EventResponse> getAllAktivniDogadjaji() {
@@ -87,6 +90,10 @@ public class EventService {
 
         eventRepository.save(event);
 
+        auditLogService.log(user, TipAkcije.KREIRANJE_DOGADJAJA, Modul.DOGADJAJI, "DOGADJAJ", event.getId(),
+                "Korisnik \"" + user.getUsername() + "\" je postavio događaj \"" + event.getNaziv()
+                        + "\" za " + dateTime.toLocalDate() + " (čeka odobrenje).");
+
         return event;
     }
 
@@ -129,7 +136,7 @@ public class EventService {
             eventRepository.save(event);
 
             String description = "Moderator: " + moderator.getUsername() + " je odobrio dogadjaj \"" + event.getNaziv() + "\".";
-            moderatorAuditService.logAction(moderator,description);
+            auditLogService.log(moderator, TipAkcije.ODOBRAVANJE, Modul.MODERACIJA, "DOGADJAJ", event.getId(), description);
 
             String title = "Zahtjev postavljanja dogadjaja";
             String message = "Vaš zahtjev za postavljanje dogadjaja \"" +  event.getNaziv() + "\" je odobren!";
@@ -140,7 +147,7 @@ public class EventService {
             eventRepository.delete(event);
 
             String description = "Moderator: " + moderator.getUsername() + " je odbio postavljanje dogadjaja \"" + event.getNaziv() + "\".";
-            moderatorAuditService.logAction(moderator,description);
+            auditLogService.log(moderator, TipAkcije.ODBIJANJE, Modul.MODERACIJA, "DOGADJAJ", event.getId(), description);
 
             String title = "Zahtjev postavljanja dogadjaja";
             String message = "Vaš zahtjev za postavljanje dogadjaja \"" +  event.getNaziv() + "\" je odbijen.";
@@ -159,6 +166,6 @@ public class EventService {
         User moderator = userService.getUserByUsername(username);
         String description = "Moderator: " + moderator.getUsername() + " je obrisao događaj \"" + event.getNaziv() + "\".";
 
-        moderatorAuditService.logAction(moderator, description);
+        auditLogService.log(moderator, TipAkcije.BRISANJE_SADRZAJA, Modul.MODERACIJA, "DOGADJAJ", event.getId(), description);
     }
 }

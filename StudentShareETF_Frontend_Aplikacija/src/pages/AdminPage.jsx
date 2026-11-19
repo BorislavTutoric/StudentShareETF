@@ -7,7 +7,9 @@ import AdminSubjectsDisplay from "../components/admin/AdminSubjectsDisplay";
 import AdminMaterialsDisplay from "../components/admin/AdminMaterialsDisplay";
 import AdminEventsDisplay from "../components/admin/AdminEventsDisplay";
 import AdminAcademicCalendar from "../components/admin/AdminAcademicCalendar";
-import ModeratorActions from "../components/admin/ModeratorActions";
+import AdminAuditLog from "../components/admin/AdminAuditLog";
+import AdminUsageStatistics from "../components/admin/AdminUsageStatistics";
+import { logoutApi } from "../services/authService";
 
 function AdminPage() {
   const [activeSection, setActiveSection] = useState("Početna");
@@ -16,11 +18,12 @@ function AdminPage() {
   const [year, setYear] = useState();
   const [materials, setMaterials] = useState([]);
 
-  const handleLogoutClick = () => {
-    window.location.href = "/";
+  const handleLogoutClick = async () => {
+    await logoutApi();
     localStorage.removeItem("jwtToken");
     localStorage.removeItem("name");
     localStorage.removeItem("username");
+    window.location.href = "/";
   };
 
   const handleSubjectsClick = () => { 
@@ -70,8 +73,11 @@ function AdminPage() {
       case "Akademski kalendar":
         return <AdminAcademicCalendar />
 
-      case "Akcije moderatora":
-        return <ModeratorActions />
+      case "Audit log":
+        return <AdminAuditLog />
+
+      case "Statistika":
+        return <AdminUsageStatistics />
 
       default:
         return <h2>Dobrodošli!</h2>;

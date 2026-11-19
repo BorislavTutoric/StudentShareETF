@@ -10,6 +10,8 @@ import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.m
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.SavedMaterial;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.Student;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.User;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.enums.Modul;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.enums.TipAkcije;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories.SavedMaterialRepository;
 
 @Service
@@ -20,6 +22,7 @@ public class SavedMaterialService {
     private final UserService userService;
     private final MaterialService materialService;
     private final StudentService studentService;
+    private final AuditLogService auditLogService;
 
     @Transactional
     public void removeSavedMaterial(String username, Integer materialId) throws UserNotFoundException {
@@ -39,6 +42,9 @@ public class SavedMaterialService {
         else {
             SavedMaterial savedMaterial = new SavedMaterial(material, student);
             savedMaterialRepository.save(savedMaterial);
+
+            auditLogService.log(user, TipAkcije.CUVANJE_MATERIJALA, Modul.SACUVANO, "MATERIJAL", material.getMaterialId(),
+                    "Korisnik \"" + user.getUsername() + "\" je sačuvao materijal \"" + material.getName() + "\".");
         }
 
     }

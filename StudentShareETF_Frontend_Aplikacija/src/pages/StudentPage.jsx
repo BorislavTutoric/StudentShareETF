@@ -14,6 +14,8 @@ import Toast from "../components/Toast";
 import { getNumOfUnreadNotificationsApi } from "../services/notificationsService";
 import { getAcademicCalendarApi } from "../services/calendarService,";
 import { getFacultyMonthTasksApi, getMyMonthTasksApi } from "../services/taskService";
+import useActivityTracker from "../services/useActivityTracker";
+import { logoutApi } from "../services/authService";
 
 function StudentPage() {
   const [activeSection, setActiveSection] = useState("Početna");
@@ -32,6 +34,9 @@ function StudentPage() {
   const [myMonthTasks, setMyMonthTasks] = useState(null);
   const [toast, setToast] = useState(null);
   const [numOfUnreadNotifications, setNumOfUnreadNotifications] = useState(0)
+
+  useActivityTracker(activeSection);
+
 
   const handleSubjectsClick = () => { 
     setActiveComponent("subjects");
@@ -61,11 +66,12 @@ function StudentPage() {
     setNotificationsRefreshKey(prev => prev + 1);
   }
 
-  const handleLogoutClick = () => {
-    window.location.href = "/";
+  const handleLogoutClick = async () => {
+    await logoutApi();
     localStorage.removeItem("jwtToken");
     localStorage.removeItem("username");
     localStorage.removeItem("name");
+    window.location.href = "/";
   };
 
   const handleCloseMaterials = () => {setActiveComponent("subjects")}

@@ -1,5 +1,8 @@
 package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services;
 
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.enums.Modul;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.enums.TipAkcije;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +27,7 @@ public class AdviceCommentService {
     private final AdviceCommentRepository adviceCommentRepository;
     private final StudentService studentService;
     private final UserService userService;
-    private final ModeratorAuditService moderatorAuditService;
+    private final AuditLogService auditLogService;
     private final NotificationsService notificationsService;
 
     private Student getStudentByUsername(String username) throws UserNotFoundException {
@@ -95,6 +98,11 @@ public class AdviceCommentService {
 
         AdviceComment newComment = new AdviceComment(request.getContent(), advice, student, parentComment);
         adviceCommentRepository.save(newComment);
+
+        User autor = student.getUser();
+        auditLogService.log(autor, TipAkcije.KOMENTARISANJE, Modul.SAVJETI, "KOMENTAR_SAVJETA", newComment.getId(),
+                "Korisnik \"" + autor.getUsername() + "\" je " + (parentComment != null ? "odgovorio na komentar" : "komentarisao savjet")
+                        + ": " + AuditLogService.isjecak(request.getContent()));
     }
 
     @Transactional
@@ -104,6 +112,11 @@ public class AdviceCommentService {
 
         comment.setReported(true);
         adviceCommentRepository.save(comment);
+
+        User prijavio = auditLogService.trenutniKorisnik();
+        auditLogService.log(prijavio, TipAkcije.PRIJAVA_SADRZAJA, Modul.SAVJETI, "KOMENTAR_SAVJETA", comment.getId(),
+                "Korisnik \"" + (prijavio != null ? prijavio.getUsername() : "nepoznat")
+                        + "\" je prijavio komentar na savjet moderatoru: " + AuditLogService.isjecak(comment.getContent()));
     }
 
     @Transactional
@@ -118,6 +131,10 @@ public class AdviceCommentService {
         }
 
         adviceCommentRepository.delete(comment);
+
+        User autor = comment.getStudent().getUser();
+        auditLogService.log(autor, TipAkcije.BRISANJE_KOMENTARA, Modul.SAVJETI, "KOMENTAR_SAVJETA", comment.getId(),
+                "Korisnik \"" + autor.getUsername() + "\" je obrisao svoj komentar na savjet: " + AuditLogService.isjecak(comment.getContent()));
     }
 
     public Integer getNumberOfComments(Advice advice) {
@@ -161,14 +178,14 @@ public class AdviceCommentService {
             adviceCommentRepository.save(adviceComment);
 
             String description = "Moderator: " + moderator.getUsername() + " je odbio zahtjev za uklanjanje komentara na post \"" + adviceComment.getContent() + "\".";
-            moderatorAuditService.logAction(moderator,description);
+            auditLogService.log(moderator, TipAkcije.ODBIJANJE, Modul.MODERACIJA, "KOMENTAR_SAVJETA", adviceComment.getId(), description);
         }
         else
         {
             adviceCommentRepository.delete(adviceComment);
 
             String description = "Moderator: " + moderator.getUsername() + " je obrisao komentar na post korisnika: " + adviceComment.getStudent().getUser().getUsername() + " čiji je sadržaj \"" + adviceComment.getContent() + "\".";
-            moderatorAuditService.logAction(moderator,description);
+            auditLogService.log(moderator, TipAkcije.BRISANJE_SADRZAJA, Modul.MODERACIJA, "KOMENTAR_SAVJETA", adviceComment.getId(), description);
 
             String title = "Obavještenje o uklanjanju komentara na savjet";
             String message = "Vaš komentar na savjet \"" +  adviceComment.getContent() + "\" je uklonjen.";

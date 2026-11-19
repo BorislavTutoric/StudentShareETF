@@ -9,7 +9,11 @@ import org.springframework.web.multipart.MultipartFile;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.AcademicCalendarResponse;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.DeleteExamsRequest;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.UserNotFoundException;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.User;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.enums.Modul;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.enums.TipAkcije;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.AcademicCalendarService;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.AuditLogService;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.ExamScheduleService;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.ExamService;
 
@@ -23,6 +27,7 @@ public class CalendarController {
     private final AcademicCalendarService academicCalendarService;
     private final ExamScheduleService examScheduleService;
     private final ExamService examService;
+    private final AuditLogService auditLogService;
 
     @PostMapping(value = "/academic-calendar/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadAcademicCalendar(@RequestParam("file") MultipartFile file){
@@ -40,7 +45,15 @@ public class CalendarController {
     @PostMapping(value = "/exam-schedule/set", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> addFaculcyTasks(@RequestParam("file") MultipartFile file)
     {
-        return examScheduleService.createExamsFromPdf(file);
+        ResponseEntity<?> odgovor = examScheduleService.createExamsFromPdf(file);
+
+        if (odgovor.getStatusCode().is2xxSuccessful()) {
+            User admin = auditLogService.trenutniKorisnik();
+            auditLogService.log(admin, TipAkcije.POSTAVLJANJE_RASPOREDA_ISPITA, Modul.ADMINISTRACIJA, "RASPORED_ISPITA", null,
+                    "Korisnik \"" + (admin != null ? admin.getUsername() : "nepoznat") + "\" je postavio raspored ispita iz fajla \""
+                            + file.getOriginalFilename() + "\".");
+        }
+        return odgovor;
     }
 
     @PostMapping("/academic-calendars/delete")

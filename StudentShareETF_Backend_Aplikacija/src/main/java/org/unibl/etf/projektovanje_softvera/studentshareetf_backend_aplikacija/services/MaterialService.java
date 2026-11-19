@@ -1,5 +1,8 @@
 package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services;
 
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.enums.Modul;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.enums.TipAkcije;
+
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -37,7 +40,7 @@ public class MaterialService {
     private final SubjectService subjectService;
     private final StudentService studentService;
     private final UserService userService;
-    private final ModeratorAuditService moderatorAuditService;
+    private final AuditLogService auditLogService;
     private final NotificationsService notificationsService;
     private final MaterialReviewRepository materialReviewRepository;
 
@@ -126,6 +129,10 @@ public class MaterialService {
         material.setApproved(false);
 
         materialRepository.save(material);
+
+        auditLogService.log(user, TipAkcije.UPLOAD_MATERIJALA, Modul.MATERIJALI, "MATERIJAL", material.getMaterialId(),
+                "Korisnik \"" + user.getUsername() + "\" je postavio materijal \"" + material.getName()
+                        + "\" za predmet \"" + subject.getName() + "\" (čeka odobrenje).");
     }
 
     public List<MaterialResponse> getSavedMaterialsForStudentFromSubject(String username, String subjectName) throws EntityNotFoundException, UserNotFoundException {
@@ -175,7 +182,7 @@ public class MaterialService {
             materialRepository.save(material);
 
             String description = "Moderator: " + moderator.getName() + " je odobrio materijal \"" + material.getName() + "\".";
-            moderatorAuditService.logAction(moderator,description);
+            auditLogService.log(moderator, TipAkcije.ODOBRAVANJE, Modul.MODERACIJA, "MATERIJAL", material.getMaterialId(), description);
 
             String title = "Zahtjev postavljanja materijala";
             String message = "Vaš zahtjev za postavljanje materijala \"" +  material.getName() + "\" je odobren!";
@@ -185,8 +192,8 @@ public class MaterialService {
         {
             materialRepository.delete(material);
 
-            String description = "Moderator: " + moderator.getName() + " je dobio materijal \"" + material.getName() + "\".";
-            moderatorAuditService.logAction(moderator,description);
+            String description = "Moderator: " + moderator.getName() + " je odbio materijal \"" + material.getName() + "\".";
+            auditLogService.log(moderator, TipAkcije.ODBIJANJE, Modul.MODERACIJA, "MATERIJAL", material.getMaterialId(), description);
 
             String title = "Zahtjev postavljanja materijala";
             String message = "Vaš zahtjev za postavljanje materijala \"" +  material.getName() + "\" je odbijen.";
@@ -205,6 +212,6 @@ public class MaterialService {
         User moderator = userService.getUserByUsername(username);
         String description = "Moderator: " + moderator.getUsername() + " je obrisao materijal \"" + material.getName() + "\".";
 
-        moderatorAuditService.logAction(moderator, description);
+        auditLogService.log(moderator, TipAkcije.BRISANJE_SADRZAJA, Modul.MODERACIJA, "MATERIJAL", material.getMaterialId(), description);
     }
 }

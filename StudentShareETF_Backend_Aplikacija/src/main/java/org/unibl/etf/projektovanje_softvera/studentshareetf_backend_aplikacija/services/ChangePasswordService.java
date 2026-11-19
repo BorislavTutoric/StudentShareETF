@@ -1,5 +1,8 @@
 package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services;
 
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.enums.Modul;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.enums.TipAkcije;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -22,6 +25,7 @@ public class ChangePasswordService {
     private final EmailService emailService;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuditLogService auditLogService;
 
     public void passwordChangeMailSender(String email) throws EmailNotFoundException {
         Optional<Student> s = studentRepository.findByEmail(email);
@@ -46,6 +50,8 @@ public class ChangePasswordService {
                 User user = u.get();
                 user.setPassword(passwordEncoder.encode(passwordChangeRequest.getPassword()));
                 userRepository.save(user);
+                auditLogService.log(user, TipAkcije.PROMJENA_LOZINKE, Modul.AUTENTIFIKACIJA, "KORISNIK", user.getUserId(),
+                        "Korisnik \"" + user.getUsername() + "\" je postavio novu lozinku preko linka za zaboravljenu lozinku.");
             }
             student.setVerificationToken(null);
             studentRepository.save(student);

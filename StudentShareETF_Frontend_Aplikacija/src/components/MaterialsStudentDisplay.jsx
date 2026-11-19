@@ -3,7 +3,7 @@ import DocumentUploadForm from './DocumentUploadForm';
 import CommentsSection from './CommentsSection';
 import Toast from './Toast';
 import ConfirmationModal from './ConfirmationModal';
-import { getComments, getMaterial, getReviews, saveMaterialApi, getMaterialsPageApi, getMaterialCategoryCountsApi } from '../services/materialsService';
+import { getComments, getMaterialUrlApi, getReviews, saveMaterialApi, getMaterialsPageApi, getMaterialCategoryCountsApi } from '../services/materialsService';
 
 const PAGE_SIZE = 10;
 
@@ -170,9 +170,9 @@ function MaterialsStudentDisplay({ isOpen, onClose, subjectName }) {
     );
   };
 
-  const handleMaterialClick = async (id) => {
+  const handleMaterialClick = async (id, akcija = "PREGLED") => {
     try {
-      const url = await getMaterial(id);
+      const url = await getMaterialUrlApi(id, akcija);
       window.open(url, "_blank");
     } catch (err) {
       console.error(err);
@@ -338,7 +338,7 @@ function MaterialsStudentDisplay({ isOpen, onClose, subjectName }) {
                   title="Preuzmi"
                   onClick={(e) => {
                     e.stopPropagation();
-                    handleMaterialClick(mat.materialId);
+                    handleMaterialClick(mat.materialId, "PREUZIMANJE");
                   }}
                   onMouseEnter={(e) => e.target.style.backgroundColor = 'rgba(96, 224, 22, 0.15)'}
                   onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}

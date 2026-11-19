@@ -1,5 +1,8 @@
 package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services;
 
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.enums.Modul;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.enums.TipAkcije;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.ReviewRequest;
@@ -25,6 +28,7 @@ public class EventReviewService {
     private final EventRepository eventRepository;
     private final StudentRepository studentRepository;
     private final UserRepository userRepository;
+    private final AuditLogService auditLogService;
 
     public ReviewResponse addReview(ReviewRequest request,Integer id,String username) {
         Event event = eventRepository.findById(id)
@@ -51,6 +55,10 @@ public class EventReviewService {
             review.setEvent(event);
 
             reviewRepository.save(review);
+
+            auditLogService.log(user, TipAkcije.OCJENJIVANJE, Modul.DOGADJAJI, "DOGADJAJ", event.getId(),
+                    "Korisnik \"" + user.getUsername() + "\" je ocijenio događaj \"" + event.getNaziv()
+                            + "\" ocjenom " + request.getRating() + ".");
 
             return new ReviewResponse(
                     key.getEventId(),
@@ -135,5 +143,9 @@ public class EventReviewService {
         }
 
         reviewRepository.deleteById(key);
+
+        String nazivDogadjaja = eventRepository.findById(eventId).map(e -> e.getNaziv()).orElse("?");
+        auditLogService.log(user, TipAkcije.BRISANJE_OCJENE, Modul.DOGADJAJI, "DOGADJAJ", eventId,
+                "Korisnik \"" + user.getUsername() + "\" je obrisao svoju ocjenu događaja \"" + nazivDogadjaja + "\".");
     }
 }

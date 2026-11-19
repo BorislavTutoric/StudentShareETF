@@ -4,13 +4,13 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-public class ModeratorAuditResponse {
-    private Integer auditId;
-    private String description;
-    private LocalDateTime dateTime;
+@NoArgsConstructor
+public class MonthlyResponse {
+    private int year;
+    private long totalStudents;
+    private List<MonthStatResponse> months;
 }

@@ -1,5 +1,8 @@
 package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services;
 
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.enums.Modul;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.enums.TipAkcije;
+
 import org.springframework.transaction.annotation.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -26,7 +29,7 @@ public class MaterialCommentService {
     private final UserService userService;
     private final StudentService studentService;
     private final MaterialService materialService;
-    private final ModeratorAuditService moderatorAuditService;
+    private final AuditLogService auditLogService;
     private final NotificationsService  notificationsService;
 
     public List<MaterialCommentResponse> getCommentsByMaterialId(Integer materialId, String username) {
@@ -51,7 +54,9 @@ public class MaterialCommentService {
         LocalDateTime  dateTime = LocalDateTime.now();
         MaterialComments materialComment = new MaterialComments(content, dateTime, material, user);
         materialCommentRepository.saveAndFlush(materialComment);
-        System.out.println(materialComment.getId());
+        auditLogService.log(user, TipAkcije.KOMENTARISANJE, Modul.MATERIJALI, "KOMENTAR_MATERIJALA", materialComment.getId(),
+                "Korisnik \"" + user.getUsername() + "\" je komentarisao materijal \"" + material.getName()
+                        + "\": " + AuditLogService.isjecak(content));
         return new MaterialCommentResponse(materialComment.getId(), materialComment.getSadrzaj(), dateTime, user.getName(), user.getSurname(), true);
     }
 
@@ -63,6 +68,10 @@ public class MaterialCommentService {
                 matComment.setPrijavljen(true);
                 materialCommentRepository.save(matComment);
             }
+            User prijavio = auditLogService.trenutniKorisnik();
+            auditLogService.log(prijavio, TipAkcije.PRIJAVA_SADRZAJA, Modul.MATERIJALI, "KOMENTAR_MATERIJALA", matComment.getId(),
+                    "Korisnik \"" + (prijavio != null ? prijavio.getUsername() : "nepoznat")
+                            + "\" je prijavio komentar na materijal moderatoru: " + AuditLogService.isjecak(matComment.getSadrzaj()));
         }else{
             throw new EntityNotFoundException("Komentar nije pronadjen!");
         }
@@ -70,10 +79,14 @@ public class MaterialCommentService {
 
     @Transactional
     public void commentDelete(Integer commentId) throws EntityNotFoundException {
-        if (!materialCommentRepository.existsById(commentId)) {
-            throw new EntityNotFoundException("Komentar nije pronađen!");
-        }
+        MaterialComments komentar = materialCommentRepository.findById(commentId)
+                .orElseThrow(() -> new EntityNotFoundException("Komentar nije pronađen!"));
         materialCommentRepository.deleteById(commentId);
+
+        User izvrsilac = auditLogService.trenutniKorisnik();
+        auditLogService.log(izvrsilac, TipAkcije.BRISANJE_KOMENTARA, Modul.MATERIJALI, "KOMENTAR_MATERIJALA", commentId,
+                "Korisnik \"" + (izvrsilac != null ? izvrsilac.getUsername() : "nepoznat") + "\" je obrisao komentar na materijal \""
+                        + komentar.getMaterijal().getName() + "\": " + AuditLogService.isjecak(komentar.getSadrzaj()));
     }
 
     @Transactional(readOnly = true)
@@ -107,7 +120,7 @@ public class MaterialCommentService {
             materialCommentRepository.save(materialComments);
 
             String description = "Moderator: " + moderator.getUsername() + " je odbio zahtjev za uklanjanje komentara korisnika :" + materialComments.getKorisnik().getUsername() + " sadržaja \"" + materialComments.getSadrzaj() + "\".";
-            moderatorAuditService.logAction(moderator,description);
+            auditLogService.log(moderator, TipAkcije.ODBIJANJE, Modul.MODERACIJA, "KOMENTAR_MATERIJALA", materialComments.getId(), description);
 
         }
         else
@@ -115,7 +128,7 @@ public class MaterialCommentService {
             materialCommentRepository.delete(materialComments);
 
             String description = "Moderator: " + moderator.getUsername() + " je obrisao komentar korisnika: " + materialComments.getKorisnik().getUsername() + " čiji je sadržaj \"" + materialComments.getSadrzaj() + "\".";
-            moderatorAuditService.logAction(moderator,description);
+            auditLogService.log(moderator, TipAkcije.BRISANJE_SADRZAJA, Modul.MODERACIJA, "KOMENTAR_MATERIJALA", materialComments.getId(), description);
 
             String title = "Obavještenje o uklanjanju komentara";
             String message = "Vaš komentar \"" +  materialComments.getSadrzaj() + "\" je uklonjen.";

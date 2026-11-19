@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { LogOut, Home, FileText, Clock, Calendar, Zap, User, Shield } from 'lucide-react';
+import { LogOut, Home, FileText, Clock, Calendar, ScrollText, User, Shield, BarChart3 } from 'lucide-react';
 
 function AdminMenuBar({ onLogoutClick, onMenuClick, onMaterialsSectionClick }) {
   const [hoveredItem, setHoveredItem] = useState(null);
@@ -11,7 +11,8 @@ function AdminMenuBar({ onLogoutClick, onMenuClick, onMaterialsSectionClick }) {
     { name: 'Materijali', icon: FileText },
     { name: 'Događaji', icon: Calendar },
     { name: 'Akademski kalendar', icon: Clock },
-    { name: 'Akcije moderatora', icon: Zap },
+    { name: 'Audit log', icon: ScrollText },
+    { name: 'Statistika', icon: BarChart3 },
   ];
 
   const renderIcon = (icon) => {
@@ -173,6 +174,8 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     gap: '12px',
+    minHeight: 0,
+    overflowY: 'auto',
   },
 
   menuButton: {

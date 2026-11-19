@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.*;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.exceptions.UserNotFoundException;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.User;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.enums.Modul;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.enums.TipAkcije;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories.UserRepository;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,6 +24,7 @@ public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuditLogService auditLogService;
 
 
     public List<User> getAllStudents() {
@@ -31,11 +34,13 @@ public class UserService implements UserDetailsService {
                 .collect(Collectors.toList());
     }
 
+    /** Moderator suspenduje / vraća studenta (PUT /api/moderator/materials/students/{id}/status). */
     public void updateUserStatus(Integer userId, Boolean aktivan) throws UserNotFoundException {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException());
         user.setActive(aktivan);
         userRepository.save(user);
+        logStatusNaloga(user, Boolean.TRUE.equals(aktivan), Modul.MODERACIJA);
     }
 
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -86,6 +91,11 @@ public class UserService implements UserDetailsService {
         user.setRole(request.getRole());
         user.setActive(true);
         userRepository.save(user);
+
+        User admin = auditLogService.trenutniKorisnik();
+        auditLogService.log(admin, TipAkcije.KREIRANJE_NALOGA, Modul.ADMINISTRACIJA, "KORISNIK", user.getUserId(),
+                "Korisnik \"" + (admin != null ? admin.getUsername() : "nepoznat") + "\" je kreirao nalog \""
+                        + user.getUsername() + "\" sa ulogom " + user.getRole() + ".");
         return user.getUserId();
     }
 
@@ -103,18 +113,34 @@ public class UserService implements UserDetailsService {
         User user = getUserById(id);
         user.setActive(false);
         userRepository.save(user);
+        logStatusNaloga(user, false, Modul.ADMINISTRACIJA);
     }
 
     public void activateAccount(Integer id) throws UserNotFoundException {
         User user = getUserById(id);
         user.setActive(true);
         userRepository.save(user);
+        logStatusNaloga(user, true, Modul.ADMINISTRACIJA);
+    }
+
+    private void logStatusNaloga(User nalog, boolean aktivan, Modul modul) {
+        User izvrsilac = auditLogService.trenutniKorisnik();
+        auditLogService.log(izvrsilac,
+                aktivan ? TipAkcije.AKTIVACIJA_NALOGA : TipAkcije.DEAKTIVACIJA_NALOGA,
+                modul, "KORISNIK", nalog.getUserId(),
+                "Korisnik \"" + (izvrsilac != null ? izvrsilac.getUsername() : "nepoznat") + "\" je "
+                        + (aktivan ? "aktivirao" : "deaktivirao") + " nalog \"" + nalog.getUsername() + "\".");
     }
 
     public void changeModeratorPassword(UpdateModeratorPasswordRequest request) throws UserNotFoundException {
         User user = getUserByUsername(request.getUsername());
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
+
+        User admin = auditLogService.trenutniKorisnik();
+        auditLogService.log(admin, TipAkcije.PROMJENA_LOZINKE, Modul.ADMINISTRACIJA, "KORISNIK", user.getUserId(),
+                "Korisnik \"" + (admin != null ? admin.getUsername() : "nepoznat") + "\" je promijenio lozinku naloga \""
+                        + user.getUsername() + "\".");
     }
 
     public boolean checkPassword(String username, CheckPasswordRequest request) throws UserNotFoundException {

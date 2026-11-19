@@ -1,5 +1,8 @@
 package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services;
 
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.enums.Modul;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.enums.TipAkcije;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +31,7 @@ public class EventCommentService {
     private final UserRepository userRepo;
     private final StudentRepository studentRepo;
     private final UserService userService;
-    private final ModeratorAuditService  moderatorAuditService;
+    private final AuditLogService auditLogService;
     private final NotificationsService notificationsService;
     private final StudentService  studentService;
 
@@ -51,6 +54,10 @@ public class EventCommentService {
         comment.setReported(false);
 
         commentRepo.save(comment);
+
+        auditLogService.log(user, TipAkcije.KOMENTARISANJE, Modul.DOGADJAJI, "KOMENTAR_DOGADJAJA", comment.getId(),
+                "Korisnik \"" + user.getUsername() + "\" je komentarisao događaj \"" + event.getNaziv()
+                        + "\": " + AuditLogService.isjecak(request.getContent()));
 
         return new EventCommentResponse(
                 comment.getId(),
@@ -109,7 +116,7 @@ public class EventCommentService {
         User moderator = userService.getUserByUsername(username);
         commentRepo.delete(comment);
         String description = "Moderator :" + moderator.getName() + " je obrisao komentar korisnika :" + comment.getUser().getUsername() + " čiji je sadržaj \"" + comment.getContent() + "\".";
-        moderatorAuditService.logAction(moderator,description);
+        auditLogService.log(moderator, TipAkcije.BRISANJE_SADRZAJA, Modul.MODERACIJA, "KOMENTAR_DOGADJAJA", comment.getId(), description);
     }
 
     public void deleteComment(Integer commentId, String username) {
@@ -125,6 +132,10 @@ public class EventCommentService {
         }
 
         commentRepo.delete(comment);
+
+        auditLogService.log(user, TipAkcije.BRISANJE_KOMENTARA, Modul.DOGADJAJI, "KOMENTAR_DOGADJAJA", comment.getId(),
+                "Korisnik \"" + user.getUsername() + "\" je obrisao svoj komentar na događaj \"" + comment.getEvent().getNaziv()
+                        + "\": " + AuditLogService.isjecak(comment.getContent()));
     }
 
     public void reportComment(Integer commentId, String username) {
@@ -141,6 +152,10 @@ public class EventCommentService {
 
         comment.setReported(true);
         commentRepo.save(comment);
+
+        auditLogService.log(user, TipAkcije.PRIJAVA_SADRZAJA, Modul.DOGADJAJI, "KOMENTAR_DOGADJAJA", comment.getId(),
+                "Korisnik \"" + user.getUsername() + "\" je prijavio komentar na događaj moderatoru: "
+                        + AuditLogService.isjecak(comment.getContent()));
     }
 
     @Transactional(readOnly = true)
@@ -176,14 +191,14 @@ public class EventCommentService {
             commentRepo.save(eventComment);
 
             String description = "Moderator :" + moderator.getUsername() + " je odbio zahtjev za uklanjanje komentara korisnika :" + eventComment.getUser().getUsername() + " čiji je sadržaj \"" + eventComment.getContent() + "\".";
-            moderatorAuditService.logAction(moderator,description);
+            auditLogService.log(moderator, TipAkcije.ODBIJANJE, Modul.MODERACIJA, "KOMENTAR_DOGADJAJA", eventComment.getId(), description);
         }
         else
         {
             commentRepo.deleteById(commentId);
 
             String description = "Moderator :" + moderator.getUsername() + " je obrisao komentar korisnika :" + eventComment.getUser().getUsername() + " čiji je sadržaj \"" + eventComment.getContent() + "\".";
-            moderatorAuditService.logAction(moderator,description);
+            auditLogService.log(moderator, TipAkcije.BRISANJE_SADRZAJA, Modul.MODERACIJA, "KOMENTAR_DOGADJAJA", eventComment.getId(), description);
 
             String title = "Obavještenje o uklanjanju komentara";
             String message = "Vaš komentar \"" +  eventComment.getContent() + "\" je uklonjen.";
