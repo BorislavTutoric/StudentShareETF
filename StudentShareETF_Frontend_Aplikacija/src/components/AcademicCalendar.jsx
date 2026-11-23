@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
-import { ChevronLeft, ChevronRight, Plus, Trash2, GraduationCap } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus, Trash2, GraduationCap, Pencil, Check } from 'lucide-react';
 import Toast from './Toast';
 import FlipPicker from './FlipPicker';
 import ConfirmationModal from './ConfirmationModal';
+import EditTaskModal from './EditTaskModal';
 import { openAcademicCalendar } from '../services/calendarService,';
-import { addTaskApi, deleteTask } from '../services/taskService';
+import { addTaskApi, deleteTask, setTaskDoneApi, statusObaveze } from '../services/taskService';
+
+const imaVrijeme = (time) => !!time && time !== "00:00";
 
 function AcademicCalendar({ calendarFile, facultyTasks = [], myTasks = [], handleMonthTasks}) {
   const currentDate = new Date();
@@ -33,6 +36,7 @@ function AcademicCalendar({ calendarFile, facultyTasks = [], myTasks = [], handl
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [onConfirm, setOnConfirm] = useState(null);
   const [message, setMessage] = useState("");
+  const [editingTask, setEditingTask] = useState(null);
 
   const monthNames = ['Januar', 'Februar', 'Mart', 'April', 'Maj', 'Jun', 'Jul', 'August', 'Septembar', 'Oktobar', 'Novembar', 'Decembar'];
   const months = monthNames.map((name, index) => ({ name, year: displayYear }));
@@ -223,6 +227,54 @@ function AcademicCalendar({ calendarFile, facultyTasks = [], myTasks = [], handl
     }
   };
 
+  // Zamjenjuje obavezu u listi za mjesec i za izabrani dan (i u otvorenom detalju).
+  const zamijeniObavezu = (taskId, izmjena) => {
+    const primijeni = (t) => (t.id === taskId ? { ...t, ...izmjena } : t);
+    setMyMonthTasks(prev => prev.map(primijeni));
+    setMyTasksOnDate(prev => (prev ? prev.map(primijeni) : prev));
+    setSelectedTask(prev => (prev && prev.id === taskId ? { ...prev, ...izmjena } : prev));
+  };
+
+  const toggleDone = async (task) => {
+    const obavljena = !task.obavljena;
+    zamijeniObavezu(task.id, { obavljena });
+    try {
+      const odgovor = await setTaskDoneApi(task.id, obavljena);
+      zamijeniObavezu(task.id, { obavljena: odgovor.obavljena, datumObavljanja: odgovor.datumObavljanja });
+      showToast(obavljena ? 'Obaveza je označena kao obavljena.' : 'Oznaka "obavljeno" je uklonjena.', 'success');
+    } catch (err) {
+      console.error(err);
+      zamijeniObavezu(task.id, { obavljena: task.obavljena });
+      showToast('Promjena statusa obaveze nije uspjela.', 'error');
+    }
+  };
+
+  // Poslije izmjene obaveza može preći na drugi dan ili mjesec.
+  const handleTaskSaved = (izmijenjena, prije) => {
+    const [g, m, d] = izmijenjena.date.split("-").map(Number);
+    const uPrikazanomMjesecu = g === months[currentMonth].year && m === currentMonth + 1;
+    const naIzabranomDanu = uPrikazanomMjesecu && d === Number(selectedDate);
+    const nova = { ...prije, ...izmijenjena };
+
+    setMyMonthTasks(prev => {
+      const bez = prev.filter(t => t.id !== prije.id);
+      return uPrikazanomMjesecu ? [...bez, nova] : bez;
+    });
+    setMyTasksOnDate(prev => {
+      const bez = (prev ?? []).filter(t => t.id !== prije.id);
+      return naIzabranomDanu ? [...bez, nova] : bez;
+    });
+    if (prije.date !== izmijenjena.date) {
+      // ručno dodat indikator za stari dan više ne važi; preostale obaveze ga i dalje prikazuju
+      setIsTaskAdded(prev => prev.filter(el =>
+        !(el.day === Number(prije.date.split("-")[2]) && el.month === currentMonth && el.yearr === months[currentMonth].year)
+      ));
+    }
+    setSelectedTask(prev => (prev && prev.id === prije.id ? nova : prev));
+    setEditingTask(null);
+    showToast(naIzabranomDanu ? 'Obaveza je izmijenjena.' : `Obaveza je izmijenjena i premještena na ${izmijenjena.date}.`, 'success');
+  };
+
   const isFacultyTaskAdded = (title) => {
     return myTasksOnDate.some(task => { 
       return task.title ===`Ispit: ${title}` && task.faculcy;
@@ -313,11 +365,17 @@ function AcademicCalendar({ calendarFile, facultyTasks = [], myTasks = [], handl
   return (
     <div style={styles.container}>
       {toast && <Toast message={toast.message} type={toast.type} />}
-      <ConfirmationModal 
+      <ConfirmationModal
         isOpen={confirmModalOpen}
         onConfirm={onConfirm}
         message={message}
         onCancel={handleCloseConfirmModal}
+      />
+      <EditTaskModal
+        isOpen={!!editingTask}
+        task={editingTask}
+        onClose={() => setEditingTask(null)}
+        onSaved={handleTaskSaved}
       />
 
       <div style={styles.header}>
@@ -550,40 +608,81 @@ function AcademicCalendar({ calendarFile, facultyTasks = [], myTasks = [], handl
               <h4 style={styles.personalTasksTitle}>✓ Moje Obaveze</h4>
               <div style={styles.tasksList}>
                 {myTasksOnDate.length > 0 ? (
-                  myTasksOnDate.map((task, index) => (
-                    <div key={index} style={styles.taskItem} onClick={() => {
+                  myTasksOnDate.map((task, index) => {
+                    const status = statusObaveze(task);
+                    return (
+                    <div key={task.id ?? index} style={{
+                      ...styles.taskItem,
+                      ...(status === "obavljena" ? styles.taskItemDone : {}),
+                      ...(status === "propustena" ? styles.taskItemMissed : {}),
+                    }} onClick={() => {
                       setSelectedTask(task);
                       setShowTaskDetails(true);
-                      scrollToModal(); 
+                      scrollToModal();
                     }}>
+                      <button
+                        style={{ ...styles.doneCheckbox, ...(task.obavljena ? styles.doneCheckboxChecked : {}) }}
+                        title={task.obavljena ? 'Ukloni oznaku "Obavljeno"' : 'Označi kao obavljeno'}
+                        aria-label="Obavljeno"
+                        aria-pressed={!!task.obavljena}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleDone(task);
+                        }}
+                      >
+                        {task.obavljena && <Check size={14} strokeWidth={3} />}
+                      </button>
                       <div style={styles.taskContent}>
-                        <span style={styles.taskText}>
+                        <span style={{
+                          ...styles.taskText,
+                          ...(status === "obavljena" ? styles.taskTextDone : {}),
+                          ...(status === "propustena" ? styles.taskTextMissed : {}),
+                        }}>
                           {task.title}
                         </span>
+                        {status === "propustena" && (
+                          <span style={styles.missedLabel}>Propuštena</span>
+                        )}
                         {task.description && (
                           <span style={styles.taskDescriptionText}>
                             📝 {task.description}
                           </span>
                         )}
-                        {task.time !== "00:00" && (
+                        {imaVrijeme(task.time) && (
                           <span style={styles.taskDescriptionText}>
                             🕐 {task.time}
                           </span>
                         )}
                       </div>
-                      <button
-                        style={styles.deleteTaskBtn}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setMessage(`obrisati obavezu: ${task.title}?`)
-                          setOnConfirm(() => () => removeTask(index, task.id));
-                          setConfirmModalOpen(true);
-                        }}
-                      >
-                        <Trash2 size={16} />
-                      </button>
+                      <div style={styles.taskActions}>
+                        <button
+                          style={styles.editTaskBtn}
+                          title="Izmijeni"
+                          aria-label="Izmijeni"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setEditingTask(task);
+                          }}
+                        >
+                          <Pencil size={16} />
+                        </button>
+                        <button
+                          style={styles.deleteTaskBtn}
+                          title="Obriši"
+                          aria-label="Obriši"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setMessage(`obrisati obavezu: ${task.title}?`)
+                            setOnConfirm(() => () => removeTask(index, task.id));
+                            setConfirmModalOpen(true);
+                          }}
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
                     </div>
-                  ))
+                    );
+                  })
                 ) : (
                   <div style={styles.noTasksMessage}>
                     Nema obaveza za ovaj datum
@@ -623,7 +722,7 @@ function AcademicCalendar({ calendarFile, facultyTasks = [], myTasks = [], handl
                     </div>
                   )}
 
-                  {selectedTask.time && (
+                  {imaVrijeme(selectedTask.time) && (
                     <div style={styles.detailItem}>
                       <span style={styles.detailLabel}>Vrijeme:</span>
                       <span style={styles.detailValue}>{selectedTask.time}</span>
@@ -636,6 +735,34 @@ function AcademicCalendar({ calendarFile, facultyTasks = [], myTasks = [], handl
                       <span style={styles.detailValue}>{selectedTask.date}</span>
                     </div>
                   )}
+
+                  <div style={styles.detailItem}>
+                    <span style={styles.detailLabel}>Status:</span>
+                    <span style={{
+                      ...styles.detailValue,
+                      ...(statusObaveze(selectedTask) === "propustena" ? { color: '#dc2626' } : {}),
+                    }}>
+                      {{ obavljena: "Obavljena", propustena: "Propuštena", na_cekanju: "Na čekanju" }[statusObaveze(selectedTask)]}
+                    </span>
+                  </div>
+                </div>
+
+                <div style={styles.modalButtonsRow}>
+                  <button
+                    style={styles.modalSecondaryButton}
+                    onClick={() => toggleDone(selectedTask)}
+                  >
+                    {selectedTask.obavljena ? 'Ukloni "Obavljeno"' : 'Označi kao obavljeno'}
+                  </button>
+                  <button
+                    style={styles.modalSecondaryButton}
+                    onClick={() => {
+                      setShowTaskDetails(false);
+                      setEditingTask(selectedTask);
+                    }}
+                  >
+                    Izmijeni
+                  </button>
                 </div>
 
                 <button
@@ -1204,6 +1331,95 @@ container: {
     alignItems: 'flex-start',
     gap: '10px',
     cursor: "pointer"
+  },
+
+  taskItemDone: {
+    background: 'rgba(255, 255, 255, 0.04)',
+    borderColor: 'rgba(255, 255, 255, 0.12)',
+    opacity: 0.75,
+  },
+
+  taskItemMissed: {
+    background: 'rgba(239, 68, 68, 0.12)',
+    borderColor: 'rgba(239, 68, 68, 0.55)',
+  },
+
+  taskTextDone: {
+    textDecoration: 'line-through',
+    color: 'rgba(255, 255, 255, 0.55)',
+  },
+
+  taskTextMissed: {
+    color: '#f87171',
+  },
+
+  missedLabel: {
+    color: '#f87171',
+    fontSize: '11px',
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: '0.4px',
+  },
+
+  doneCheckbox: {
+    width: '22px',
+    height: '22px',
+    minWidth: '22px',
+    marginTop: '1px',
+    borderRadius: '6px',
+    border: '2px solid rgba(96, 224, 22, 0.6)',
+    background: 'transparent',
+    color: '#0a1457',
+    cursor: 'pointer',
+    padding: 0,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    outline: 'none',
+    transition: 'all 0.2s ease',
+  },
+
+  doneCheckboxChecked: {
+    background: '#60e016',
+    borderColor: '#60e016',
+  },
+
+  taskActions: {
+    display: 'flex',
+    gap: '6px',
+  },
+
+  editTaskBtn: {
+    background: 'rgba(168, 237, 234, 0.15)',
+    border: 'none',
+    borderRadius: '6px',
+    padding: '6px',
+    cursor: 'pointer',
+    color: '#a8edea',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'all 0.3s ease',
+    outline: 'none',
+  },
+
+  modalButtonsRow: {
+    display: 'flex',
+    gap: '8px',
+    marginBottom: '10px',
+  },
+
+  modalSecondaryButton: {
+    flex: 1,
+    background: 'rgba(10, 20, 87, 0.1)',
+    border: '2px solid rgba(10, 20, 87, 0.25)',
+    borderRadius: '10px',
+    padding: '10px 12px',
+    cursor: 'pointer',
+    color: '#0a1457',
+    fontWeight: '700',
+    fontSize: '13px',
+    outline: 'none',
   },
 
   taskContent: {
