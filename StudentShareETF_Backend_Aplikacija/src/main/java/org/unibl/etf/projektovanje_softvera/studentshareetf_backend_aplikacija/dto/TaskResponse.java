@@ -13,5 +13,7 @@ public class TaskResponse {
     private String description;
     private String date;
     private String time;
-    private boolean isFaculcy;
+    private boolean isFaculcy;      // u JSON-u "faculcy"
+    private boolean obavljena;
+    private String datumObavljanja; // ISO datum i vrijeme ili null
 }

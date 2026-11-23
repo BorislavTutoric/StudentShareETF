@@ -28,6 +28,12 @@ public class Task {
     @Column(name = "Fakultetska")
     private boolean fakultetska;
 
+    @Column(name = "Obavljena", nullable = false)
+    private boolean obavljena;
+
+    @Column(name = "DatumObavljanja")
+    private LocalDateTime datumObavljanja;
+
     public Task() {}
 
     public Integer getId() {
@@ -65,5 +71,17 @@ public class Task {
     }
     public void setFakultetska(boolean fakultetska) {
         this.fakultetska = fakultetska;
+    }
+    public boolean isObavljena() {
+        return obavljena;
+    }
+    public void setObavljena(boolean obavljena) {
+        this.obavljena = obavljena;
+    }
+    public LocalDateTime getDatumObavljanja() {
+        return datumObavljanja;
+    }
+    public void setDatumObavljanja(LocalDateTime datumObavljanja) {
+        this.datumObavljanja = datumObavljanja;
     }
 }

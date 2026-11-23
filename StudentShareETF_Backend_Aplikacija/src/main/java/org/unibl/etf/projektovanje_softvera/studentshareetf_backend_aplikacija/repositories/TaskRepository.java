@@ -13,5 +13,7 @@ public interface TaskRepository extends JpaRepository<Task, Integer> {
 
     List<Task> findByStudentAndDatumVrijemeBetween(Student student, LocalDateTime start, LocalDateTime end);
 
+    List<Task> findByStudent(Student student);
+
 
 }

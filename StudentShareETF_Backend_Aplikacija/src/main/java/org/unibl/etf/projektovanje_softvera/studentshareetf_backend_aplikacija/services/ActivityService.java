@@ -3,6 +3,7 @@ package org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.dto.MyActivityResponse;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.models.*;
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.repositories.ModuleActivityRepository;
 
@@ -40,5 +41,23 @@ public class ActivityService {
 
         repo.dodajSekunde(u.getUserId(), modul, LocalDate.now(), SEKUNDI_PO_HEARTBEATU);
         return true;
+    }
+
+    /** GET /api/activity/me: vrijeme prijavljenog korisnika u periodu [od, do] (oba uključivo). */
+    @Transactional(readOnly = true)
+    public MyActivityResponse moje(String username, LocalDate od, LocalDate datumDo) {
+        User u = userService.getUserByUsername(username);
+
+        List<MyActivityResponse.PoModulu> poModulu = repo.poModuluZaKorisnika(u.getUserId(), od, datumDo).stream()
+                .map(r -> new MyActivityResponse.PoModulu(r.getModul(), r.getSekundi() != null ? r.getSekundi() : 0))
+                .sorted(Comparator.comparingLong(MyActivityResponse.PoModulu::sekundi).reversed())
+                .toList();
+
+        List<MyActivityResponse.PoDanu> poDanu = repo.poDanuZaKorisnika(u.getUserId(), od, datumDo).stream()
+                .map(r -> new MyActivityResponse.PoDanu(r.getDatum(), r.getSekundi() != null ? r.getSekundi() : 0))
+                .toList();
+
+        long ukupno = poModulu.stream().mapToLong(MyActivityResponse.PoModulu::sekundi).sum();
+        return new MyActivityResponse(ukupno, poModulu, poDanu);
     }
 }

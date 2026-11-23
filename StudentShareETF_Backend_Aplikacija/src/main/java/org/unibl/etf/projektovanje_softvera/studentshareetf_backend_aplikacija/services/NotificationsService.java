@@ -105,4 +105,15 @@ public class NotificationsService {
             }
         }
     }
+
+    /** Briše samo podsjetnike za obavezu koji studentu još nisu stigli (AktivnoOd je u budućnosti). */
+    public void deleteUpcomingTaskNotifications(Integer taskId, Student student){
+        LocalDateTime now = LocalDateTime.now();
+        List<Notification> taskNotifications = notificationsRepository.findTaskNotifications("Podsjetnik za obavezu!", student);
+        for (Notification notification : taskNotifications) {
+            if(notification.getTitle().contains("(id: " + taskId + ")") && notification.getActiveFrom().isAfter(now)){
+                notificationsRepository.delete(notification);
+            }
+        }
+    }
 }
