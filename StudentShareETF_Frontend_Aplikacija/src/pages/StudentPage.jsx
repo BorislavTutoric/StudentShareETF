@@ -10,6 +10,7 @@ import SavedMaterials from "../components/SavedMaterials";
 import SavedMaterialsDisplay from "../components/SavedMaterialsDisplay";
 import Notifications from "../components/Notifications";
 import AcademicCalendar from "../components/AcademicCalendar";
+import MyActivities from "../components/MyActivities";
 import Toast from "../components/Toast";
 import { getNumOfUnreadNotificationsApi } from "../services/notificationsService";
 import { getAcademicCalendarApi } from "../services/calendarService,";
@@ -175,6 +176,9 @@ function StudentPage() {
 
       case "Događaji":
         return <EventsDisplayAuth />;
+
+      case "Moje aktivnosti":
+        return <MyActivities />;
 
       default:
         return <h2>Dobrodošli!</h2>;

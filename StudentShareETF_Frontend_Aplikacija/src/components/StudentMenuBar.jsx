@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { LogOut, Home, Bell, Bookmark, Calendar, Lightbulb, Users } from 'lucide-react';
+import { LogOut, Home, Bell, Bookmark, Calendar, Lightbulb, Users, Activity } from 'lucide-react';
 
 function StudentMenuBar({ onLogoutClick, onMenuClick, onHomeCLick, onCalendarClick, onNotificationsClick, unreadNotifications}) {
   const [hoveredItem, setHoveredItem] = useState(null);
@@ -13,6 +13,7 @@ function StudentMenuBar({ onLogoutClick, onMenuClick, onHomeCLick, onCalendarCli
     { name: 'Akademski kalendar', icon: Calendar },
     { name: 'Savjeti', icon: Lightbulb },
     { name: 'Događaji', icon: Users },
+    { name: 'Moje aktivnosti', icon: Activity },
   ];
 
   const renderIcon = (icon) => {
@@ -157,6 +158,8 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     gap: '12px',
+    minHeight: 0,
+    overflowY: 'auto', // 8 stavki: na nižim ekranima meni se skroluje umjesto da sakrije "Odjava"
   },
 
   menuButton: {
