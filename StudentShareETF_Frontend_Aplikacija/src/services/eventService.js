@@ -74,15 +74,6 @@ export const reportEventComment = async (commentId) => {
   }
 }
 
-export const getEventAvgRating = async (eventId) => {
-  try {
-    const response = await api.get(`api/events/${eventId}/reviews-average`);
-    return response.data; 
-  } catch (err) {
-    throw err;
-  }
-};
-
 export const deleteEventReview = async (eventId) => {
   try {
     const response = await api.delete(`/api/events/${eventId}/reviews`);
