@@ -10,6 +10,9 @@ import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.d
 import org.unibl.etf.projektovanje_softvera.studentshareetf_backend_aplikacija.services.ActivityService;
 import org.springframework.security.core.Authentication;
 
+import org.springframework.format.annotation.DateTimeFormat;
+
+import java.time.LocalDate;
 import java.util.Map;
 
 
@@ -26,5 +29,20 @@ public class ActivityController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         boolean ok = activityService.heartbeat(a.getName(), req.getModul());
         return ResponseEntity.ok(Map.of("prihvaceno", ok));
+    }
+
+    /** Lično vrijeme u aplikaciji (Dio 3). Bez perioda: zadnjih 30 dana. */
+    @GetMapping("/me")
+    public ResponseEntity<?> moje(
+            @RequestParam(name = "od", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate od,
+            @RequestParam(name = "do", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate datumDo) {
+        Authentication a = SecurityContextHolder.getContext().getAuthentication();
+        if (a == null || a instanceof AnonymousAuthenticationToken)
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        LocalDate kraj = datumDo != null ? datumDo : LocalDate.now();
+        LocalDate pocetak = od != null ? od : kraj.minusDays(29);
+        if (pocetak.isAfter(kraj))
+            return ResponseEntity.badRequest().body("Datum \"od\" ne može biti poslije datuma \"do\".");
+        return ResponseEntity.ok(activityService.moje(a.getName(), pocetak, kraj));
     }
 }
